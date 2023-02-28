@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://dux6616n2uxn"]
+
+[ext_resource type="Script" path="res://camera/FlyingCameraControl.gd" id="1_hkymb"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_4vdg0"]
+
+[node name="FlyingCameraControl" type="CharacterBody3D"]
+script = ExtResource("1_hkymb")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("CapsuleShape3D_4vdg0")
+
+[node name="CameraMount" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="CameraMount"]
+current = true
