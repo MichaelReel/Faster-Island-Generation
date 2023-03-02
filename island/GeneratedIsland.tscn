@@ -9,7 +9,7 @@ shader = ExtResource("2_fcc08")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_qw12c"]
 material = SubResource("ShaderMaterial_54e7f")
-size = Vector2(50, 50)
+size = Vector2(100, 100)
 
 [node name="GeneratedIsland" type="Node3D"]
 script = ExtResource("1_v0fho")

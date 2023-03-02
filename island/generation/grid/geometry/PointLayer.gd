@@ -39,8 +39,11 @@ func perform() -> void:
 func get_point_index_for_vector2i(vector: Vector2i) -> int:
 	return vector.x + (vector.y * _points_per_row)
 
+func get_point_for_index(index: int) -> Vector2:
+	return _grid_points[index]
+
 func get_point_for_vector2i(vector: Vector2i) -> Vector2:
-	return _grid_points[get_point_index_for_vector2i(vector)]
+	return get_point_for_index(get_point_index_for_vector2i(vector))
 
 func get_points_per_row() -> int:
 	return _points_per_row

@@ -8,3 +8,9 @@ signal percent_complete(stage, percent)
 
 func perform() -> void:
 	pass
+
+func get_mesh_dict() -> Dictionary:
+	return {}
+
+func _to_string() -> String:
+	return "Unnamed Stage"
