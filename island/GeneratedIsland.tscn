@@ -1,7 +1,15 @@
-[gd_scene load_steps=5 format=3 uid="uid://qyqjsv6gy5sa"]
+[gd_scene load_steps=7 format=3 uid="uid://qyqjsv6gy5sa"]
 
 [ext_resource type="Script" path="res://island/GeneratedIsland.gd" id="1_v0fho"]
 [ext_resource type="Shader" path="res://island/material/debug_outline.gdshader" id="2_fcc08"]
+
+[sub_resource type="Material" id="Material_6k20l"]
+resource_local_to_scene = false
+resource_name = ""
+
+[sub_resource type="Material" id="Material_5jwn0"]
+resource_local_to_scene = false
+resource_name = ""
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_54e7f"]
 render_priority = 0
@@ -9,10 +17,13 @@ shader = ExtResource("2_fcc08")
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_qw12c"]
 material = SubResource("ShaderMaterial_54e7f")
-size = Vector2(100, 100)
+size = Vector2(50, 50)
+center_offset = Vector3(0, -0.5, 0)
 
 [node name="GeneratedIsland" type="Node3D"]
 script = ExtResource("1_v0fho")
+sub_water = SubResource("Material_6k20l")
+ground = SubResource("Material_5jwn0")
 
 [node name="BoundsMesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("PlaneMesh_qw12c")

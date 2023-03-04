@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://ti6hvbnvt6l7"]
+[gd_scene load_steps=8 format=3 uid="uid://ti6hvbnvt6l7"]
 
 [ext_resource type="PackedScene" uid="uid://qyqjsv6gy5sa" path="res://island/GeneratedIsland.tscn" id="1_77t7i"]
 [ext_resource type="PackedScene" uid="uid://dux6616n2uxn" path="res://camera/FlyingCameraControl.tscn" id="2_gt1th"]
@@ -16,6 +16,12 @@ sky = SubResource("Sky_lp3de")
 tonemap_mode = 2
 glow_enabled = true
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_582fk"]
+albedo_color = Color(0.121569, 0.227451, 0.027451, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g3d72"]
+albedo_color = Color(0.0862745, 0.611765, 0.0784314, 1)
+
 [node name="Main" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -27,6 +33,9 @@ shadow_enabled = true
 
 [node name="GeneratedIsland" parent="." instance=ExtResource("1_77t7i")]
 bounds_side = 100.0
+island_cell_count = 7202
+sub_water = SubResource("StandardMaterial3D_582fk")
+ground = SubResource("StandardMaterial3D_g3d72")
 
 [node name="FlyingCameraControl" parent="." instance=ExtResource("2_gt1th")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 30)

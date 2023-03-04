@@ -6,11 +6,11 @@ var _edge_layer: EdgeLayer
 var _tri_cell_layer: TriCellLayer
 var _grid_mesh: GridMesh
 
-func _init(tri_side: float, points_per_row: int) -> void:
+func _init(tri_side: float, points_per_row: int, material_lib: MaterialLib) -> void:
 	_point_layer = PointLayer.new(tri_side, points_per_row)
 	_edge_layer = EdgeLayer.new(_point_layer)
 	_tri_cell_layer = TriCellLayer.new(_point_layer, _edge_layer)
-	_grid_mesh = GridMesh.new(_point_layer, _tri_cell_layer)
+	_grid_mesh = GridMesh.new(_point_layer, _tri_cell_layer, material_lib)
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
@@ -30,3 +30,6 @@ func get_mesh_dict() -> Dictionary:
 	return {
 		"terrain": _grid_mesh
 	}
+
+func get_tri_cell_layer() -> TriCellLayer:
+	return _tri_cell_layer

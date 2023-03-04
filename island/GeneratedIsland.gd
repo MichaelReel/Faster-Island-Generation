@@ -11,19 +11,30 @@ extends Node3D
 		tri_side = value
 		_changes_pending = true
 
+@export var island_cell_count: int = 1000 :
+	set(value):
+		island_cell_count = value
+		_changes_pending = true
+
 @export var random_seed: int = -2147483648 :
 	set(value):
 		random_seed = value
 		_changes_pending = true
 
+@export_category("debug_materials")
+@export var sub_water: Material = Material.new()
+@export var ground: Material = Material.new()
+
 @onready var bounds : Mesh = $BoundsMesh.mesh
+@onready var material_lib: MaterialLib = MaterialLib.new()
 
 var _terrain_manager : TerrainManager
 var _changes_pending : bool = true
 var _mesh_instance_dict : Dictionary = {}
 
 func _ready() -> void:
-	pass
+	material_lib.set_material("sub_water", sub_water)
+	material_lib.set_material("ground", ground)
 
 func _process(delta: float) -> void:
 	if not _changes_pending:
@@ -36,13 +47,13 @@ func _process(delta: float) -> void:
 
 func _tool_execute(_delta: float) -> void:
 	bounds.size = Vector2.ONE * bounds_side
-	_terrain_manager = TerrainManager.new(random_seed, tri_side, bounds_side)
+	_terrain_manager = TerrainManager.new(random_seed, material_lib, tri_side, bounds_side, island_cell_count)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
-	_terrain_manager.perform("Grid Stage")
+	_terrain_manager.perform("Outline Stage")
 
 func _game_execute(_delta: float) -> void:
 	bounds.size = Vector2.ONE * bounds_side
-	_terrain_manager = TerrainManager.new(random_seed, tri_side, bounds_side)
+	_terrain_manager = TerrainManager.new(random_seed, material_lib, tri_side, bounds_side, island_cell_count)
 	var _err1 = _terrain_manager.connect("all_stages_complete", _on_all_stages_complete)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
 	var _err3 = _terrain_manager.connect("stage_percent_complete", _on_stage_percent_complete)
@@ -63,6 +74,7 @@ func _update_meshes_by_dictionary(mesh_dict: Dictionary) -> void:
 		if mesh_name in _mesh_instance_dict:
 			remove_child(_mesh_instance_dict[mesh_name])
 		var mesh_instance: MeshInstance3D = MeshInstance3D.new()
-		mesh_instance.mesh = mesh_dict[mesh_name]
+		var new_mesh = mesh_dict[mesh_name]
+		mesh_instance.mesh = new_mesh
 		_mesh_instance_dict[mesh_name] = mesh_instance
 		add_child(mesh_instance)

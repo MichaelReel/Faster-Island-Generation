@@ -9,20 +9,25 @@ signal stage_complete(stage, duration_us)
 signal all_stages_complete()
 
 var _grid_manager: GridManager
+var _outline_manager: OutlineManager
 
 func _init(
 	random_seed: int,
+	material_lib: MaterialLib,
 	tri_side: float,
-	bounds_side: float
+	bounds_side: float,
+	island_cell_limit: int,
 ) -> void:
 	var rng = RandomNumberGenerator.new()
 	rng.seed = random_seed
 	var points_per_row = int(bounds_side / tri_side)
-	_grid_manager = GridManager.new(tri_side, points_per_row)
+	_grid_manager = GridManager.new(tri_side, points_per_row, material_lib)
+	_outline_manager = OutlineManager.new(_grid_manager, island_cell_limit, material_lib, rng.randi())
 
 func perform(up_to_stage_with_name: String = "") -> void:
 	var stages: Array[Stage] = [
-		_grid_manager
+		_grid_manager,
+		_outline_manager,
 	]
 	
 	for stage in stages:
