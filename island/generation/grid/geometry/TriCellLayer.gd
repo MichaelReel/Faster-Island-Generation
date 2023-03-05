@@ -21,6 +21,9 @@ func perform() -> void:
 			var new_triangle: PackedInt64Array = _create_tri_cell(Vector2i(tri_col_ind, tri_row_ind))
 			_cells.append(new_triangle)
 
+func get_triangle_as_point_indices(triangle_index: int) -> PackedInt64Array:
+	return _cells[triangle_index]
+
 func get_triangles_as_vector3_arrays() -> Array:
 	"""Return each triangle as an array of 3d vectors for surface creation"""
 	var vec3_array: Array = _cells.map(get_points_as_vector3_array_for_point_indices)
@@ -28,7 +31,9 @@ func get_triangles_as_vector3_arrays() -> Array:
 
 func get_triangle_as_vector3_array_for_index(triangle_index: int) -> PackedVector3Array:
 	"""Return the points of triangle, by index, as an array of 3d vectors"""
-	return get_points_as_vector3_array_for_point_indices(_cells[triangle_index])
+	return get_points_as_vector3_array_for_point_indices(
+		get_triangle_as_point_indices(triangle_index)
+	)
 
 func get_points_as_vector3_array_for_point_indices(point_indices: PackedInt64Array) -> PackedVector3Array:
 	"""Return an array from a list of point indices as an array of 3d vectors"""
@@ -83,6 +88,9 @@ func _create_tri_cell(vector: Vector2i) -> PackedInt64Array:
 
 func _point_index(vector: Vector2i) -> int:
 	return _point_layer.get_point_index_for_vector2i(vector)
+
+func get_point_count() -> int:
+	return _point_layer.get_total_point_count()
 
 func get_cell_count() -> int:
 	return len(_cells)

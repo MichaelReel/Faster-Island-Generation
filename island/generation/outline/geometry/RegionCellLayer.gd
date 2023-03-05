@@ -6,6 +6,7 @@ var _edge_neighbour_indices: Array[PackedInt64Array] = []  # Links to neighbour 
 var _cell_parents: PackedInt64Array = []  # Link from a cell to it's parent reference index
 var _root_region: Region
 var _parent_reference: Array[Region] = []  # Link from parent reference to the parent Region
+var _point_to_cells_map: Array[PackedInt64Array] = []
 
 func _init(tri_cell_layer: TriCellLayer) -> void:
 	_tri_cell_layer = tri_cell_layer
@@ -15,6 +16,8 @@ func perform() -> void:
 	for cell_ind in range(_tri_cell_layer.get_cell_count()):
 		_edge_neighbour_indices.append(_get_edge_sharing_neighbours(cell_ind))
 		_cell_parents.append(_root_region.get_region_index())  # Default all cells to root region
+	
+	_map_point_indices_to_connected_cell_indices()
 
 func get_region_ref() -> int:
 	return _root_region.get_region_index()
@@ -73,3 +76,28 @@ func _get_edge_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
 		neighbours.append(_tri_cell_layer.get_tri_cell_index_for_vector2i(tri_cell_coords + Vector2i(0, inter_row_dir)))
 	
 	return neighbours
+
+func _map_point_indices_to_connected_cell_indices() -> void:
+	var total_points = _tri_cell_layer.get_point_count()
+	for point_index in range(total_points):
+		_point_to_cells_map.append(PackedInt64Array())
+	
+	for cell_ind in range(_tri_cell_layer.get_cell_count()):
+		for point_index in _tri_cell_layer.get_triangle_as_point_indices(cell_ind):
+			if not cell_ind in _point_to_cells_map[point_index]:
+				_point_to_cells_map[point_index].append(cell_ind)
+
+func region_surrounds_cell(region_ind: int, cell_ind: int) -> bool:
+	for point_index in _tri_cell_layer.get_triangle_as_point_indices(cell_ind):
+		var point_has_tri_in_region = false
+		for tri_index in _point_to_cells_map[point_index]:
+			if tri_index == cell_ind:
+				continue
+			if _cell_parents[tri_index] == region_ind:
+				point_has_tri_in_region = true
+				break
+		if not point_has_tri_in_region:
+			# Not surrounded as one point is entirely outside the region
+			return false
+	# Not points found outside region
+	return true

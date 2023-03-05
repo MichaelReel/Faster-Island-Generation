@@ -32,8 +32,14 @@ func add_cell_index_to_region(cell_index: int) -> void:
 func get_cell_count() -> int:
 	return len(_region_cells)
 
+func front_cell_indices() -> PackedInt64Array:
+	return _region_front
+
 func front_empty() -> bool:
 	return _region_front.is_empty()
 
 func random_front_cell_index(rng: RandomNumberGenerator) -> int:
 	return _region_front[rng.randi_range(0, len(_region_front) - 1)]
+
+func surrounding_cell_with_index(cell_index: int) -> bool:
+	return _region_cell_layer.region_surrounds_cell(_region_index, cell_index)
