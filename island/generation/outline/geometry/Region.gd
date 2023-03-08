@@ -18,6 +18,9 @@ func _init(region_cell_layer: RegionCellLayer, parent_index: int) -> void:
 func get_region_index() -> int:
 	return _region_index
 
+func get_parent_index() -> int:
+	return _parent_index
+
 func add_cell_index_to_front(cell_index: int) -> void:
 	if cell_index in _region_cells:
 		_region_cells.remove_at(_region_cells.find(cell_index))
@@ -31,6 +34,9 @@ func add_cell_index_to_region(cell_index: int) -> void:
 
 func get_cell_count() -> int:
 	return len(_region_cells)
+
+func get_cell_indices() -> PackedInt64Array:
+	return _region_cells
 
 func front_cell_indices() -> PackedInt64Array:
 	return _region_front

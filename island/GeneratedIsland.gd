@@ -21,6 +21,10 @@ extends Node3D
 		random_seed = value
 		_changes_pending = true
 
+@export_category("lake_creation")
+@export var max_lake_regions: int = 6
+@export var max_lakes_per_region: int = 3 
+
 @export_category("debug_materials")
 @export var sub_water: Material = Material.new()
 @export var ground: Material = Material.new()
@@ -47,13 +51,29 @@ func _process(delta: float) -> void:
 
 func _tool_execute(_delta: float) -> void:
 	bounds.size = Vector2.ONE * bounds_side
-	_terrain_manager = TerrainManager.new(random_seed, material_lib, tri_side, bounds_side, island_cell_count)
+	_terrain_manager = TerrainManager.new(
+		random_seed,
+		material_lib,
+		tri_side,
+		bounds_side,
+		island_cell_count,
+		max_lake_regions,
+		max_lakes_per_region,
+	)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
 	_terrain_manager.perform("Outline Stage")
 
 func _game_execute(_delta: float) -> void:
 	bounds.size = Vector2.ONE * bounds_side
-	_terrain_manager = TerrainManager.new(random_seed, material_lib, tri_side, bounds_side, island_cell_count)
+	_terrain_manager = TerrainManager.new(
+		random_seed,
+		material_lib,
+		tri_side,
+		bounds_side,
+		island_cell_count,
+		max_lake_regions,
+		max_lakes_per_region,
+	)
 	var _err1 = _terrain_manager.connect("all_stages_complete", _on_all_stages_complete)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
 	var _err3 = _terrain_manager.connect("stage_percent_complete", _on_stage_percent_complete)

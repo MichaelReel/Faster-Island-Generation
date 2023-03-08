@@ -5,7 +5,7 @@ var _tri_cell_layer: TriCellLayer
 var _edge_neighbour_indices: Array[PackedInt64Array] = []  # Links to neighbour cells by index
 var _cell_parents: PackedInt64Array = []  # Link from a cell to it's parent reference index
 var _root_region: Region
-var _parent_reference: Array[Region] = []  # Link from parent reference to the parent Region
+var _region_by_index: Array[Region] = []  # Link from parent reference to the parent Region
 var _point_to_cells_map: Array[PackedInt64Array] = []
 
 func _init(tri_cell_layer: TriCellLayer) -> void:
@@ -23,25 +23,25 @@ func get_region_ref() -> int:
 	return _root_region.get_region_index()
 
 func register_region(parent: Region) -> int:
-	var index = len(_parent_reference)
-	_parent_reference.append(parent)
+	var index = len(_region_by_index)
+	_region_by_index.append(parent)
 	return index
 
 func get_region_count() -> int:
-	return len(_parent_reference)
+	return len(_region_by_index)
 
-func get_parent_by_reference(index: int) -> Region:
-	return _parent_reference[index]
+func get_region_by_reference(index: int) -> Region:
+	return _region_by_index[index]
 
-func get_reference_by_parent(parent: Region) -> int:
-	return _parent_reference.find(parent)
+func get_index_by_region(parent: Region) -> int:
+	return _region_by_index.find(parent)
 
 func get_middle_triangle_index() -> int:
 	return _tri_cell_layer.get_tri_cell_index_for_vector2i(
 		_tri_cell_layer.get_triangles_grid_dimensions() / 2
 	)
 
-func get_parent_reference_for_cell_index(cell_index: int) -> int:
+func get_region_by_index_for_cell_index(cell_index: int) -> int:
 	return _cell_parents[cell_index]
 
 func update_cell_to_region(cell_index: int, region_index: int) -> void:
@@ -101,3 +101,30 @@ func region_surrounds_cell(region_ind: int, cell_ind: int) -> bool:
 			return false
 	# Not points found outside region
 	return true
+
+func get_some_triangles_in_region(count: int, region_index: int, rng: RandomNumberGenerator) -> PackedInt64Array:
+	"""Get upto count random cells from the region referenced by region_index"""
+	var region : Region = _region_by_index[region_index]
+	
+	var actual_count : int = min(count, region.get_cell_count())
+	var random_cells = region.get_cell_indices().duplicate()
+	ArrayUtils.shuffle(rng, random_cells)
+	return random_cells.slice(0, actual_count)
+
+func expand_region_into_parent(region_index: int, rng: RandomNumberGenerator) -> bool:
+	"""
+	Extend by a cell into the parent medium
+	Return true if there is no space left
+	"""
+	var region : Region = _region_by_index[region_index]
+	if region.front_empty():
+		return true
+	
+	var random_front_cell_index = region.random_front_cell_index(rng)
+	
+	for neighbour_index in get_edge_sharing_neighbours(random_front_cell_index):
+		if get_region_by_index_for_cell_index(neighbour_index) == region.get_parent_index():
+			region.add_cell_index_to_front(neighbour_index)
+	
+	region.add_cell_index_to_region(random_front_cell_index)
+	return region.front_empty()
