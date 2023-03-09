@@ -26,11 +26,19 @@ func add_cell_index_to_front(cell_index: int) -> void:
 		_region_cells.remove_at(_region_cells.find(cell_index))
 	_region_front.append(cell_index)
 
+func set_entire_region_front(region_front: PackedInt64Array) -> void:
+	_region_front = region_front
+
 func add_cell_index_to_region(cell_index: int) -> void:
 	if cell_index in _region_front:
 		_region_front.remove_at(_region_front.find(cell_index))
 	_region_cells.append(cell_index)
 	_region_cell_layer.update_cell_to_region(cell_index, _region_index)
+
+func remove_cell_index_from_region(cell_index: int) -> void:
+	var cell_pos_in_cells: int = _region_cells.find(cell_index)
+	if cell_pos_in_cells >= 0:
+		_region_cells.remove_at(cell_pos_in_cells)
 
 func get_cell_count() -> int:
 	return len(_region_cells)
