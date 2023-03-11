@@ -82,7 +82,7 @@ func _game_execute(_delta: float) -> void:
 	_terrain_manager.perform()
 
 func _on_stage_percent_complete(stage: Stage, percent: float) -> void:
-	print("%d percent of %s completed" % [percent, stage])
+	print("%d%% of %s completed" % [percent, stage])
 
 func _on_stage_complete(stage: Stage, duration: int) -> void:
 	print("%s completed in %d msecs" % [stage, duration])

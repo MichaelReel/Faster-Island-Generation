@@ -40,4 +40,4 @@ func get_region_cell_layer() -> RegionCellLayer:
 	return _region_cell_layer
 
 func get_island_region_index() -> int:
-	return _island_outline_layer.get_region_ref()
+	return _island_outline_layer.get_island_region_index()

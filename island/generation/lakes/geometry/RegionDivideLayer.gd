@@ -1,4 +1,4 @@
-class_name RegionDividelLayer
+class_name RegionDivideLayer
 extends Object
 
 var _outline_manager: OutlineManager
@@ -31,45 +31,45 @@ func perform() -> void:
 #	for region in _regions:
 #		var _lines: Array[Edge] = region.get_perimeter_lines(false)
 
+func get_region_indices() -> PackedInt64Array:
+	return _region_indices
+
 func _setup_regions() -> void:
 	var parent_region_index = _outline_manager.get_island_region_index()
-	var start_triangles = get_some_triangles_in_region(_lake_regions, parent_region_index, _rng)
+	var start_triangles = _region_cell_layer.get_some_triangles_in_region(_lake_regions, parent_region_index, _rng)
 	
 	for tri_index in start_triangles:
 		var new_region = Region.new(_region_cell_layer, parent_region_index)
-		new_region.add_cell_index_to_front(tri_index)
+		_region_cell_layer.add_cell_to_subregion_front(tri_index, new_region.get_region_index())
 		_region_indices.append(new_region.get_region_index())
-
-func get_some_triangles_in_region(count: int, region_index: int, rng: RandomNumberGenerator) -> PackedInt64Array:
-	"""Get upto count random cells from the region referenced by region_index"""
-	var region : Region = _region_cell_layer.get_region_by_index(region_index)
-	
-	var actual_count : int = min(count, region.get_cell_count())
-	var random_cells = region.get_cell_indices().duplicate()
-	ArrayUtils.shuffle(rng, random_cells)
-	return random_cells.slice(0, actual_count)
 
 func reduce_region_and_create_margin(region_index: int) -> void:
 	var border_cell_indices: PackedInt64Array = _find_inner_border_cell_indices(region_index)
+	
+	var mass_debug_string := "region: %d" % region_index
 
 	# Return the border cells to the parent and mark as frontier
 	for border_cell_index in border_cell_indices:
-		_region_cell_layer.return_cell_to_parent_region(border_cell_index, _outline_manager.get_island_region_index())
+		mass_debug_string += "\n"
+		var bc_region = _region_cell_layer.get_region_by_index_for_cell_index(border_cell_index)
+		var bc_parent = _region_cell_layer.get_region_by_index(bc_region).get_parent_index()
+		mass_debug_string += "bci: %d, region: %d, parent: %d | " % [border_cell_index, bc_region, bc_parent]
+		_region_cell_layer.remove_cell_from_current_subregion(border_cell_index) # , _outline_manager.get_island_region_index())
+		var new_region = _region_cell_layer.get_region_by_index_for_cell_index(border_cell_index)
+		var new_parent = _region_cell_layer.get_region_by_index(bc_region).get_parent_index()
+		mass_debug_string += "new region: %d, new parent: %d" % [new_region, new_parent]
 
 	# Recreate the frontier for this region, subset of removed cells
-	var new_region_front: PackedInt64Array = []
 	for border_cell_index in border_cell_indices:
 		if count_neighbours_with_parent(border_cell_index, region_index) > 0:
-			new_region_front.append(border_cell_index)
-
-	var region: Region = _region_cell_layer.get_region_by_index(region_index)
-	region.set_entire_region_front(new_region_front)
+			_region_cell_layer.add_cell_to_subregion_front(border_cell_index, region_index)
 
 func _find_inner_border_cell_indices(region_index: int) -> PackedInt64Array:
 	"""Find the indices of the cells on the edge, but inside the notional perimeter"""
 	var border_cells: PackedInt64Array = []
 	# Find cells on the boundaries of the region
-	for cell_index in _region_cell_layer.get_region_by_index(region_index).get_cell_indices():
+	var region_cells_indices: PackedInt64Array = _region_cell_layer.get_region_by_index(region_index).get_cell_indices()
+	for cell_index in region_cells_indices:
 		if count_corner_neighbours_with_parent(cell_index, region_index) < 9:
 			border_cells.append(cell_index)
 	return border_cells
