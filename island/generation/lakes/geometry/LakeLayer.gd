@@ -27,8 +27,8 @@ func perform() -> void:
 		if done:
 			expansion_done = true
 
-#	for lake_index in _lake_indices:
-#		_region_divide_layer.reduce_region_and_create_margin(lake_index)
+	for lake_index in _lake_indices:
+		_region_divide_layer.reduce_region_and_create_margin(lake_index)
 	
 #	for region in _regions:
 #		var _lines: Array[Edge] = region.get_perimeter_lines(false)
@@ -43,5 +43,5 @@ func _setup_lake_regions() -> void:
 		
 		for tri_index in start_triangles:
 			var new_lake = Region.new(_region_cell_layer, region_index)
-			_region_cell_layer.add_cell_to_subregion(tri_index, new_lake.get_region_index())
+			_region_cell_layer.add_cell_to_subregion_front(tri_index, new_lake.get_region_index())
 			_lake_indices.append(new_lake.get_region_index())

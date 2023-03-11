@@ -108,8 +108,8 @@ func get_some_triangles_in_region(count: int, region_index: int, rng: RandomNumb
 	var region : Region = get_region_by_index(region_index)
 	
 	var actual_count : int = min(count, region.get_cell_count())
-	var random_cells = region.get_cell_indices().duplicate()
-	ArrayUtils.shuffle(rng, random_cells)
+	var random_cells: PackedInt64Array = region.get_cell_indices().duplicate()
+	ArrayUtils.shuffle_int64(rng, random_cells)
 	return random_cells.slice(0, actual_count)
 
 func random_front_cell_index(region_index: int, rng: RandomNumberGenerator) -> int:

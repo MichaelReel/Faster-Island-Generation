@@ -63,7 +63,7 @@ func _tool_execute(_delta: float) -> void:
 		max_lakes_per_region,
 	)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
-	_terrain_manager.perform("Outline Stage")
+	_terrain_manager.perform("Lake Stage")
 
 func _game_execute(_delta: float) -> void:
 	bounds.size = Vector2.ONE * bounds_side
@@ -82,10 +82,10 @@ func _game_execute(_delta: float) -> void:
 	_terrain_manager.perform()
 
 func _on_stage_percent_complete(stage: Stage, percent: float) -> void:
-	print("%d%% of %s completed" % [percent, stage])
+	print("%3d%% of %s completed at t: %7.6f sec" % [percent, stage, Time.get_ticks_usec() / 1000000.0])
 
 func _on_stage_complete(stage: Stage, duration: int) -> void:
-	print("%s completed in %d msecs" % [stage, duration])
+	print("        %s completed in %d usecs" % [stage, duration])
 	_update_meshes_by_dictionary(stage.get_mesh_dict())
 
 func _on_all_stages_complete() -> void:

@@ -46,19 +46,10 @@ func _setup_regions() -> void:
 func reduce_region_and_create_margin(region_index: int) -> void:
 	var border_cell_indices: PackedInt64Array = _find_inner_border_cell_indices(region_index)
 	
-	var mass_debug_string := "region: %d" % region_index
-
 	# Return the border cells to the parent and mark as frontier
 	for border_cell_index in border_cell_indices:
-		mass_debug_string += "\n"
-		var bc_region = _region_cell_layer.get_region_by_index_for_cell_index(border_cell_index)
-		var bc_parent = _region_cell_layer.get_region_by_index(bc_region).get_parent_index()
-		mass_debug_string += "bci: %d, region: %d, parent: %d | " % [border_cell_index, bc_region, bc_parent]
 		_region_cell_layer.remove_cell_from_current_subregion(border_cell_index) # , _outline_manager.get_island_region_index())
-		var new_region = _region_cell_layer.get_region_by_index_for_cell_index(border_cell_index)
-		var new_parent = _region_cell_layer.get_region_by_index(bc_region).get_parent_index()
-		mass_debug_string += "new region: %d, new parent: %d" % [new_region, new_parent]
-
+	
 	# Recreate the frontier for this region, subset of removed cells
 	for border_cell_index in border_cell_indices:
 		if count_neighbours_with_parent(border_cell_index, region_index) > 0:
