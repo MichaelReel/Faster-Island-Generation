@@ -11,6 +11,7 @@ signal all_stages_complete()
 var _grid_manager: GridManager
 var _outline_manager: OutlineManager
 var _lake_manager: LakeManager
+var _height_manager: HeightManager
 
 func _init(
 	random_seed: int,
@@ -27,12 +28,14 @@ func _init(
 	_grid_manager = GridManager.new(tri_side, points_per_row, material_lib)
 	_outline_manager = OutlineManager.new(_grid_manager, island_cell_limit, material_lib, rng.randi())
 	_lake_manager = LakeManager.new(_grid_manager, _outline_manager, lake_regions, lakes_per_region, material_lib, rng.randi())
+	_height_manager = HeightManager.new(_grid_manager, _outline_manager, _lake_manager, material_lib, rng.randi())
 
 func perform(up_to_stage_with_name: String = "") -> void:
 	var stages: Array[Stage] = [
 		_grid_manager,
 		_outline_manager,
 		_lake_manager,
+		_height_manager,
 	]
 	
 	for stage in stages:
