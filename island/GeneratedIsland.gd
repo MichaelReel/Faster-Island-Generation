@@ -63,7 +63,7 @@ func _tool_execute(_delta: float) -> void:
 		max_lakes_per_region,
 	)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
-	_terrain_manager.perform("Lake Stage")
+	_terrain_manager.perform("Outline Stage")
 
 func _game_execute(_delta: float) -> void:
 	bounds.size = Vector2.ONE * bounds_side

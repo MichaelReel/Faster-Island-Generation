@@ -44,7 +44,7 @@ func perform_expansion_smoothing() -> void:
 				# Ensure the front is updated
 				for neighbour_index in _region_cell_layer.get_edge_sharing_neighbours(front_cell_ind):
 					if _region_cell_layer.get_region_by_index_for_cell_index(neighbour_index) == _region_cell_layer.get_root_region_index():
-						_region_cell_layer.add_cell_to_subregion(neighbour_index, _region.get_region_index())
+						_region_cell_layer.add_cell_to_subregion_front(neighbour_index, _region.get_region_index())
 				# Move front cell to the region and mark for another pass
 				_region_cell_layer.add_cell_to_subregion(front_cell_ind, _region.get_region_index())
 				still_smoothing = true
