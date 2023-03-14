@@ -28,6 +28,7 @@ extends Node3D
 @export_category("debug_materials")
 @export var sub_water: Material = Material.new()
 @export var ground: Material = Material.new()
+@export var lake_debug: Material = Material.new()
 @export var region_debug: Material = Material.new()
 
 @onready var bounds : Mesh = $BoundsMesh.mesh
@@ -40,6 +41,7 @@ var _mesh_instance_dict : Dictionary = {}
 func _ready() -> void:
 	material_lib.set_material("sub_water", sub_water)
 	material_lib.set_material("ground", ground)
+	material_lib.set_material("lake_debug", lake_debug)
 	material_lib.set_material("region_debug", region_debug)
 
 func _process(delta: float) -> void:

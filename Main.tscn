@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://ti6hvbnvt6l7"]
+[gd_scene load_steps=10 format=3 uid="uid://ti6hvbnvt6l7"]
 
 [ext_resource type="PackedScene" uid="uid://qyqjsv6gy5sa" path="res://island/GeneratedIsland.tscn" id="1_77t7i"]
 [ext_resource type="PackedScene" uid="uid://dux6616n2uxn" path="res://camera/FlyingCameraControl.tscn" id="2_gt1th"]
@@ -22,6 +22,9 @@ albedo_color = Color(0.121569, 0.227451, 0.027451, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g3d72"]
 albedo_color = Color(0.0862745, 0.611765, 0.0784314, 1)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0k3rk"]
+albedo_color = Color(0.137255, 0.478431, 0.658824, 1)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cmf4l"]
 albedo_color = Color(0.572549, 0.219608, 0.890196, 1)
 
@@ -39,6 +42,7 @@ bounds_side = 100.0
 island_cell_count = 6000
 sub_water = SubResource("StandardMaterial3D_582fk")
 ground = SubResource("StandardMaterial3D_g3d72")
+lake_debug = SubResource("StandardMaterial3D_0k3rk")
 region_debug = SubResource("StandardMaterial3D_cmf4l")
 
 [node name="FlyingCameraControl" parent="." instance=ExtResource("2_gt1th")]

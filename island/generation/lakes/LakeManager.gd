@@ -31,7 +31,6 @@ func _init(
 		material_lib
 	)
 
-
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
 	_region_divide_layer.perform()
@@ -43,6 +42,9 @@ func perform() -> void:
 
 func _to_string() -> String:
 	return "Lake Stage"
+
+func get_lake_layer() -> LakeLayer:
+	return _lake_layer
 
 func get_mesh_dict() -> Dictionary:
 	return {

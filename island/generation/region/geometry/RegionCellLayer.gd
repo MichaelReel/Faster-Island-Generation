@@ -38,8 +38,11 @@ func get_region_count() -> int:
 func get_region_by_index(index: int) -> Region:
 	return _region_by_index[index]
 
-func get_index_by_region(parent: Region) -> int:
-	return _region_by_index.find(parent)
+func get_index_by_region(region: Region) -> int:
+	return _region_by_index.find(region)
+
+func get_parent_index_by_region_index(region_index: int) -> int:
+	return _region_by_index[region_index]._parent_index
 
 func get_middle_triangle_index() -> int:
 	return _tri_cell_layer.get_tri_cell_index_for_vector2i(
@@ -51,6 +54,12 @@ func get_region_by_index_for_cell_index(cell_index: int) -> int:
 
 func get_front_cell_indices(region_index: int) -> PackedInt64Array:
 	return _region_by_index[region_index]._region_front
+
+func get_region_fronts_by_cell_index(cell_index: int) -> PackedInt64Array: 
+	return _region_fronts_by_cell_index[cell_index]
+
+func get_cell_count() -> int:
+	return _tri_cell_layer.get_cell_count()
 
 func add_cell_to_subregion_front(cell_index: int, sub_region_index: int) -> void:
 	var region = _region_by_index[sub_region_index]
@@ -67,6 +76,13 @@ func add_cell_to_subregion_front(cell_index: int, sub_region_index: int) -> void
 
 	region._region_front.append(cell_index)
 	_region_fronts_by_cell_index[cell_index].append(sub_region_index)
+
+func remove_cell_from_subregion_front(cell_index: int, fronting_region_index: int) -> void:
+	var fronting_region = _region_by_index[fronting_region_index]
+	if cell_index in fronting_region._region_front:
+		fronting_region._region_front.remove_at(fronting_region._region_front.find(cell_index))
+	var ind_in_fronts_by_cell: int = _region_fronts_by_cell_index[cell_index].find(fronting_region_index)
+	_region_fronts_by_cell_index[cell_index].remove_at(ind_in_fronts_by_cell)
 
 func add_cell_to_subregion(cell_index: int, sub_region_index: int) -> void:
 	var sub_region: Region = _region_by_index[sub_region_index]
@@ -94,8 +110,8 @@ func add_cell_to_subregion(cell_index: int, sub_region_index: int) -> void:
 	parent_region._region_cells.remove_at(index_in_parent)
 
 func remove_cell_from_current_subregion(cell_index: int) -> void:
-	var sub_region = _region_by_index[get_region_by_index_for_cell_index(cell_index)]
 	"""Cell should return to the parent region"""
+	var sub_region = _region_by_index[get_region_by_index_for_cell_index(cell_index)]
 	var cell_pos_in_cells: int = sub_region._region_cells.find(cell_index)
 	if cell_pos_in_cells >= 0:
 		sub_region._region_cells.remove_at(cell_pos_in_cells)

@@ -84,3 +84,6 @@ func get_indices_of_corner_neighbours_with_parent(cell_index:int, parent_index: 
 
 func count_corner_neighbours_with_parent(cell_index: int, parent_index: int) -> int:
 	return len(get_indices_of_corner_neighbours_with_parent(cell_index, parent_index))
+
+func get_indices_of_edge_and_corner_neighbours_with_parent(cell_index: int, parent_index: int) -> PackedInt64Array:
+	return get_indices_of_neighbours_with_parent(cell_index, parent_index) + get_indices_of_corner_neighbours_with_parent(cell_index, parent_index)

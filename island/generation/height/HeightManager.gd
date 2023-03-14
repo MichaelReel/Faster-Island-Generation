@@ -24,6 +24,7 @@ func _init(
 	_height_mesh = HeightMesh.new(
 		_grid_manager.get_tri_cell_layer(),
 		_outline_manager.get_region_cell_layer(),
+		_lake_manager.get_lake_layer(),
 		_outline_manager.get_island_region_index(),
 		material_lib
 	)
