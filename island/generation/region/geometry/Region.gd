@@ -9,6 +9,10 @@ var _region_front: PackedInt64Array = []  # Indices of cells on the potential bo
 var _region_cells: PackedInt64Array = []  # Indices of cells in this region
 var _parent_index: int  # Index of the region upon which this region is carved
 var _region_index: int
+var _point_indices_calculated: bool
+var _point_indices_in_region: PackedInt64Array = []
+var _outer_perimeter_point_indices: PackedInt64Array = []
+var _inner_perimeter_point_indices: PackedInt64Array = []
 
 func _init(region_cell_layer: RegionCellLayer, parent_index: int) -> void:
 	_region_cell_layer = region_cell_layer

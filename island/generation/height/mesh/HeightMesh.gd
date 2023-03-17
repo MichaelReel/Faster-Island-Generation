@@ -4,23 +4,23 @@ extends ArrayMesh
 Mesh for height map portion of the island generation
 """
 
-var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer
 var _lake_layer: LakeLayer
 var _island_region_index: int
+var _height_layer: HeightLayer
 var _material_lib: MaterialLib
 
 func _init(
-	tri_cell_layer: TriCellLayer,
 	regional_cell_layer: RegionCellLayer,
 	lake_layer: LakeLayer,
 	island_region_index: int,
+	height_layer: HeightLayer,
 	material_lib: MaterialLib
 ) -> void:
-	_tri_cell_layer = tri_cell_layer
 	_region_cell_layer = regional_cell_layer
 	_lake_layer = lake_layer
 	_island_region_index = island_region_index
+	_height_layer = height_layer
 	_material_lib = material_lib
 
 func perform() -> void:
@@ -40,9 +40,9 @@ func perform() -> void:
 	debug_surface_tool.set_material(_material_lib.get_material("region_debug"))
 	
 	
-	for cell_index in range(_tri_cell_layer.get_cell_count()):
+	for cell_index in range(_region_cell_layer.get_cell_count()):
 		var region_index: int = _region_cell_layer.get_region_by_index_for_cell_index(cell_index)
-		var triangle_vertices = _tri_cell_layer.get_triangle_as_vector3_array_for_index(cell_index)
+		var triangle_vertices = _height_layer.get_triangle_as_vector3_array_for_index_with_heights(cell_index)
 		if len(_region_cell_layer.get_region_fronts_by_cell_index(cell_index)) > 0:
 			for vertex in triangle_vertices:
 				debug_surface_tool.add_vertex(vertex)

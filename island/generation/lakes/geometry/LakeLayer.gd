@@ -6,6 +6,8 @@ var _region_divide_layer: RegionDivideLayer
 var _lakes_per_region: int
 var _region_cell_layer: RegionCellLayer
 var _lake_indices: PackedInt64Array
+var _exit_point_index_by_lake_index: Dictionary = {} # Map from lake's region_index to the exit point_index
+var _lake_height_by_region_index: Dictionary = {} # Map from lake's region_index to the exit point_index
 var _rng := RandomNumberGenerator.new()
 
 func _init(outline_manager: OutlineManager, region_divide_layer: RegionDivideLayer, lakes_per_region: int, rng_seed: int) -> void:
@@ -35,9 +37,32 @@ func perform() -> void:
 	
 #	for region in _regions:
 #		var _lines: Array[Edge] = region.get_perimeter_lines(false)
+	
+	# Discover the inner and outer point perimeters
+	_identify_perimeter_points()
+	
+	# Remove any lakes that don't have points or cells
+	# TODO
 
 func get_lake_region_indices() -> PackedInt64Array:
 	return _lake_indices
+
+func lake_has_exit_point(region_index: int) -> bool:
+	return _exit_point_index_by_lake_index.has(region_index)
+
+func get_exit_point_index_by_lake_index(region_index: int) -> int:
+	"""Return the exit point for the given region or -1 if none was recorded"""
+	return _exit_point_index_by_lake_index.get(region_index, -1)
+
+func set_exit_point_index_by_lake_index(point_index: int, region_index: int) -> void:
+	_exit_point_index_by_lake_index[region_index] = point_index
+
+func get_lake_height_by_region_index(region_index: int) -> float:
+	"""Return the height of the lake, if it has been set. Default to sealevel (0.0) otherwise"""
+	return _lake_height_by_region_index.get(region_index, 0.0)
+
+func set_lake_height_by_region_index(height: float, region_index: int) -> void:
+	_lake_height_by_region_index[region_index] = height
 
 func _setup_lake_regions() -> void:
 	var region_indices: PackedInt64Array = _region_divide_layer.get_region_indices()
@@ -127,3 +152,7 @@ func frontier_cleanup() -> void:
 			
 			if not has_neighbour_in_region:
 				_region_cell_layer.remove_cell_from_subregion_front(cell_index, region_index)
+
+func _identify_perimeter_points() -> void:
+	for region_index in _lake_indices:
+		_region_cell_layer.identify_perimeter_points_for_region(region_index)

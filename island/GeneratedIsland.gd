@@ -23,7 +23,11 @@ extends Node3D
 
 @export_category("lake_creation")
 @export var max_lake_regions: int = 6
-@export var max_lakes_per_region: int = 3 
+@export var max_lakes_per_region: int = 3
+
+@export_category("height_map_creation")
+@export var diff_height: float = 0.5
+@export var diff_max_multi: int = 3
 
 @export_category("debug_materials")
 @export var sub_water: Material = Material.new()
@@ -63,6 +67,8 @@ func _tool_execute(_delta: float) -> void:
 		island_cell_count,
 		max_lake_regions,
 		max_lakes_per_region,
+		diff_height,
+		diff_max_multi,
 	)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
 	_terrain_manager.perform("Outline Stage")
@@ -77,6 +83,8 @@ func _game_execute(_delta: float) -> void:
 		island_cell_count,
 		max_lake_regions,
 		max_lakes_per_region,
+		diff_height,
+		diff_max_multi,
 	)
 	var _err1 = _terrain_manager.connect("all_stages_complete", _on_all_stages_complete)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
