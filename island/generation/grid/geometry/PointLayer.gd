@@ -79,7 +79,7 @@ func _get_connected_point_indices_by_point_index(point_index: int) -> PackedInt6
 		neighbours.append(get_point_index_for_vector2i(point_coords + Vector2i(0, +1)))
 	
 	# On even rows include, y+/-1 and x-1, On odd rows include, y+/-1 and x+1
-	var offset_x = point_coords.x + (-1 if point_coords.x % 2 == 0 else 1)
+	var offset_x = point_coords.x + (-1 if point_coords.y % 2 == 0 else 1)
 	if offset_x >= 0 and offset_x < point_grid_dimensions.x:
 		if point_coords.y - 1 >= 0:
 			neighbours.append(get_point_index_for_vector2i(Vector2i(offset_x, point_coords.y - 1)))
@@ -111,3 +111,17 @@ func get_point_grid_dimensions() -> Vector2i:
 
 func get_total_point_count() -> int:
 	return len(_grid_points)
+
+func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt64Array) -> Dictionary:
+	# -> Dictionary[int, PackedInt64Array]
+	"""Create a dictionary of each point in point_indices to each other adjacent point in point_indices"""
+
+	var point_index_to_connects_in_list: Dictionary = {}  # Dictionary[int, PackedInt64Array]
+	for point_index in point_indices:
+		point_index_to_connects_in_list[point_index] = PackedInt64Array()
+		var directions: PackedInt64Array = _connected_point_indices_by_point_index[point_index]
+		for direction in directions:
+			if direction in point_indices:
+				point_index_to_connects_in_list[point_index].append(direction)
+	
+	return point_index_to_connects_in_list

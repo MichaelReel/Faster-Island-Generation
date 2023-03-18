@@ -194,3 +194,7 @@ func _get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
 			neighbours.append(get_tri_cell_index_for_vector2i(Vector2i(x, three_cell_row)))
 	
 	return neighbours
+
+func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt64Array) -> Dictionary:
+	# -> Dictionary[int, PackedInt64Array]
+	return _point_layer.get_valid_adjacent_point_indices_from_list(point_indices)

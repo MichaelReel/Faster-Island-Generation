@@ -71,12 +71,16 @@ func get_point_height(point_index: int) -> float:
 
 func _setup_sealevel() -> void:
 	""" Record each point on the edges between the island region frontier and the region itself """
-	var island_region_index = _outline_manager.get_island_region_index()
-	var frontier_indices = _region_cell_layer.get_front_cell_indices(island_region_index)
-	for front_cell_index in frontier_indices:
-		for point in _region_cell_layer.get_region_front_point_indices_by_front_cell_index(island_region_index, front_cell_index):
-			if not point in _sealevel_point_indices:
-				_sealevel_point_indices.append(point)
+	var island_region_index: int = _outline_manager.get_island_region_index()
+	var front_cell_indices: PackedInt64Array = _region_cell_layer.get_front_cell_indices(island_region_index)
+	var temp_sealevel_point_indices: Array[int] = []
+	for front_cell_index in front_cell_indices:
+		for point_index in _region_cell_layer.get_region_front_point_indices_by_front_cell_index(island_region_index, front_cell_index):
+			if not point_index in temp_sealevel_point_indices:
+				set_point_height(point_index, 0.0)
+				temp_sealevel_point_indices.append(point_index)
+	
+	_sealevel_point_indices = temp_sealevel_point_indices
 
 func _setup_height_fronts() -> void:
 	"""Create the initial uphill and downhill point frontiers"""
@@ -85,7 +89,7 @@ func _setup_height_fronts() -> void:
 		for point_index in _region_cell_layer.get_connected_point_indices_by_point_index(center_point):
 			if not is_point_height_set(point_index):
 				# Uphill or downhill neighbour?
-				if _region_cell_layer.point_has_any_cell_with_parent(point_index, island_region_index):
+				if not _region_cell_layer.point_has_any_cell_with_parent(point_index, _region_cell_layer.get_root_region_index()):
 					set_point_height(point_index, _uphill_height)
 					_uphill_front_indices.append(point_index)
 				else:

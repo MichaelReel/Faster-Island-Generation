@@ -63,7 +63,6 @@ func get_region_front_point_indices_by_front_cell_index(region_index: int, front
 		for cell_index in _point_to_cells_map[point_index]:
 			if _region_index_by_cell_index[cell_index] == region_index and not point_index in front_point_indices:
 				front_point_indices.append(point_index)
-				break
 	return front_point_indices
 
 func add_cell_to_subregion_front(cell_index: int, sub_region_index: int) -> void:
@@ -250,3 +249,7 @@ func _get_point_indices_in_region(region_index: int) -> PackedInt64Array:
 					region._point_indices_in_region.append(point_index)
 		region._point_indices_calculated = true
 	return region._point_indices_in_region
+
+func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt64Array) -> Dictionary:
+	# -> Dictionary[int, PackedInt64Array]
+	return _tri_cell_layer.get_valid_adjacent_point_indices_from_list(point_indices)

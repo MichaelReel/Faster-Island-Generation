@@ -26,7 +26,7 @@ extends Node3D
 @export var max_lakes_per_region: int = 3
 
 @export_category("height_map_creation")
-@export var diff_height: float = 0.5
+@export var diff_height: float = 0.2
 @export var diff_max_multi: int = 3
 
 @export_category("debug_materials")
