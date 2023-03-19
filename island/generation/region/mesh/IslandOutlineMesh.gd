@@ -22,7 +22,7 @@ func perform() -> void:
 	sub_surface_tool.set_material(_material_lib.get_material("sub_water"))
 	ground_surface_tool.set_material(_material_lib.get_material("ground"))
 	
-	for cell_index in range(_tri_cell_layer.get_cell_count()):
+	for cell_index in range(_tri_cell_layer.get_total_cell_count()):
 		var surface_tool = sub_surface_tool
 		
 		var region_index = _region_cell_layer.get_region_by_index_for_cell_index(cell_index)

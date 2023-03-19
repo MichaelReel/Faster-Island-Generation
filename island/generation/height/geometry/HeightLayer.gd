@@ -33,8 +33,8 @@ func _init(outline_manager: OutlineManager, lake_manager: LakeManager, diff_heig
 	_rng.seed = rng_seed
 
 func perform() -> void:
-	_point_height_set.resize(_region_cell_layer.get_cell_count())
-	_point_height.resize(_region_cell_layer.get_cell_count())
+	_point_height_set.resize(_region_cell_layer.get_total_cell_count())
+	_point_height.resize(_region_cell_layer.get_total_cell_count())
 	
 	while not _uphill_complete:
 		if not _sealevel_started:
@@ -84,7 +84,6 @@ func _setup_sealevel() -> void:
 
 func _setup_height_fronts() -> void:
 	"""Create the initial uphill and downhill point frontiers"""
-	var island_region_index = _outline_manager.get_island_region_index()
 	for center_point in _sealevel_point_indices:
 		for point_index in _region_cell_layer.get_connected_point_indices_by_point_index(center_point):
 			if not is_point_height_set(point_index):
@@ -142,8 +141,8 @@ func _step_uphill() -> void:
 	for point_index in _downhill_front_indices:
 		set_point_height(point_index, _downhill_height)
 
-func get_cell_count() -> int:
-	return _region_cell_layer.get_cell_count()
+func get_total_cell_count() -> int:
+	return _region_cell_layer.get_total_cell_count()
 
 func get_triangle_as_vector3_array_for_index_with_heights(cell_index) -> PackedVector3Array:
 	var triangle_as_point_indices: PackedInt64Array = (

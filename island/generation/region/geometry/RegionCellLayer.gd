@@ -3,30 +3,33 @@ extends Object
 
 var _tri_cell_layer: TriCellLayer
 var _region_index_by_cell_index: PackedInt64Array = []  # Link from a cell to it's parent reference index
-var _root_region: Region
+var _root_region_index: int
 var _region_by_index: Array[Region] = []  # Link from region index to the Region
 var _region_fronts_by_cell_index: Array[PackedInt64Array] = []
 var _point_to_cells_map: Array[PackedInt64Array] = []
 
 func _init(tri_cell_layer: TriCellLayer) -> void:
 	_tri_cell_layer = tri_cell_layer
-	_root_region = Region.new(self, 0)
+	_root_region_index = create_new_region()
 
 func perform() -> void:
-	for cell_ind in range(_tri_cell_layer.get_cell_count()):
-		_root_region._region_cells.append(cell_ind)
+	for cell_ind in range(_tri_cell_layer.get_total_cell_count()):
+		_region_by_index[_root_region_index].region_cells.append(cell_ind)
 		_region_fronts_by_cell_index.append(PackedInt64Array())
-		_region_index_by_cell_index.append(_root_region._region_index)  # Default all cells to root region
+		_region_index_by_cell_index.append(_root_region_index)  # Default all cells to root region
 
 	_map_point_indices_to_connected_cell_indices()
 
 func get_root_region_index() -> int:
-	return _root_region._region_index
+	return _region_by_index[_root_region_index].region_index
 
-func register_region(parent: Region) -> int:
-	var index = len(_region_by_index)
-	_region_by_index.append(parent)
-	return index
+func create_new_region(parent_region_index: int = 0) -> int:
+	"""Creates a new region in the Region Cell Layer and returns the index for the new region"""
+	var new_region = Region.new()
+	new_region.region_index = len(_region_by_index)
+	new_region.parent_index = parent_region_index
+	_region_by_index.append(new_region)
+	return new_region.region_index
 
 func get_region_count() -> int:
 	return len(_region_by_index)
@@ -38,7 +41,7 @@ func get_index_by_region(region: Region) -> int:
 	return _region_by_index.find(region)
 
 func get_parent_index_by_region_index(region_index: int) -> int:
-	return _region_by_index[region_index]._parent_index
+	return _region_by_index[region_index].parent_index
 
 func get_middle_triangle_index() -> int:
 	return _tri_cell_layer.get_tri_cell_index_for_vector2i(
@@ -49,13 +52,16 @@ func get_region_by_index_for_cell_index(cell_index: int) -> int:
 	return _region_index_by_cell_index[cell_index]
 
 func get_front_cell_indices(region_index: int) -> PackedInt64Array:
-	return _region_by_index[region_index]._region_front
+	return _region_by_index[region_index].region_front
 
 func get_region_fronts_by_cell_index(cell_index: int) -> PackedInt64Array: 
 	return _region_fronts_by_cell_index[cell_index]
 
-func get_cell_count() -> int:
-	return _tri_cell_layer.get_cell_count()
+func get_total_cell_count() -> int:
+	return _tri_cell_layer.get_total_cell_count()
+
+func get_cell_count_by_region_index(region_index: int) -> int:
+	return len(_region_by_index[region_index].region_cells)
 
 func get_region_front_point_indices_by_front_cell_index(region_index: int, front_cell_index: int) -> PackedInt64Array:
 	var front_point_indices: PackedInt64Array = []
@@ -67,78 +73,81 @@ func get_region_front_point_indices_by_front_cell_index(region_index: int, front
 
 func add_cell_to_subregion_front(cell_index: int, sub_region_index: int) -> void:
 	var region = _region_by_index[sub_region_index]
-	if region._parent_index != get_region_by_index_for_cell_index(cell_index):
+	if region.parent_index != get_region_by_index_for_cell_index(cell_index):
 		printerr("Attempt to add cell to front when cell is not in parent region of target region")
 	
 	# Ignore attempts to re-add cells to the same front
-	if cell_index in region._region_front:
+	if cell_index in region.region_front:
 		return
 	
 	# If cell is already in region, chuck an error, move back to front should be separate
-	if cell_index in region._region_cells:
+	if cell_index in region.region_cells:
 		printerr("Attempt to add cell to front when cell is already in target region")
 
-	region._region_front.append(cell_index)
+	region.region_front.append(cell_index)
 	_region_fronts_by_cell_index[cell_index].append(sub_region_index)
 
 func remove_cell_from_subregion_front(cell_index: int, fronting_region_index: int) -> void:
 	var fronting_region = _region_by_index[fronting_region_index]
-	if cell_index in fronting_region._region_front:
-		fronting_region._region_front.remove_at(fronting_region._region_front.find(cell_index))
+	if cell_index in fronting_region.region_front:
+		fronting_region.region_front.remove_at(fronting_region.region_front.find(cell_index))
 	var ind_in_fronts_by_cell: int = _region_fronts_by_cell_index[cell_index].find(fronting_region_index)
 	_region_fronts_by_cell_index[cell_index].remove_at(ind_in_fronts_by_cell)
 
 func add_cell_to_subregion(cell_index: int, sub_region_index: int) -> void:
 	var sub_region: Region = _region_by_index[sub_region_index]
-	if sub_region._parent_index != get_region_by_index_for_cell_index(cell_index):
+	if sub_region.parent_index != get_region_by_index_for_cell_index(cell_index):
 		printerr("Attempt to add cell when cell is not in parent region of target region")
 	
-	if cell_index in sub_region._region_cells:
+	if cell_index in sub_region.region_cells:
 		printerr("Attempt to add cell when cell is already in target region")
 		return
 	
 	# remove from any region fronts this cell in
 	for fronting_region_index in _region_fronts_by_cell_index[cell_index]:
 		var fronting_region = _region_by_index[fronting_region_index]
-		if cell_index in fronting_region._region_front:
-			fronting_region._region_front.remove_at(fronting_region._region_front.find(cell_index))
+		if cell_index in fronting_region.region_front:
+			fronting_region.region_front.remove_at(fronting_region.region_front.find(cell_index))
 	_region_fronts_by_cell_index[cell_index].clear()
 	
 	# Add to subregion and set the mapping
-	sub_region._region_cells.append(cell_index)
-	_region_index_by_cell_index[cell_index] = sub_region._region_index
+	sub_region.region_cells.append(cell_index)
+	_region_index_by_cell_index[cell_index] = sub_region.region_index
 	
 	# Remove from parent
-	var parent_region: Region = _region_by_index[sub_region._parent_index]
-	var index_in_parent = parent_region._region_cells.find(cell_index)
-	parent_region._region_cells.remove_at(index_in_parent)
+	var parent_region: Region = _region_by_index[sub_region.parent_index]
+	var index_in_parent = parent_region.region_cells.find(cell_index)
+	parent_region.region_cells.remove_at(index_in_parent)
 
 func remove_cell_from_current_subregion(cell_index: int) -> void:
 	"""Cell should return to the parent region"""
 	var sub_region = _region_by_index[get_region_by_index_for_cell_index(cell_index)]
-	var cell_pos_in_cells: int = sub_region._region_cells.find(cell_index)
+	var cell_pos_in_cells: int = sub_region.region_cells.find(cell_index)
 	if cell_pos_in_cells >= 0:
-		sub_region._region_cells.remove_at(cell_pos_in_cells)
-		_region_index_by_cell_index[cell_index] = sub_region._parent_index
+		sub_region.region_cells.remove_at(cell_pos_in_cells)
+		_region_index_by_cell_index[cell_index] = sub_region.parent_index
 	else:
-		printerr("Attempt to remove cell %d not in region %d" % [cell_index, sub_region._region_index])
+		printerr("Attempt to remove cell %d not in region %d" % [cell_index, sub_region.region_index])
 
 func get_some_triangles_in_region(count: int, region_index: int, rng: RandomNumberGenerator) -> PackedInt64Array:
 	"""Get upto count random cells from the region referenced by region_index"""
 	var region : Region = get_region_by_index(region_index)
 	
-	var actual_count : int = min(count, region.get_cell_count())
-	var random_cells: PackedInt64Array = region.get_cell_indices().duplicate()
+	var actual_count : int = min(count, len(region.region_cells))
+	var random_cells: PackedInt64Array = region.region_cells.duplicate()
 	ArrayUtils.shuffle_int64(rng, random_cells)
 	return random_cells.slice(0, actual_count)
 
+func get_region_cell_indices_by_region_index(region_index: int) -> PackedInt64Array:
+	return _region_by_index[region_index].region_cells
+
 func random_front_cell_index(region_index: int, rng: RandomNumberGenerator) -> int:
 	var region: Region = _region_by_index[region_index]
-	var random_pos_in_front: int = rng.randi_range(0, len(region._region_front) - 1)
-	var random_cell_index: int = region._region_front[random_pos_in_front]
+	var random_pos_in_front: int = rng.randi_range(0, len(region.region_front) - 1)
+	var random_cell_index: int = region.region_front[random_pos_in_front]
 	
 	# Some debug, warn if this cell doesn't have the correct parent region
-	if _region_index_by_cell_index[random_cell_index] != region._parent_index:
+	if _region_index_by_cell_index[random_cell_index] != region.parent_index:
 		printerr("Random front cell is not in parent region")
 	
 	return random_cell_index
@@ -176,7 +185,7 @@ func _map_point_indices_to_connected_cell_indices() -> void:
 	for point_index in range(total_points):
 		_point_to_cells_map.append(PackedInt64Array())
 	
-	for cell_ind in range(_tri_cell_layer.get_cell_count()):
+	for cell_ind in range(_tri_cell_layer.get_total_cell_count()):
 		for point_index in _tri_cell_layer.get_triangle_as_point_indices(cell_ind):
 			if not cell_ind in _point_to_cells_map[point_index]:
 				_point_to_cells_map[point_index].append(cell_ind)
@@ -202,8 +211,8 @@ func expand_region_into_parent(region_index: int, rng: RandomNumberGenerator) ->
 	Return true if there is no space left
 	"""
 	var region: Region = _region_by_index[region_index]
-	var parent_index: int = region._parent_index
-	if region._region_front.is_empty():
+	var parent_index: int = region.parent_index
+	if region.region_front.is_empty():
 		return true
 	
 	var random_cell_index = random_front_cell_index(region_index, rng)
@@ -213,42 +222,42 @@ func expand_region_into_parent(region_index: int, rng: RandomNumberGenerator) ->
 			add_cell_to_subregion_front(neighbour_index, region_index)
 	
 	add_cell_to_subregion(random_cell_index, region_index)
-	return region._region_front.is_empty()
+	return region.region_front.is_empty()
 
 func identify_perimeter_points_for_region(region_index: int) -> void:
 	var region: Region = get_region_by_index(region_index)
 	var region_point_indices : PackedInt64Array = _get_point_indices_in_region(region_index)
 	for point_index in region_point_indices:
-		if point_has_any_cell_with_parent(point_index, region._parent_index):
-			region._outer_perimeter_point_indices.append(point_index)
+		if point_has_any_cell_with_parent(point_index, region.parent_index):
+			region.outer_perimeter_point_indices.append(point_index)
 	
-	for outer_point_index in region._outer_perimeter_point_indices:
+	for outer_point_index in region.outer_perimeter_point_indices:
 		for point_index in get_connected_point_indices_by_point_index(outer_point_index):
 			if (
-				not point_index in region._outer_perimeter_point_indices 
+				not point_index in region.outer_perimeter_point_indices 
 				and point_index in region_point_indices
-				and not point_index in region._inner_perimeter_point_indices
+				and not point_index in region.inner_perimeter_point_indices
 			):
-				region._inner_perimeter_point_indices.append(point_index)
+				region.inner_perimeter_point_indices.append(point_index)
 
 func get_outer_perimeter_point_indices(region_index: int) -> PackedInt64Array:
 	var region: Region = get_region_by_index(region_index)
-	return region._outer_perimeter_point_indices # _perimeter_points
+	return region.outer_perimeter_point_indices # _perimeter_points
 
 func get_inner_perimeter_point_indices(region_index: int) -> PackedInt64Array:
 	var region: Region = get_region_by_index(region_index)
-	return region._inner_perimeter_point_indices # _inner_perimeter
+	return region.inner_perimeter_point_indices # _inner_perimeter
 
 func _get_point_indices_in_region(region_index: int) -> PackedInt64Array:
 	"""Get all the point indices within the region"""
 	var region: Region = get_region_by_index(region_index)
-	if not region._point_indices_calculated:
-		for cell_index in region._region_cells:
+	if not region.point_indices_calculated:
+		for cell_index in region.region_cells:
 			for point_index in _tri_cell_layer.get_triangle_as_point_indices(cell_index):
-				if not point_index in region._point_indices_in_region:
-					region._point_indices_in_region.append(point_index)
-		region._point_indices_calculated = true
-	return region._point_indices_in_region
+				if not point_index in region.point_indices_in_region:
+					region.point_indices_in_region.append(point_index)
+		region.point_indices_calculated = true
+	return region.point_indices_in_region
 
 func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt64Array) -> Dictionary:
 	# -> Dictionary[int, PackedInt64Array]

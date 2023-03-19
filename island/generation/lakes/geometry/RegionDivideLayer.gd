@@ -39,9 +39,9 @@ func _setup_regions() -> void:
 	var start_triangles = _region_cell_layer.get_some_triangles_in_region(_lake_regions, parent_region_index, _rng)
 	
 	for tri_index in start_triangles:
-		var new_region = Region.new(_region_cell_layer, parent_region_index)
-		_region_cell_layer.add_cell_to_subregion_front(tri_index, new_region.get_region_index())
-		_region_indices.append(new_region.get_region_index())
+		var new_region_index = _region_cell_layer.create_new_region(parent_region_index)
+		_region_cell_layer.add_cell_to_subregion_front(tri_index, new_region_index)
+		_region_indices.append(new_region_index)
 
 func reduce_region_and_create_margin(region_index: int) -> void:
 	var border_cell_indices: PackedInt64Array = _find_inner_border_cell_indices(region_index)
@@ -59,7 +59,7 @@ func _find_inner_border_cell_indices(region_index: int) -> PackedInt64Array:
 	"""Find the indices of the cells on the edge, but inside the notional perimeter"""
 	var border_cells: PackedInt64Array = []
 	# Find cells on the boundaries of the region
-	var region_cells_indices: PackedInt64Array = _region_cell_layer.get_region_by_index(region_index).get_cell_indices()
+	var region_cells_indices: PackedInt64Array = _region_cell_layer.get_region_cell_indices_by_region_index(region_index)
 	for cell_index in region_cells_indices:
 		if count_corner_neighbours_with_parent(cell_index, region_index) < 9:
 			border_cells.append(cell_index)

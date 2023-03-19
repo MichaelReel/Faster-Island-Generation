@@ -40,7 +40,7 @@ func perform() -> void:
 	debug_surface_tool.set_material(_material_lib.get_material("region_debug"))
 	
 	
-	for cell_index in range(_region_cell_layer.get_cell_count()):
+	for cell_index in range(_region_cell_layer.get_total_cell_count()):
 		var region_index: int = _region_cell_layer.get_region_by_index_for_cell_index(cell_index)
 		var triangle_vertices = _height_layer.get_triangle_as_vector3_array_for_index_with_heights(cell_index)
 		if len(_region_cell_layer.get_region_fronts_by_cell_index(cell_index)) > 0:

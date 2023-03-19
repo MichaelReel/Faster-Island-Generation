@@ -23,7 +23,7 @@ func perform() -> void:
 			var new_triangle: PackedInt64Array = _create_tri_cell(Vector2i(tri_col_ind, tri_row_ind))
 			_cells.append(new_triangle)
 		
-	for cell_ind in range(get_cell_count()):
+	for cell_ind in range(get_total_cell_count()):
 		_edge_neighbour_indices.append(_get_edge_sharing_neighbours(cell_ind))
 		_corner_neighbours_indices.append(_get_corner_only_sharing_neighbours(cell_ind))
 
@@ -101,7 +101,7 @@ func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt64
 func get_point_count() -> int:
 	return _point_layer.get_total_point_count()
 
-func get_cell_count() -> int:
+func get_total_cell_count() -> int:
 	return len(_cells)
 
 func get_triangles_grid_dimensions() -> Vector2i:

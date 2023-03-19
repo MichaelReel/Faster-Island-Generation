@@ -28,21 +28,15 @@ func perform() -> void:
 				done = false
 		if done:
 			expansion_done = true
-
+	
 	for lake_index in _lake_indices:
 		_region_divide_layer.reduce_region_and_create_margin(lake_index)
 		_perform_lake_smoothing(lake_index)
 	
 	frontier_cleanup()
 	
-#	for region in _regions:
-#		var _lines: Array[Edge] = region.get_perimeter_lines(false)
-	
 	# Discover the inner and outer point perimeters
 	_identify_perimeter_points()
-	
-	# Remove any lakes that don't have points or cells
-	# TODO
 
 func get_lake_region_indices() -> PackedInt64Array:
 	return _lake_indices
@@ -70,9 +64,9 @@ func _setup_lake_regions() -> void:
 		var start_triangles = _region_cell_layer.get_some_triangles_in_region(_lakes_per_region, region_index, _rng)
 		
 		for tri_index in start_triangles:
-			var new_lake = Region.new(_region_cell_layer, region_index)
-			_region_cell_layer.add_cell_to_subregion_front(tri_index, new_lake.get_region_index())
-			_lake_indices.append(new_lake.get_region_index())
+			var new_lake_region_index = _region_cell_layer.create_new_region(region_index)
+			_region_cell_layer.add_cell_to_subregion_front(tri_index, new_lake_region_index)
+			_lake_indices.append(new_lake_region_index)
 
 func _create_internal_frontier(lake_region_index: int) -> PackedInt64Array:
 	"""Produce an array of the internal cells along the inside edge"""
@@ -139,7 +133,7 @@ func frontier_cleanup() -> void:
 	There will be some frontier cells that (somehow) got left behind by the smoothing step
 	In lieu of fixing the code that doesn't remove them, just find and remove them now
 	"""
-	for cell_index in range(_region_cell_layer.get_cell_count()):
+	for cell_index in range(_region_cell_layer.get_total_cell_count()):
 		var fronts_by_cell_index = _region_cell_layer.get_region_fronts_by_cell_index(cell_index)
 		if fronts_by_cell_index.is_empty():
 			continue

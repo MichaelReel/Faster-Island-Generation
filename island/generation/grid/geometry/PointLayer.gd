@@ -115,7 +115,7 @@ func get_total_point_count() -> int:
 func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt64Array) -> Dictionary:
 	# -> Dictionary[int, PackedInt64Array]
 	"""Create a dictionary of each point in point_indices to each other adjacent point in point_indices"""
-
+	
 	var point_index_to_connects_in_list: Dictionary = {}  # Dictionary[int, PackedInt64Array]
 	for point_index in point_indices:
 		point_index_to_connects_in_list[point_index] = PackedInt64Array()
