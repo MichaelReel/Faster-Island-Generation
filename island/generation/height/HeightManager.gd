@@ -40,6 +40,9 @@ func perform() -> void:
 	_height_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
+func get_progess_step() -> GlobalStageProgressStep:
+	return Stage.GlobalStageProgressStep.HEIGHT
+
 func _to_string() -> String:
 	return "Height Stage"
 

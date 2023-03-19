@@ -28,6 +28,9 @@ func perform() -> void:
 	_island_outline_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
+func get_progess_step() -> GlobalStageProgressStep:
+	return Stage.GlobalStageProgressStep.OUTLINE
+
 func _to_string() -> String:
 	return "Outline Stage"
 

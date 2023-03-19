@@ -40,7 +40,7 @@ func _init(
 		rng.randi()
 	)
 
-func perform(up_to_stage_with_name: String = "") -> void:
+func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgressStep.ALL) -> void:
 	var stages: Array[Stage] = [
 		_grid_manager,
 		_outline_manager,
@@ -53,7 +53,7 @@ func perform(up_to_stage_with_name: String = "") -> void:
 		var time_start = Time.get_ticks_usec()
 		stage.perform()
 		emit_signal("stage_complete", stage, Time.get_ticks_usec() - time_start)
-		if up_to_stage_with_name == str(stage):
+		if up_to_stage == stage.get_progess_step():
 			break
 	
 	emit_signal("all_stages_complete")

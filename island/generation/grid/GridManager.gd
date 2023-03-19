@@ -23,6 +23,9 @@ func perform() -> void:
 	_grid_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
+func get_progess_step() -> GlobalStageProgressStep:
+	return Stage.GlobalStageProgressStep.GRID
+
 func _to_string() -> String:
 	return "Grid Stage"
 

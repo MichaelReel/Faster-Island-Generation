@@ -1,6 +1,11 @@
 @tool
 extends Node3D
 
+@export var editor_display: Stage.GlobalStageProgressStep = Stage.GlobalStageProgressStep.OUTLINE :
+	set(value):
+		editor_display = value
+		_changes_pending = true
+
 @export var bounds_side: float = 50.0 :
 	set(value):
 		bounds_side = value
@@ -71,7 +76,7 @@ func _tool_execute(_delta: float) -> void:
 		diff_max_multi,
 	)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
-	_terrain_manager.perform("Outline Stage")
+	_terrain_manager.perform(editor_display)
 
 func _game_execute(_delta: float) -> void:
 	bounds.size = Vector2.ONE * bounds_side
