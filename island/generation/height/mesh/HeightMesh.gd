@@ -6,6 +6,7 @@ Mesh for height map portion of the island generation
 
 var _region_cell_layer: RegionCellLayer
 var _lake_layer: LakeLayer
+var _root_region_index: int
 var _island_region_index: int
 var _height_layer: HeightLayer
 var _material_lib: MaterialLib
@@ -18,6 +19,7 @@ func _init(
 	material_lib: MaterialLib
 ) -> void:
 	_region_cell_layer = regional_cell_layer
+	_root_region_index = _region_cell_layer.get_root_region_index()
 	_lake_layer = lake_layer
 	_island_region_index = island_region_index
 	_height_layer = height_layer
@@ -43,15 +45,18 @@ func perform() -> void:
 	for cell_index in range(_region_cell_layer.get_total_cell_count()):
 		var region_index: int = _region_cell_layer.get_region_by_index_for_cell_index(cell_index)
 		var triangle_vertices = _height_layer.get_triangle_as_vector3_array_for_index_with_heights(cell_index)
-		if len(_region_cell_layer.get_region_fronts_by_cell_index(cell_index)) > 0:
-			for vertex in triangle_vertices:
-				debug_surface_tool.add_vertex(vertex)
-		elif region_index == _island_region_index:
+#		if len(_region_cell_layer.get_region_fronts_by_cell_index(cell_index)) > 0:
+#			for vertex in triangle_vertices:
+#				debug_surface_tool.add_vertex(vertex)
+#		if region_index == _island_region_index:
+#			for vertex in triangle_vertices:
+#				sub_surface_tool.add_vertex(vertex)
+		if region_index == _root_region_index:
 			for vertex in triangle_vertices:
 				sub_surface_tool.add_vertex(vertex)
 		elif region_index in _lake_layer.get_lake_region_indices():
 			for vertex in triangle_vertices:
-				lake_surface_tool.add_vertex(vertex)
+				sub_surface_tool.add_vertex(vertex)
 		else:
 			for vertex in triangle_vertices:
 				ground_surface_tool.add_vertex(vertex)
