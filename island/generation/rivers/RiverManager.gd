@@ -1,62 +1,55 @@
-class_name HeightManager
+class_name RiverManager
 extends Stage
 
 var _grid_manager: GridManager
 var _outline_manager: OutlineManager
 var _lake_manager: LakeManager
-var _height_layer: HeightLayer
-var _height_mesh: HeightMesh
-var _coast_line_mesh: CoastLineMesh
+var _height_manager: HeightManager
+var _river_count: int
+var _erode_depth: float
+var _material_lib: MaterialLib
 var _rng := RandomNumberGenerator.new()
+var _river_layer: RiverLayer
+var _river_mesh: RiverMesh
 
 func _init(
 	grid_manager: GridManager,
 	outline_manager: OutlineManager,
 	lake_manager: LakeManager,
-	diff_height: float,
-	diff_max_multi: int,
+	height_manager: HeightManager,
+	river_count: int,
+	erode_depth: float,
 	material_lib: MaterialLib,
 	rng_seed: int
 ) -> void:
 	_grid_manager = grid_manager
 	_outline_manager = outline_manager
 	_lake_manager = lake_manager
+	_height_manager = height_manager
+	_river_count = river_count
+	_erode_depth = erode_depth
+	_material_lib = material_lib
 	_rng.seed = rng_seed
-
-	_height_layer = HeightLayer.new(
-		_outline_manager, _lake_manager, diff_height, diff_max_multi, _rng.randi()
-	)
-	_height_mesh = HeightMesh.new(
+	
+	_river_layer = RiverLayer.new(_rng.randi())
+	_river_mesh = RiverMesh.new(
 		_outline_manager.get_region_cell_layer(),
-		_lake_manager.get_lake_layer(),
-		_height_layer,
-		material_lib
-	)
-	_coast_line_mesh = CoastLineMesh.new(
-		_outline_manager.get_region_cell_layer(),
-		_height_layer,
+		_height_manager.get_height_layer(),
 	)
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
-	_height_layer.perform()
 	emit_signal("percent_complete", self, 33.3)
-	_height_mesh.perform()
 	emit_signal("percent_complete", self, 66.6)
-	_coast_line_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
-	return Stage.GlobalStageProgressStep.HEIGHT
+	return Stage.GlobalStageProgressStep.RIVER
 
 func _to_string() -> String:
-	return "Height Stage"
+	return "River Stage"
 
 func get_mesh_dict() -> Dictionary:
 	return {
-		"terrain": _height_mesh,
-		"coast_line": _coast_line_mesh,
+		"rivers": _river_mesh
 	}
-
-func get_height_layer() -> HeightLayer:
-	return _height_layer

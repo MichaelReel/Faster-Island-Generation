@@ -11,6 +11,7 @@ enum GlobalStageProgressStep {
 	OUTLINE,
 	LAKE,
 	HEIGHT,
+	RIVER,
 	ALL,
 }
 

@@ -12,6 +12,7 @@ var _grid_manager: GridManager
 var _outline_manager: OutlineManager
 var _lake_manager: LakeManager
 var _height_manager: HeightManager
+var _river_manager: RiverManager
 
 func _init(
 	random_seed: int,
@@ -23,6 +24,8 @@ func _init(
 	lakes_per_region: int,
 	diff_height: float,
 	diff_max_multi: int,
+	river_count: int,
+	erode_depth: float,
 ) -> void:
 	var rng = RandomNumberGenerator.new()
 	rng.seed = random_seed
@@ -37,7 +40,17 @@ func _init(
 		diff_height,
 		diff_max_multi,
 		material_lib,
-		rng.randi()
+		rng.randi(),
+	)
+	_river_manager = RiverManager.new(
+		_grid_manager,
+		_outline_manager,
+		_lake_manager,
+		_height_manager,
+		river_count,
+		erode_depth,
+		material_lib,
+		rng.randi(),
 	)
 
 func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgressStep.ALL) -> void:
@@ -46,6 +59,7 @@ func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgr
 		_outline_manager,
 		_lake_manager,
 		_height_manager,
+		_river_manager,
 	]
 	
 	for stage in stages:
