@@ -98,7 +98,7 @@ func _point_index(vector: Vector2i) -> int:
 func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt64Array:
 	return _point_layer.get_connected_point_indices_by_point_index(point_index)
 
-func get_point_count() -> int:
+func get_total_point_count() -> int:
 	return _point_layer.get_total_point_count()
 
 func get_total_cell_count() -> int:

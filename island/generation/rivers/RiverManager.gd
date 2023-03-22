@@ -31,16 +31,25 @@ func _init(
 	_material_lib = material_lib
 	_rng.seed = rng_seed
 	
-	_river_layer = RiverLayer.new(_rng.randi())
+	_river_layer = RiverLayer.new(
+		_lake_manager.get_lake_layer(),
+		_outline_manager.get_region_cell_layer(),
+		_height_manager.get_height_layer(),
+		_river_count,
+		_erode_depth,
+		_rng.randi(),
+	)
 	_river_mesh = RiverMesh.new(
 		_outline_manager.get_region_cell_layer(),
 		_height_manager.get_height_layer(),
+		_river_layer
 	)
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
-	emit_signal("percent_complete", self, 33.3)
-	emit_signal("percent_complete", self, 66.6)
+	_river_layer.perform()
+	emit_signal("percent_complete", self, 50.0)
+	_river_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:

@@ -181,7 +181,7 @@ func point_has_any_cell_with_parent_in_list_get_region_index(point_index: int, r
 	return -1
 
 func _map_point_indices_to_connected_cell_indices() -> void:
-	var total_points = _tri_cell_layer.get_point_count()
+	var total_points = _tri_cell_layer.get_total_point_count()
 	for point_index in range(total_points):
 		_point_to_cells_map.append(PackedInt64Array())
 	
@@ -262,3 +262,16 @@ func _get_point_indices_in_region(region_index: int) -> PackedInt64Array:
 func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt64Array) -> Dictionary:
 	# -> Dictionary[int, PackedInt64Array]
 	return _tri_cell_layer.get_valid_adjacent_point_indices_from_list(point_indices)
+
+func get_all_point_indices_for_region_indices_in_list(region_indices: PackedInt64Array) -> PackedInt64Array:
+	var total_point_indices: PackedInt64Array = []
+	for region_index in region_indices:
+		total_point_indices.append_array(_get_point_indices_in_region(region_index))
+	return total_point_indices
+
+func get_all_point_indices_not_in_point_index_list(other_point_indices: PackedInt64Array) -> PackedInt64Array:
+	return PackedInt64Array(
+		range(_tri_cell_layer.get_total_point_count()).filter(
+			func(point_index: int): return not point_index in other_point_indices
+		)
+	)
