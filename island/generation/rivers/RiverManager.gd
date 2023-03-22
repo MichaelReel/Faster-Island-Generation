@@ -10,7 +10,8 @@ var _erode_depth: float
 var _material_lib: MaterialLib
 var _rng := RandomNumberGenerator.new()
 var _river_layer: RiverLayer
-var _river_mesh: RiverMesh
+var _water_mesh: WaterMesh
+var _debug_mesh: DebugRiverMesh
 
 func _init(
 	grid_manager: GridManager,
@@ -39,7 +40,12 @@ func _init(
 		_erode_depth,
 		_rng.randi(),
 	)
-	_river_mesh = RiverMesh.new(
+	_water_mesh = WaterMesh.new(
+		_outline_manager.get_region_cell_layer(),
+		_height_manager.get_height_layer(),
+		_river_layer
+	)
+	_debug_mesh = DebugRiverMesh.new(
 		_outline_manager.get_region_cell_layer(),
 		_height_manager.get_height_layer(),
 		_river_layer
@@ -48,8 +54,10 @@ func _init(
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
 	_river_layer.perform()
-	emit_signal("percent_complete", self, 50.0)
-	_river_mesh.perform()
+	emit_signal("percent_complete", self, 33.3)
+	_water_mesh.perform()
+	emit_signal("percent_complete", self, 66.6)
+	_debug_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -60,5 +68,6 @@ func _to_string() -> String:
 
 func get_mesh_dict() -> Dictionary:
 	return {
-		"rivers": _river_mesh
+		"rivers": _water_mesh,
+		"river_debug": _debug_mesh,
 	}

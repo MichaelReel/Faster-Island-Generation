@@ -1,4 +1,4 @@
-class_name RiverMesh
+class_name DebugRiverMesh
 extends ArrayMesh
 """
 Mesh for height map portion of the island generation
