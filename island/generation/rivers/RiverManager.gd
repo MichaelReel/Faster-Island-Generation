@@ -42,8 +42,10 @@ func _init(
 	)
 	_water_mesh = WaterMesh.new(
 		_outline_manager.get_region_cell_layer(),
+		_lake_manager.get_lake_layer(),
 		_height_manager.get_height_layer(),
-		_river_layer
+		_river_layer,
+		material_lib
 	)
 	_debug_mesh = DebugRiverMesh.new(
 		_outline_manager.get_region_cell_layer(),

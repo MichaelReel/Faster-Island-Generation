@@ -22,8 +22,9 @@ albedo_color = Color(0.121569, 0.227451, 0.027451, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g3d72"]
 albedo_color = Color(0.0862745, 0.611765, 0.0784314, 1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0k3rk"]
-albedo_color = Color(0.137255, 0.478431, 0.658824, 1)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ui302"]
+transparency = 1
+albedo_color = Color(0.0784314, 0.270588, 1, 0.666667)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cmf4l"]
 albedo_color = Color(0.572549, 0.219608, 0.890196, 1)
@@ -43,7 +44,7 @@ bounds_side = 100.0
 island_cell_count = 6000
 sub_water = SubResource("StandardMaterial3D_582fk")
 ground = SubResource("StandardMaterial3D_g3d72")
-lake_debug = SubResource("StandardMaterial3D_0k3rk")
+water_surface = SubResource("StandardMaterial3D_ui302")
 region_debug = SubResource("StandardMaterial3D_cmf4l")
 
 [node name="FlyingCameraControl" parent="." instance=ExtResource("2_gt1th")]
