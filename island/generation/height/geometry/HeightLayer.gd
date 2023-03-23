@@ -69,6 +69,10 @@ func is_point_height_set(point_index: int) -> bool:
 func get_point_height(point_index: int) -> float:
 	return _point_height[point_index]
 
+func edit_point_height(point_index: int, increment: float) -> void:
+	"""Adjust the height of the point by adding the increment"""
+	_point_height[point_index] += increment
+
 func _setup_sealevel() -> void:
 	""" Record each point on the edges between the island region frontier and the region itself """
 	var island_region_index: int = _outline_manager.get_island_region_index()

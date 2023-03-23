@@ -164,6 +164,9 @@ func get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
 func get_triangle_as_point_indices(cell_ind: int) -> PackedInt64Array:
 	return _tri_cell_layer.get_triangle_as_point_indices(cell_ind)
 
+func get_total_point_count() -> int:
+	return _tri_cell_layer.get_total_point_count()
+
 func get_point_as_vector3(point_index: int, height: float = 0) -> Vector3:
 	return _tri_cell_layer.get_point_as_vector3(point_index, height)
 

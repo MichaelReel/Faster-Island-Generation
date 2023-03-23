@@ -21,8 +21,8 @@ func perform() -> void:
 	var surface_tool: SurfaceTool = SurfaceTool.new()
 	surface_tool.begin(Mesh.PRIMITIVE_LINES)
 	
-	var rivers: Array[PackedInt64Array] = _river_layer.get_rivers()
-	for river in rivers:
+	for river_index in range(_river_layer.get_total_river_count()):
+		var river: PackedInt64Array = _river_layer.get_river_midstream_point_indices_by_index(river_index)
 		for list_position in range(len(river) - 1):
 			var point_index_a: int = river[list_position]
 			var point_index_b: int = river[list_position + 1]
