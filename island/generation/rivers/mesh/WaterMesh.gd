@@ -33,31 +33,25 @@ func perform() -> void:
 		_create_river_surface_mesh(river_index)
 
 func _create_river_surface_mesh(river_index: int) -> void:
-	var midstream_point_indices: PackedInt64Array = _river_layer.get_river_midstream_point_indices_by_index(river_index)
-	var ratio = 0.75
+	var surface_drop = 0.05
 	var surface_tool: SurfaceTool = SurfaceTool.new()
 
 	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	surface_tool.set_material(_material_lib.get_material("water_surface"))
 	
-	for pos_down_river in range(len(midstream_point_indices)):
-		var point_index: int = midstream_point_indices[pos_down_river]
-		var drop_depth: Vector3 = Vector3.DOWN * _river_layer.get_point_eroded_depth(point_index) * ratio
-		# Ignore the drop depth if this is an end point at a water body
-		if (
-			(pos_down_river == 0 and _river_layer.river_starts_at_lake(river_index)) 
-			or pos_down_river == len(midstream_point_indices) - 1
-		):
-			drop_depth = Vector3.ZERO
-		
-		
-
-#	for triangle in river.get_adjacent_triangles():
-#		for vertex in triangle.get_vertices():
-#			if lake_stage.point_in_water_body(vertex):
-#				surface_tool.add_vertex(vertex.get_uneroded_vector())
-#			else:
-#				surface_tool.add_vertex(vertex.get_uneroded_vector() + drop_depth)
+	for cell_index in _river_layer.get_river_adjacent_cell_indices(river_index):
+		for point_index in _region_cell_layer.get_triangle_as_point_indices(cell_index):
+			# Set the normal river height to below the uneroded height, but above the terrain
+			var height: float = _height_layer.get_point_height(point_index)
+			height += _river_layer.get_point_eroded_depth(point_index)
+			height -= surface_drop
+			
+			# If point is on the edge of a water body, draw at the uneroded height
+			if point_index in _river_layer.get_all_water_body_point_indices():
+				height = _height_layer.get_point_height(point_index)
+				height += _river_layer.get_point_eroded_depth(point_index)
+			
+			surface_tool.add_vertex(_region_cell_layer.get_point_as_vector3(point_index, height))
 
 	surface_tool.generate_normals()
 	surface_tool.commit(self)

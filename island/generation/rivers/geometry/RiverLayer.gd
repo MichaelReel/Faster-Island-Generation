@@ -9,6 +9,7 @@ var _erode_depth: float
 var _rng := RandomNumberGenerator.new()
 var _rivers_by_index: Array[River] = []
 var _erosion_by_point_index: PackedFloat32Array = []
+var _all_water_body_point_indices: PackedInt64Array
 
 func _init(
 	lake_layer: LakeLayer,
@@ -47,11 +48,11 @@ func _setup_rivers():
 	# Find all the points not in the lakes OR the sea
 	var water_bodies: PackedInt64Array = lake_region_indices.duplicate()
 	water_bodies.append(_region_cell_layer.get_root_region_index())
-	var all_water_body_point_indices: PackedInt64Array = (
+	_all_water_body_point_indices = (
 		_region_cell_layer.get_all_point_indices_for_region_indices_in_list(water_bodies)
 	)
 	var all_land_point_indices: PackedInt64Array = (
-		_region_cell_layer.get_all_point_indices_not_in_point_index_list(all_water_body_point_indices)
+		_region_cell_layer.get_all_point_indices_not_in_point_index_list(_all_water_body_point_indices)
 	)
 	
 	# For each lake outlet, get first point is the exit point of the lake
@@ -96,6 +97,24 @@ func _create_new_river(starts_from_lake: bool = false) -> int:
 
 func _extend_river_by_point_index(river_index: int, point_index: int) -> void:
 	_rivers_by_index[river_index].midstream_point_indices.append(point_index)
+	_update_river_adjacent_triangles(river_index, point_index)
+
+func _update_river_adjacent_triangles(river_index: int, new_point_index: int) -> void:
+	for cell_index in _region_cell_layer.get_triangles_using_point_by_index(new_point_index):
+		if cell_index in _rivers_by_index[river_index].adjacent_cell_indices:
+			continue
+		var region_index: int = _region_cell_layer.get_region_by_index_for_cell_index(cell_index)
+		if region_index in _lake_layer.get_lake_region_indices():
+			continue
+		if region_index == _region_cell_layer.get_root_region_index():
+			continue
+		_rivers_by_index[river_index].adjacent_cell_indices.append(cell_index)
+
+func get_all_water_body_point_indices() -> PackedInt64Array:
+	return _all_water_body_point_indices
+
+func get_river_adjacent_cell_indices(river_index: int) -> PackedInt64Array:
+	return _rivers_by_index[river_index].adjacent_cell_indices
 
 func _get_most_downstream_point_in_river(river_index: int) -> int:
 	return _rivers_by_index[river_index].midstream_point_indices[-1]

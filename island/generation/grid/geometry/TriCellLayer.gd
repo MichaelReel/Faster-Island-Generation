@@ -8,6 +8,7 @@ var _tri_rows: int
 var _cells: Array[PackedInt64Array] = []
 var _edge_neighbour_indices: Array[PackedInt64Array] = []  # Links to neighbour cells by index
 var _corner_neighbours_indices: Array[PackedInt64Array] = []  # Links to touching cells by index
+var _tris_using_point_by_index: Array[PackedInt64Array] = []  # Cells touching a given point
 
 func _init(point_layer: PointLayer, edge_layer: EdgeLayer) -> void:
 	_point_layer = point_layer
@@ -15,6 +16,9 @@ func _init(point_layer: PointLayer, edge_layer: EdgeLayer) -> void:
 
 func perform() -> void:
 	"""Reference the point indices and create triangles"""
+	for point_index in range(_point_layer.get_total_point_count()):
+		_tris_using_point_by_index.append(PackedInt64Array())
+	
 	_tri_per_row = (_point_layer.get_points_per_row() - 1) * 2
 	_tri_rows = _point_layer.get_row_count() - 1
 	
@@ -26,9 +30,14 @@ func perform() -> void:
 	for cell_ind in range(get_total_cell_count()):
 		_edge_neighbour_indices.append(_get_edge_sharing_neighbours(cell_ind))
 		_corner_neighbours_indices.append(_get_corner_only_sharing_neighbours(cell_ind))
+		for point_index in _cells[cell_ind]:
+			_tris_using_point_by_index[point_index].append(cell_ind)
 
 func get_triangle_as_point_indices(triangle_index: int) -> PackedInt64Array:
 	return _cells[triangle_index]
+
+func get_triangles_using_point_by_index(point_index: int) -> PackedInt64Array:
+	return _tris_using_point_by_index[point_index]
 
 func get_triangles_as_vector3_arrays() -> Array:
 	"""Return each triangle as an array of 3d vectors for surface creation"""
