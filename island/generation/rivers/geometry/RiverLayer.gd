@@ -97,7 +97,7 @@ func _create_new_river(starts_from_lake: bool = false) -> int:
 func _extend_river_by_point_index(river_index: int, point_index: int) -> void:
 	_rivers_by_index[river_index].midstream_point_indices.append(point_index)
 
-func _get_lowest_point_in_river(river_index: int) -> int:
+func _get_most_downstream_point_in_river(river_index: int) -> int:
 	return _rivers_by_index[river_index].midstream_point_indices[-1]
 
 func _erode_river(river_index: int, erosion_depth: float) -> void:
@@ -119,30 +119,27 @@ func continue_river_by_index(
 	or until it reaches a water body such as a lake or the sea
 	"""
 	# Find the lowest neighbour point that is in the available points
-	var last_river_point: int = _get_lowest_point_in_river(river_index)
-	while true:
+	var last_river_point: int = _get_most_downstream_point_in_river(river_index)
+	var river_complete: bool = false
+	while not river_complete:
 		var neighbour_point_indices: Array = Array(
 			_region_cell_layer.get_connected_point_indices_by_point_index(last_river_point)
 		)
 		neighbour_point_indices.sort_custom(ascending_by_height)
 		var lowest_neighbour: int = neighbour_point_indices[0]
+		
+		# If this river has no more available land based points to flow into
 		if not lowest_neighbour in available_point_indices:
-			break
+			river_complete = true
 		
+		# If this river has reached another river
 		if lowest_neighbour in all_river_points:
-			break
+			river_complete = true
 		
+		# Add the next (or last) river point
 		_extend_river_by_point_index(river_index, lowest_neighbour)
 		all_river_points.append(lowest_neighbour)
-	
-	# Add the lowest point (likely in a water body or river) to finish
-	var neighbour_point_indices: Array = Array(
-		_region_cell_layer.get_connected_point_indices_by_point_index(last_river_point)
-	)
-	neighbour_point_indices.sort_custom(ascending_by_height)
-	var lowest_neighbour: int = neighbour_point_indices[0]
-	_extend_river_by_point_index(river_index, lowest_neighbour)
-	all_river_points.append(lowest_neighbour)
-	
+		last_river_point = _get_most_downstream_point_in_river(river_index)
+
 func ascending_by_height(index_a: int, index_b: int) -> bool:
 	return _height_layer.get_point_height(index_a) < _height_layer.get_point_height(index_b)
