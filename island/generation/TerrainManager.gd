@@ -13,6 +13,7 @@ var _outline_manager: OutlineManager
 var _lake_manager: LakeManager
 var _height_manager: HeightManager
 var _river_manager: RiverManager
+var _civil_manager: CivilManager
 
 func _init(
 	random_seed: int,
@@ -52,6 +53,15 @@ func _init(
 		material_lib,
 		rng.randi(),
 	)
+	_civil_manager = CivilManager.new(
+		_grid_manager,
+		_outline_manager,
+		_lake_manager,
+		_height_manager,
+		_river_manager,
+		material_lib,
+		rng.randi(),
+	)
 
 func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgressStep.ALL) -> void:
 	var stages: Array[Stage] = [
@@ -60,6 +70,7 @@ func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgr
 		_lake_manager,
 		_height_manager,
 		_river_manager,
+		_civil_manager,
 	]
 	
 	for stage in stages:
