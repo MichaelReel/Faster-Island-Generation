@@ -25,7 +25,7 @@ func perform() -> void:
 	for cell_index in range(_tri_cell_layer.get_total_cell_count()):
 		var surface_tool = sub_surface_tool
 		
-		var region_index = _region_cell_layer.get_region_by_index_for_cell_index(cell_index)
+		var region_index = _region_cell_layer.get_region_index_for_cell(cell_index)
 		if region_index == _island_outline_layer.get_island_region_index():
 			surface_tool = ground_surface_tool
 		

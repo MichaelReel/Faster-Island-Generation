@@ -140,7 +140,7 @@ func frontier_cleanup() -> void:
 		for region_index in fronts_by_cell_index:
 			var has_neighbour_in_region = false
 			for neighbour_index in _region_cell_layer.get_edge_sharing_neighbours(cell_index):
-				if _region_cell_layer.get_region_by_index_for_cell_index(neighbour_index) == region_index:
+				if _region_cell_layer.get_region_index_for_cell(neighbour_index) == region_index:
 					has_neighbour_in_region = true
 					break
 			

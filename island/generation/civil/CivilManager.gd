@@ -8,6 +8,8 @@ var _height_manager: HeightManager
 var _river_manager: RiverManager
 var _material_lib: MaterialLib
 var _rng := RandomNumberGenerator.new()
+var _settlement_layer: SettlementLayer
+var _settlements_mesh: SettlementsMesh
 
 func _init(
 	grid_manager: GridManager,
@@ -26,10 +28,30 @@ func _init(
 	_material_lib = material_lib
 	_rng.seed = rng_seed
 	
-	# TODO: Create settlement and road layers here
+	_settlement_layer = SettlementLayer.new(
+		_lake_manager.get_lake_layer(),
+		_outline_manager.get_region_cell_layer(),
+		_height_manager.get_height_layer(),
+	)
+	
+	# TODO: Create road layer here
+	
+	_settlements_mesh = SettlementsMesh.new(
+		_grid_manager.get_tri_cell_layer(),
+		_height_manager.get_height_layer(),
+		_settlement_layer,
+		material_lib
+	)
+	
+	# TODO: Create road meshes here
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
+	_settlement_layer.perform()
+	emit_signal("percent_complete", self, 25.0)
+	emit_signal("percent_complete", self, 50.0)
+	_settlements_mesh.perform()
+	emit_signal("percent_complete", self, 75.0)
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -39,4 +61,6 @@ func _to_string() -> String:
 	return "Civil Stage"
 
 func get_mesh_dict() -> Dictionary:
-	return {}
+	return {
+		"settlements": _settlements_mesh
+	}

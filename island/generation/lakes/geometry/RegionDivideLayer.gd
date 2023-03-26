@@ -68,7 +68,7 @@ func _find_inner_border_cell_indices(region_index: int) -> PackedInt64Array:
 func get_indices_of_neighbours_with_parent(cell_index: int, parent_index: int) -> PackedInt64Array:
 	var parented_neighbours: PackedInt64Array = []
 	for neighbour_index in _region_cell_layer.get_edge_sharing_neighbours(cell_index):
-		if _region_cell_layer.get_region_by_index_for_cell_index(neighbour_index) == parent_index:
+		if _region_cell_layer.get_region_index_for_cell(neighbour_index) == parent_index:
 			parented_neighbours.append(neighbour_index)
 	return parented_neighbours
 
@@ -78,7 +78,7 @@ func count_neighbours_with_parent(cell_index: int, parent_index: int) -> int:
 func get_indices_of_corner_neighbours_with_parent(cell_index:int, parent_index: int) -> PackedInt64Array:
 	var parented_corner_neighbours: PackedInt64Array = []
 	for corner_neighbour in _region_cell_layer.get_corner_only_sharing_neighbours(cell_index):
-		if _region_cell_layer.get_region_by_index_for_cell_index(corner_neighbour) == parent_index:
+		if _region_cell_layer.get_region_index_for_cell(corner_neighbour) == parent_index:
 			parented_corner_neighbours.append(corner_neighbour)
 	return parented_corner_neighbours
 

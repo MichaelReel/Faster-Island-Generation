@@ -103,7 +103,7 @@ func _update_river_adjacent_triangles(river_index: int, new_point_index: int) ->
 	for cell_index in _region_cell_layer.get_triangles_using_point_by_index(new_point_index):
 		if cell_index in _rivers_by_index[river_index].adjacent_cell_indices:
 			continue
-		var region_index: int = _region_cell_layer.get_region_by_index_for_cell_index(cell_index)
+		var region_index: int = _region_cell_layer.get_region_index_for_cell(cell_index)
 		if region_index in _lake_layer.get_lake_region_indices():
 			continue
 		if region_index == _region_cell_layer.get_root_region_index():

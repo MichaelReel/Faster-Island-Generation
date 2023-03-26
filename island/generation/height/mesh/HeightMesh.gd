@@ -34,7 +34,7 @@ func perform() -> void:
 	
 	
 	for cell_index in range(_region_cell_layer.get_total_cell_count()):
-		var region_index: int = _region_cell_layer.get_region_by_index_for_cell_index(cell_index)
+		var region_index: int = _region_cell_layer.get_region_index_for_cell(cell_index)
 		var triangle_vertices = _height_layer.get_triangle_as_vector3_array_for_index_with_heights(cell_index)
 		if region_index == _root_region_index:
 			for vertex in triangle_vertices:

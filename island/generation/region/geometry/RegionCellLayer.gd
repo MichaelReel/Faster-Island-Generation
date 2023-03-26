@@ -48,7 +48,7 @@ func get_middle_triangle_index() -> int:
 		_tri_cell_layer.get_triangles_grid_dimensions() / 2
 	)
 
-func get_region_by_index_for_cell_index(cell_index: int) -> int:
+func get_region_index_for_cell(cell_index: int) -> int:
 	return _region_index_by_cell_index[cell_index]
 
 func get_front_cell_indices(region_index: int) -> PackedInt64Array:
@@ -56,9 +56,6 @@ func get_front_cell_indices(region_index: int) -> PackedInt64Array:
 
 func get_region_fronts_by_cell_index(cell_index: int) -> PackedInt64Array: 
 	return _region_fronts_by_cell_index[cell_index]
-
-func get_total_cell_count() -> int:
-	return _tri_cell_layer.get_total_cell_count()
 
 func get_cell_count_by_region_index(region_index: int) -> int:
 	return len(_region_by_index[region_index].region_cells)
@@ -73,7 +70,7 @@ func get_region_front_point_indices_by_front_cell_index(region_index: int, front
 
 func add_cell_to_subregion_front(cell_index: int, sub_region_index: int) -> void:
 	var region = _region_by_index[sub_region_index]
-	if region.parent_index != get_region_by_index_for_cell_index(cell_index):
+	if region.parent_index != get_region_index_for_cell(cell_index):
 		printerr("Attempt to add cell to front when cell is not in parent region of target region")
 	
 	# Ignore attempts to re-add cells to the same front
@@ -96,7 +93,7 @@ func remove_cell_from_subregion_front(cell_index: int, fronting_region_index: in
 
 func add_cell_to_subregion(cell_index: int, sub_region_index: int) -> void:
 	var sub_region: Region = _region_by_index[sub_region_index]
-	if sub_region.parent_index != get_region_by_index_for_cell_index(cell_index):
+	if sub_region.parent_index != get_region_index_for_cell(cell_index):
 		printerr("Attempt to add cell when cell is not in parent region of target region")
 	
 	if cell_index in sub_region.region_cells:
@@ -121,7 +118,7 @@ func add_cell_to_subregion(cell_index: int, sub_region_index: int) -> void:
 
 func remove_cell_from_current_subregion(cell_index: int) -> void:
 	"""Cell should return to the parent region"""
-	var sub_region = _region_by_index[get_region_by_index_for_cell_index(cell_index)]
+	var sub_region = _region_by_index[get_region_index_for_cell(cell_index)]
 	var cell_pos_in_cells: int = sub_region.region_cells.find(cell_index)
 	if cell_pos_in_cells >= 0:
 		sub_region.region_cells.remove_at(cell_pos_in_cells)
@@ -153,6 +150,9 @@ func random_front_cell_index(region_index: int, rng: RandomNumberGenerator) -> i
 	return random_cell_index
 
 # TODO: Remove pass-through functions and just return the underlying TriCellLayer
+
+func get_total_cell_count() -> int:
+	return _tri_cell_layer.get_total_cell_count()
 
 func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt64Array:
 	return _tri_cell_layer.get_connected_point_indices_by_point_index(point_index)
@@ -226,7 +226,7 @@ func expand_region_into_parent(region_index: int, rng: RandomNumberGenerator) ->
 	var random_cell_index = random_front_cell_index(region_index, rng)
 	
 	for neighbour_index in get_edge_sharing_neighbours(random_cell_index):
-		if get_region_by_index_for_cell_index(neighbour_index) == parent_index:
+		if get_region_index_for_cell(neighbour_index) == parent_index:
 			add_cell_to_subregion_front(neighbour_index, region_index)
 	
 	add_cell_to_subregion(random_cell_index, region_index)
