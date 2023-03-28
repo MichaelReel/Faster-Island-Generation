@@ -69,6 +69,9 @@ func _process(delta: float) -> void:
 	_changes_pending = false
 
 func _tool_execute(_delta: float) -> void:
+	for mesh_name in _mesh_instance_dict.keys().duplicate():
+		remove_child(_mesh_instance_dict[mesh_name])
+		_mesh_instance_dict.erase(mesh_name)
 	bounds.size = Vector2.ONE * bounds_side
 	_terrain_manager = TerrainManager.new(
 		random_seed,
