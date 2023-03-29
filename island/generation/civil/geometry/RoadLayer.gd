@@ -133,6 +133,7 @@ func _path_from_every_settlement() -> void:
 		while _direction_to_destination_by_cell_index[to_origin_index] != to_origin_index:
 			road_path.append(to_origin_index)
 			to_origin_index = _direction_to_destination_by_cell_index[to_origin_index]
+		road_path.append(to_origin_index)
 		road_path.reverse()
 
 		# Work forward to cell_b as path destination
@@ -140,7 +141,7 @@ func _path_from_every_settlement() -> void:
 		while _direction_to_destination_by_cell_index[to_dest_index] != to_dest_index:
 			road_path.append(to_dest_index)
 			to_dest_index = _direction_to_destination_by_cell_index[to_dest_index]
-
+		road_path.append(to_dest_index)
 		_road_paths.append(road_path)
 
 func _sort_by_cost(cell_index_a: int, cell_index_b: int) -> bool:

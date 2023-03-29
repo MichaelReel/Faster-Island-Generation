@@ -14,7 +14,7 @@ func _init(
 	road_layer: RoadLayer,
 	material_lib: MaterialLib,
 	road_width: float = 0.25,
-	road_clearance: float = 0.1,
+	road_clearance: float = 0.05,
 ) -> void:
 	_height_layer = height_layer
 	_road_layer = road_layer
@@ -26,6 +26,7 @@ func _init(
 func perform() -> void:
 	var surface_tool: SurfaceTool = SurfaceTool.new()
 	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	surface_tool.set_material(_material_lib.get_material("road"))
 	
 	for road in _road_layer.get_road_paths():
 		if len(road) == 0:
@@ -36,34 +37,116 @@ func perform() -> void:
 	surface_tool.commit(self)
 
 func _get_road_surface_mesh_for_path(road: PackedInt64Array, surface_tool: SurfaceTool) -> void:
+	# Get the path as triangles (point arrays) where the middle point is the inside "curve"
+	var path_pair_edges: Array[PackedInt64Array] = _get_path_pair_edges(road)
 	
-	## TEMP DEBUG
-	for cell_index in road:
-		for point_index in _tri_cell_layer.get_triangle_as_point_indices(cell_index):
-			var height = _height_layer.get_point_height(point_index) + _road_clearance
-			var vertex = _tri_cell_layer.get_point_as_vector3(point_index, height)
+	# Draw a little bit of road for each pair of edges
+	for path_edge_pair in path_pair_edges:
+		var vertices: Array[Vector3] = _get_road_vertices_for_edges(path_edge_pair)
+		for vertex in vertices:
 			surface_tool.add_vertex(vertex)
-	
-#	# Draw a little bit of road for each pair of edges
-#	var edge_pair_list = road_path.get_path_pair_edges()
-#	for edge_pair in edge_pair_list:
-#		var vertices: Array[Vector3] = _get_road_vertices_for_edges(edge_pair[0], edge_pair[1], width, clearance)
-#		for vertex in vertices:
-#			surface_tool.set_color(debug_color_dict.road_color)
-#			surface_tool.add_vertex(vertex + clearance * Vector3.UP)
 
-#
-#static func _get_road_vertices_for_edges(edge_1: Edge, edge_2: Edge, width: float, clearance: float) -> Array[Vector3]:
-#	var shared_point = edge_1.shared_point(edge_2)
-#	var other_1 = edge_1.other_point(shared_point)
-#	var other_2 = edge_2.other_point(shared_point)
-#	var clearance_adjust = clearance * Vector3.UP
-#	var vertices: Array[Vector3] = [
-#		lerp(shared_point.get_vector(), other_1.get_vector(), 0.5 - 0.5 * width) + clearance_adjust,
-#		lerp(shared_point.get_vector(), other_2.get_vector(), 0.5 - 0.5 * width) + clearance_adjust,
-#		lerp(shared_point.get_vector(), other_2.get_vector(), 0.5 + 0.5 * width) + clearance_adjust,
-#		lerp(shared_point.get_vector(), other_2.get_vector(), 0.5 + 0.5 * width) + clearance_adjust,
-#		lerp(shared_point.get_vector(), other_1.get_vector(), 0.5 + 0.5 * width) + clearance_adjust,
-#		lerp(shared_point.get_vector(), other_1.get_vector(), 0.5 - 0.5 * width) + clearance_adjust,
-#	]
-#	return vertices
+func _get_road_vertices_for_edges(edge_pair: PackedInt64Array) -> Array[Vector3]:
+	"""
+	Return the six points required to draw a path between the centers of 2 edges
+	The 2 edges in edge_pair are defined by 3 points where they join at the middle point
+	"""
+	var point_1: Vector3 = _tri_cell_layer.get_point_as_vector3(edge_pair[0], _height_layer.get_point_height(edge_pair[0]))
+	var shared_point: Vector3 = _tri_cell_layer.get_point_as_vector3(edge_pair[1], _height_layer.get_point_height(edge_pair[1]))
+	var point_3: Vector3 = _tri_cell_layer.get_point_as_vector3(edge_pair[2], _height_layer.get_point_height(edge_pair[2]))
+	var clearance_adjust: Vector3 = _road_clearance * Vector3.UP
+	var vertices: Array[Vector3] = [
+		lerp(shared_point, point_1, 0.5 - 0.5 * _road_width) + clearance_adjust,
+		lerp(shared_point, point_3, 0.5 - 0.5 * _road_width) + clearance_adjust,
+		lerp(shared_point, point_3, 0.5 + 0.5 * _road_width) + clearance_adjust,
+		lerp(shared_point, point_3, 0.5 + 0.5 * _road_width) + clearance_adjust,
+		lerp(shared_point, point_1, 0.5 + 0.5 * _road_width) + clearance_adjust,
+		lerp(shared_point, point_1, 0.5 - 0.5 * _road_width) + clearance_adjust,
+	]
+	return vertices
+
+func _get_path_pair_edges(road: PackedInt64Array) -> Array[PackedInt64Array]:
+	"""Return a list of point_index arrays, where 3 points represent 2 edges in clockwise rotation order"""
+	
+	var edges_as_point_lists: Array[PackedInt64Array] = _get_shared_edges_in_cell_path(road)
+	
+	var edge_pair_list: Array[PackedInt64Array] = []
+	for i in range(len(edges_as_point_lists) - 1):
+		edge_pair_list.append(
+			_get_edges_as_point_indices_in_clockwise_order(
+				edges_as_point_lists[i], edges_as_point_lists[i + 1], road[i + 1]
+			)
+		)
+	
+	return edge_pair_list
+
+func _get_edges_as_point_indices_in_clockwise_order(
+	edge_a: PackedInt64Array, edge_b: PackedInt64Array, cell_ind: int
+) -> PackedInt64Array:
+	"""
+	Returns the edges as an array in clockwise order
+	The shared point in the array is the middle point where the edges join.
+	The first point should be the rotationally anti-clockwise point from the joint
+	and the second point the rotationally clockwise point from the joint
+	"""
+	
+	# The cells in the triangle are already in clockwise order
+	var points_indices_in_triangle: PackedInt64Array = (
+		_tri_cell_layer.get_triangle_as_point_indices(cell_ind)
+	)
+	
+	# Order the edge points by the cell point order
+	_order_values_in_edge_by_triangle_array(edge_a, points_indices_in_triangle)
+	_order_values_in_edge_by_triangle_array(edge_b, points_indices_in_triangle)
+	
+	# Where the edges join determines the output
+	if edge_a[0] == edge_b[1]:
+		# Rotate from edge_b first around to edge_a
+		return PackedInt64Array([edge_b[0], edge_a[0], edge_a[1]])
+	elif edge_a[1] == edge_b[0]:
+		# Rotate from edge_a first around to edge_b
+		return PackedInt64Array([edge_a[0], edge_a[1], edge_b[1]])
+	
+	printerr("Edge %s and %s dont appear to join" % [edge_a, edge_b])
+	return []
+
+func _order_values_in_edge_by_triangle_array(
+	edge: PackedInt64Array, triangle: PackedInt64Array
+) -> void:
+	"""
+	Assuming the edge points are withing the triangle points
+	Ensure the order of the edges points matches the rotational order of the triangle
+	"""
+	for i in range(len(triangle)):
+		if edge[0] == triangle[i]:
+			if edge[1] == triangle[(i + 1) % 3]:
+				return
+			if edge[1] == triangle[(i + 2) % 3]:
+				edge.reverse()
+				return
+	
+	printerr("Edge cells %s do not appear to be in triangle %s" % [edge, triangle])
+
+func _get_shared_edges_in_cell_path(road: PackedInt64Array) -> Array[PackedInt64Array]:
+	"""Get the sequence of edges crossing when traversing along cells in the road"""
+	var shared_edge_sequence: Array[PackedInt64Array] = []
+	for i in range(len(road) -1):
+		var edge_as_point_indices: PackedInt64Array = _get_shared_edge_as_point_indices(road[i], road[i + 1])
+		shared_edge_sequence.append(edge_as_point_indices)
+	
+	return shared_edge_sequence
+
+func _get_shared_edge_as_point_indices(cell_a_index: int, cell_b_index: int) -> PackedInt64Array:
+	"""Find the 2 points shared by these cells and return as an array"""
+	var shared_point_indices: PackedInt64Array = []
+	
+	var cell_a_point_indices: PackedInt64Array = _tri_cell_layer.get_triangle_as_point_indices(cell_a_index)
+	var cell_b_point_indices: PackedInt64Array = _tri_cell_layer.get_triangle_as_point_indices(cell_b_index)
+	for cell in cell_a_point_indices:
+		if cell in cell_b_point_indices:
+			shared_point_indices.append(cell)
+	
+	if len(shared_point_indices) != 2:
+		printerr("%d points shared between cells %d and %d (should be 2)" % [len(shared_point_indices), cell_a_index, cell_b_index])
+	
+	return shared_point_indices
