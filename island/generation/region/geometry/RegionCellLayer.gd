@@ -175,6 +175,9 @@ func get_point_as_vector3(point_index: int, height: float = 0) -> Vector3:
 func get_triangles_using_point_by_index(point_index: int) -> PackedInt64Array:
 	return _tri_cell_layer.get_triangles_using_point_by_index(point_index)
 
+func get_vector2i_for_cell_index(cell_index: int) -> Vector2i:
+	return _tri_cell_layer.get_tri_cell_vector2i_for_index(cell_index)
+
 func point_has_any_cell_with_parent(point_index: int, region_index: int) -> bool:
 	for tri_index in _point_to_cells_map[point_index]:
 		if _region_index_by_cell_index[tri_index] == region_index:

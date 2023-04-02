@@ -14,7 +14,7 @@ var _cost_to_nearest_by_cell_index: Dictionary = {}  # Dictionary[int, float]
 var _direction_to_destination_by_cell_index: Dictionary = {}  # Dictionary[int, int]
 var _destination_cell_by_cell_index: Dictionary = {}  # Dictionary[int, int]
 var _best_settlement_pair_cost: Dictionary = {}  # Dictionary[String, Dictionary{String, int | float}]
-var _road_mid_points: PackedInt64Array = []
+var _road_mid_points: PackedVector3Array = []
 var _road_paths: Array[PackedInt64Array] = []
 
 func _init(
@@ -36,8 +36,23 @@ func perform() -> void:
 func get_road_paths() -> Array[PackedInt64Array]:
 	return _road_paths
 
-func get_road_mid_points() -> PackedInt64Array:
+func get_road_mid_point_vector3s() -> PackedVector3Array:
 	return _road_mid_points
+
+func get_shared_edge_as_point_indices(cell_a_index: int, cell_b_index: int) -> PackedInt64Array:
+	"""Find the 2 points shared by these cells and return as an array"""
+	var shared_point_indices: PackedInt64Array = []
+	
+	var cell_a_point_indices: PackedInt64Array = _region_cell_layer.get_triangle_as_point_indices(cell_a_index)
+	var cell_b_point_indices: PackedInt64Array = _region_cell_layer.get_triangle_as_point_indices(cell_b_index)
+	for cell in cell_a_point_indices:
+		if cell in cell_b_point_indices:
+			shared_point_indices.append(cell)
+	
+	if len(shared_point_indices) != 2:
+		printerr("%d points shared between cells %d and %d (should be 2)" % [len(shared_point_indices), cell_a_index, cell_b_index])
+	
+	return shared_point_indices
 
 func _path_from_every_settlement() -> void:
 	var water_region_indices: PackedInt64Array = _lake_layer.get_lake_region_indices().duplicate()
@@ -126,7 +141,7 @@ func _path_from_every_settlement() -> void:
 		var cell_index_a: int = path_details["cell_a"]
 		var cell_index_b: int = path_details["cell_b"]
 		var road_path: PackedInt64Array = []
-		_road_mid_points.append(cell_index_a)
+		_add_a_mid_point_vector_between_cells(cell_index_a, cell_index_b)
 
 		# Work back to cell_a as origin
 		var to_origin_index: int = cell_index_a
@@ -171,4 +186,21 @@ func _update_smallest_path_cost_table(cell_index_a: int, cell_index_b: int) -> v
 
 func _get_cell_path_key(cell_index_a: int, cell_index_b: int) -> String:
 	"""Get a key unique to the destination paths of the search cells, order should be unimportant"""
-	return "%d:%d" % ([cell_index_a, cell_index_b] if cell_index_a < cell_index_b else [cell_index_b, cell_index_a])
+	var dest_a = _destination_cell_by_cell_index[cell_index_a]
+	var dest_b = _destination_cell_by_cell_index[cell_index_b]
+	return "%d:%d" % ([dest_a, dest_b] if dest_a < dest_b else [dest_b, dest_a])
+
+func _add_a_mid_point_vector_between_cells(cell_index_a: int, cell_index_b: int) -> void:
+	var shared_edge: PackedInt64Array = get_shared_edge_as_point_indices(cell_index_a, cell_index_b)
+	_road_mid_points.append(
+		lerp(
+			_region_cell_layer.get_point_as_vector3(
+				shared_edge[0], _height_layer.get_point_height(shared_edge[0])
+			),
+			_region_cell_layer.get_point_as_vector3(
+				shared_edge[1], _height_layer.get_point_height(shared_edge[1])
+			),
+			0.5
+		)
+	)
+	

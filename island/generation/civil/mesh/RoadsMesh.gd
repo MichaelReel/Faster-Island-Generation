@@ -131,22 +131,7 @@ func _get_shared_edges_in_cell_path(road: PackedInt64Array) -> Array[PackedInt64
 	"""Get the sequence of edges crossing when traversing along cells in the road"""
 	var shared_edge_sequence: Array[PackedInt64Array] = []
 	for i in range(len(road) -1):
-		var edge_as_point_indices: PackedInt64Array = _get_shared_edge_as_point_indices(road[i], road[i + 1])
+		var edge_as_point_indices: PackedInt64Array = _road_layer.get_shared_edge_as_point_indices(road[i], road[i + 1])
 		shared_edge_sequence.append(edge_as_point_indices)
 	
 	return shared_edge_sequence
-
-func _get_shared_edge_as_point_indices(cell_a_index: int, cell_b_index: int) -> PackedInt64Array:
-	"""Find the 2 points shared by these cells and return as an array"""
-	var shared_point_indices: PackedInt64Array = []
-	
-	var cell_a_point_indices: PackedInt64Array = _tri_cell_layer.get_triangle_as_point_indices(cell_a_index)
-	var cell_b_point_indices: PackedInt64Array = _tri_cell_layer.get_triangle_as_point_indices(cell_b_index)
-	for cell in cell_a_point_indices:
-		if cell in cell_b_point_indices:
-			shared_point_indices.append(cell)
-	
-	if len(shared_point_indices) != 2:
-		printerr("%d points shared between cells %d and %d (should be 2)" % [len(shared_point_indices), cell_a_index, cell_b_index])
-	
-	return shared_point_indices

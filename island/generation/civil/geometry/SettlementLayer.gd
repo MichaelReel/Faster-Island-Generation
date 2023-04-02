@@ -30,13 +30,24 @@ func _locate_potential_settlements() -> void:
 	water_region_indices.append(_region_cell_layer.get_root_region_index())
 	
 	for cell_ind in range(_region_cell_layer.get_total_cell_count()):
-		
+		# Only accept plain areas for settlements
 		if not _cell_is_flat(cell_ind):
 			continue
+		# Don't have settlments under water
 		var region_index: int = _region_cell_layer.get_region_index_for_cell(cell_ind)
 		if region_index in water_region_indices:
 			continue
+		# But only accept settlements near to water
 		if not _cell_is_beside_region_in_list(cell_ind, water_region_indices):
+			continue
+		# Don't have settlements too close to other settlements
+		var skip: bool = false
+		for other_cell in _settlement_cell_indices:
+			var cell_distance: int = _get_cell_distance_between_cells_by_indices(cell_ind, other_cell)
+			if cell_distance < 6:
+				skip = true
+				break
+		if skip:
 			continue
 		
 		_settlement_cell_indices.append(cell_ind)
@@ -56,6 +67,60 @@ func _cell_is_beside_region_in_list(cell_index: int, region_indices: PackedInt64
 	return Array(_region_cell_layer.get_edge_sharing_neighbours(cell_index)).any(
 		func(neighbour_index): return _region_cell_layer.get_region_index_for_cell(neighbour_index) in region_indices
 	)
+
+func _get_cell_distance_between_cells_by_indices(cell_ind: int, other_cell: int) -> int:
+	"""
+	Calculate the number of edges that would have to be crossed 
+	to traverse from one cell to another
+	"""
+	var pos_a: Vector2i = _region_cell_layer.get_vector2i_for_cell_index(cell_ind)
+	var pos_b: Vector2i = _region_cell_layer.get_vector2i_for_cell_index(other_cell)
+	var vert_diff = abs(pos_a.x - pos_b.x)
+	var hort_diff = abs(pos_a.y - pos_b.y)
+	
+	# Most of the time the distance is just the dx and dy, as long as dx is equal or greater than dy
+	if vert_diff >= hort_diff:
+		return vert_diff + hort_diff
+	
+	# Depending on the polarity of the start an finish (details in TriangleGridDistance.md)
+	# Apply some special rules to allow for the orientation of the start and end triangles
+	
+	var odd_ax: bool = (pos_a.x % 2 == 1)
+	var even_ax: bool = (pos_a.x % 2 == 0)
+	var even_ay: bool = (pos_a.y % 2 == 0)
+	var odd_bx: bool = (pos_b.x % 2 == 1)
+	var even_bx: bool = (pos_b.x % 2 == 0)
+	var even_by: bool = (pos_b.y % 2 == 0)
+	
+	# 100% certain this can be greatly improved, but for now, this works
+	if even_ay:
+		if even_by:
+			if even_ax and odd_bx:
+				return hort_diff * 2 + 1
+			if odd_ax and even_bx:
+				return hort_diff * 2 - 1
+		
+		else:
+			if even_ax and even_bx:
+				return hort_diff * 2 + 1
+			if odd_ax and odd_bx:
+				return hort_diff * 2 - 1
+	
+	else:
+		if even_by:
+			if odd_ax and odd_bx:
+				return hort_diff * 2 + 1
+			if even_ax and even_bx:
+				return hort_diff * 2 - 1
+		
+		else:
+			if odd_ax and even_bx:
+				return hort_diff * 2 + 1
+			if even_ax and odd_bx:
+				return hort_diff * 2 - 1
+	
+	# If non of the other special rules applied, then apply the last special rull
+	return hort_diff * 2
 
 func cell_is_potential_settlement(cell_ind: int) -> bool:
 	return cell_ind in _settlement_cell_indices
