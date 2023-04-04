@@ -5,7 +5,7 @@ var _outline_manager: OutlineManager
 var _region_divide_layer: RegionDivideLayer
 var _lakes_per_region: int
 var _region_cell_layer: RegionCellLayer
-var _lake_indices: PackedInt64Array
+var _lake_indices: PackedInt32Array
 var _exit_point_index_by_lake_index: Dictionary = {} # Map from lake's region_index to the exit point_index
 var _lake_height_by_region_index: Dictionary = {} # Map from lake's region_index to the exit point_index
 var _rng := RandomNumberGenerator.new()
@@ -38,7 +38,7 @@ func perform() -> void:
 	# Discover the inner and outer point perimeters
 	_identify_perimeter_points()
 
-func get_lake_region_indices() -> PackedInt64Array:
+func get_lake_region_indices() -> PackedInt32Array:
 	return _lake_indices
 
 func lake_has_exit_point(region_index: int) -> bool:
@@ -59,7 +59,7 @@ func set_lake_height_by_region_index(height: float, region_index: int) -> void:
 	_lake_height_by_region_index[region_index] = height
 
 func _setup_lake_regions() -> void:
-	var region_indices: PackedInt64Array = _region_divide_layer.get_region_indices()
+	var region_indices: PackedInt32Array = _region_divide_layer.get_region_indices()
 	for region_index in region_indices:
 		var start_triangles = _region_cell_layer.get_some_triangles_in_region(_lakes_per_region, region_index, _rng)
 		
@@ -68,9 +68,9 @@ func _setup_lake_regions() -> void:
 			_region_cell_layer.add_cell_to_subregion_front(tri_index, new_lake_region_index)
 			_lake_indices.append(new_lake_region_index)
 
-func _create_internal_frontier(lake_region_index: int) -> PackedInt64Array:
+func _create_internal_frontier(lake_region_index: int) -> PackedInt32Array:
 	"""Produce an array of the internal cells along the inside edge"""
-	var inner_front: PackedInt64Array = []
+	var inner_front: PackedInt32Array = []
 	for outer_front_cell_index in _region_cell_layer.get_front_cell_indices(lake_region_index):
 		for inner_cell in _region_divide_layer.get_indices_of_neighbours_with_parent(
 			outer_front_cell_index, lake_region_index
@@ -84,7 +84,7 @@ func _perform_lake_smoothing(lake_region_index: int) -> void:
 	Smooth the edges of the lakes to remove flat internal edge areas
 	"""
 	# Create an internal frontier for the lake
-	var inner_front: PackedInt64Array = _create_internal_frontier(lake_region_index)
+	var inner_front: PackedInt32Array = _create_internal_frontier(lake_region_index)
 	var parent_index: int = _region_cell_layer.get_parent_index_by_region_index(lake_region_index)
 	# Remove internal frontier cells that are surrounded
 	var still_smoothing: bool = true
@@ -97,7 +97,7 @@ func _perform_lake_smoothing(lake_region_index: int) -> void:
 
 
 func _move_cell_from_inner_front_to_outer_front(
-	cell_index: int, inner_front: PackedInt64Array, lake_region_index: int
+	cell_index: int, inner_front: PackedInt32Array, lake_region_index: int
 ) -> void:
 	"""
 	This will perform:

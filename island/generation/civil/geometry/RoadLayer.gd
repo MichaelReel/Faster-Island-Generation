@@ -16,7 +16,7 @@ var _direction_to_destination_by_cell_index: Dictionary = {}  # Dictionary[int, 
 var _destination_cell_by_cell_index: Dictionary = {}  # Dictionary[int, int]
 var _best_settlement_pair_cost: Dictionary = {}  # Dictionary[String, Dictionary{String, int | float}]
 var _road_mid_points: PackedVector3Array = []
-var _road_paths: Array[PackedInt64Array] = []
+var _road_paths: Array[PackedInt32Array] = []
 
 func _init(
 	lake_layer: LakeLayer,
@@ -38,18 +38,18 @@ func _init(
 func perform() -> void:
 	_path_from_every_settlement()
 
-func get_road_paths() -> Array[PackedInt64Array]:
+func get_road_paths() -> Array[PackedInt32Array]:
 	return _road_paths
 
 func get_road_mid_point_vector3s() -> PackedVector3Array:
 	return _road_mid_points
 
-func get_shared_edge_as_point_indices(cell_a_index: int, cell_b_index: int) -> PackedInt64Array:
+func get_shared_edge_as_point_indices(cell_a_index: int, cell_b_index: int) -> PackedInt32Array:
 	"""Find the 2 points shared by these cells and return as an array"""
-	var shared_point_indices: PackedInt64Array = []
+	var shared_point_indices: PackedInt32Array = []
 	
-	var cell_a_point_indices: PackedInt64Array = _region_cell_layer.get_triangle_as_point_indices(cell_a_index)
-	var cell_b_point_indices: PackedInt64Array = _region_cell_layer.get_triangle_as_point_indices(cell_b_index)
+	var cell_a_point_indices: PackedInt32Array = _region_cell_layer.get_triangle_as_point_indices(cell_a_index)
+	var cell_b_point_indices: PackedInt32Array = _region_cell_layer.get_triangle_as_point_indices(cell_b_index)
 	for cell in cell_a_point_indices:
 		if cell in cell_b_point_indices:
 			shared_point_indices.append(cell)
@@ -60,7 +60,7 @@ func get_shared_edge_as_point_indices(cell_a_index: int, cell_b_index: int) -> P
 	return shared_point_indices
 
 func _path_from_every_settlement() -> void:
-	var water_region_indices: PackedInt64Array = _lake_layer.get_lake_region_indices().duplicate()
+	var water_region_indices: PackedInt32Array = _lake_layer.get_lake_region_indices().duplicate()
 	water_region_indices.append(_region_cell_layer.get_root_region_index())
 	
 	var search_front: Array[int] = []  # Array because we'll want to sort, etc
@@ -89,7 +89,7 @@ func _path_from_every_settlement() -> void:
 			journey_cost += _NORMAL_COST
 			
 			# Up the cost if crossing a river
-			var edge_points: PackedInt64Array = get_shared_edge_as_point_indices(search_cell_index, neighbour_cell_index)
+			var edge_points: PackedInt32Array = get_shared_edge_as_point_indices(search_cell_index, neighbour_cell_index)
 			if _river_layer.get_river_following_points(edge_points[0], edge_points[1]) >= 0:
 				journey_cost += _river_penalty
 			
@@ -145,7 +145,7 @@ func _path_from_every_settlement() -> void:
 	for path_details in _best_settlement_pair_cost.values():
 		var cell_index_a: int = path_details["cell_a"]
 		var cell_index_b: int = path_details["cell_b"]
-		var road_path: PackedInt64Array = []
+		var road_path: PackedInt32Array = []
 		_add_a_mid_point_vector_between_cells(cell_index_a, cell_index_b)
 
 		# Work back to cell_a as origin
@@ -198,7 +198,7 @@ func _get_cell_path_key(cell_index_a: int, cell_index_b: int) -> String:
 	)
 
 func _add_a_mid_point_vector_between_cells(cell_index_a: int, cell_index_b: int) -> void:
-	var shared_edge: PackedInt64Array = get_shared_edge_as_point_indices(cell_index_a, cell_index_b)
+	var shared_edge: PackedInt32Array = get_shared_edge_as_point_indices(cell_index_a, cell_index_b)
 	_road_mid_points.append(
 		lerp(
 			_region_cell_layer.get_point_as_vector3(

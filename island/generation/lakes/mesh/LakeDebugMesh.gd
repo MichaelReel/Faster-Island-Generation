@@ -6,8 +6,8 @@ Mesh for debugging the region and lake portion of the island generation
 
 var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer
-var _region_indices: PackedInt64Array
-var _lake_indices: PackedInt64Array
+var _region_indices: PackedInt32Array
+var _lake_indices: PackedInt32Array
 var _material_lib: MaterialLib
 var _island_region_index: int
 
@@ -15,8 +15,8 @@ func _init(
 	tri_cell_layer: TriCellLayer,
 	region_cell_layer: RegionCellLayer,
 	island_region_index: int,
-	region_indices: PackedInt64Array,
-	lake_indices: PackedInt64Array,
+	region_indices: PackedInt32Array,
+	lake_indices: PackedInt32Array,
 	material_lib: MaterialLib
 ) -> void:
 	_tri_cell_layer = tri_cell_layer

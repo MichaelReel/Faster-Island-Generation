@@ -5,9 +5,9 @@ var _outline_manager: OutlineManager
 var _lake_manager: LakeManager
 var _region_cell_layer: RegionCellLayer
 var _lake_layer: LakeLayer
-var _sealevel_point_indices: PackedInt64Array = []
-var _uphill_front_indices: PackedInt64Array = []
-var _downhill_front_indices: PackedInt64Array = []
+var _sealevel_point_indices: PackedInt32Array = []
+var _uphill_front_indices: PackedInt32Array = []
+var _downhill_front_indices: PackedInt32Array = []
 var _sealevel_started: bool = false
 var _height_fronts_started: bool = false
 var _downhill_complete: bool = false
@@ -76,7 +76,7 @@ func edit_point_height(point_index: int, increment: float) -> void:
 func _setup_sealevel() -> void:
 	""" Record each point on the edges between the island region frontier and the region itself """
 	var island_region_index: int = _outline_manager.get_island_region_index()
-	var front_cell_indices: PackedInt64Array = _region_cell_layer.get_front_cell_indices(island_region_index)
+	var front_cell_indices: PackedInt32Array = _region_cell_layer.get_front_cell_indices(island_region_index)
 	var temp_sealevel_point_indices: Array[int] = []
 	for front_cell_index in front_cell_indices:
 		for point_index in _region_cell_layer.get_region_front_point_indices_by_front_cell_index(island_region_index, front_cell_index):
@@ -101,7 +101,7 @@ func _setup_height_fronts() -> void:
 
 func _step_downhill() -> void:
 	_downhill_height -= _diff_height * (_rng.randi() % _diff_height_max_multiplier + 1) 
-	var new_downhill_front_indices: PackedInt64Array = []
+	var new_downhill_front_indices: PackedInt32Array = []
 	for center_point in _downhill_front_indices:
 		for point_index in _region_cell_layer.get_connected_point_indices_by_point_index(center_point):
 			if not is_point_height_set(point_index):
@@ -110,9 +110,9 @@ func _step_downhill() -> void:
 	_downhill_front_indices = new_downhill_front_indices
 
 func _step_uphill() -> void:
-	var lake_region_indices: PackedInt64Array = _lake_layer.get_lake_region_indices()
+	var lake_region_indices: PackedInt32Array = _lake_layer.get_lake_region_indices()
 	_uphill_height += _diff_height * (_rng.randi() % _diff_height_max_multiplier + 1) 
-	var new_uphill_front_indices: PackedInt64Array = []
+	var new_uphill_front_indices: PackedInt32Array = []
 	for center_point in _uphill_front_indices:
 		for point_index in _region_cell_layer.get_connected_point_indices_by_point_index(center_point):
 			if not is_point_height_set(point_index):
@@ -130,7 +130,7 @@ func _step_uphill() -> void:
 						_region_cell_layer.get_outer_perimeter_point_indices(lake_as_region_index)
 					)
 					# Add any inside points to the downhill
-					var inside_point_indices : PackedInt64Array = _region_cell_layer.get_inner_perimeter_point_indices(lake_as_region_index)
+					var inside_point_indices : PackedInt32Array = _region_cell_layer.get_inner_perimeter_point_indices(lake_as_region_index)
 					if not inside_point_indices.is_empty():
 						# Reset the downhill state, and set the downhill height
 						_downhill_height = _uphill_height - _diff_height * (_rng.randi() % _diff_height_max_multiplier + 1) 
@@ -149,7 +149,7 @@ func get_total_cell_count() -> int:
 	return _region_cell_layer.get_total_cell_count()
 
 func get_triangle_as_vector3_array_for_index_with_heights(cell_index) -> PackedVector3Array:
-	var triangle_as_point_indices: PackedInt64Array = (
+	var triangle_as_point_indices: PackedInt32Array = (
 		_region_cell_layer.get_triangle_as_point_indices(cell_index)
 	)
 	return Array(triangle_as_point_indices).map(get_vector3_with_height_for_point_index)

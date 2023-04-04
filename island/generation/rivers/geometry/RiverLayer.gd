@@ -10,7 +10,7 @@ var _rng := RandomNumberGenerator.new()
 var _rivers_by_index: Array[River] = []
 var _cell_transitions_crossing_river: Dictionary = {}  # Dictionary[String, int]
 var _erosion_by_point_index: PackedFloat32Array = []
-var _all_water_body_point_indices: PackedInt64Array
+var _all_water_body_point_indices: PackedInt32Array
 
 func _init(
 	lake_layer: LakeLayer,
@@ -32,7 +32,7 @@ func perform() -> void:
 	
 	_setup_rivers()
 
-func get_river_midstream_point_indices_by_index(river_index) -> PackedInt64Array:
+func get_river_midstream_point_indices_by_index(river_index) -> PackedInt32Array:
 	return _rivers_by_index[river_index].midstream_point_indices
 
 func get_total_river_count() -> int:
@@ -41,10 +41,10 @@ func get_total_river_count() -> int:
 func river_starts_at_lake(river_index: int) -> bool:
 	return _rivers_by_index[river_index].starts_from_lake
 
-func get_all_water_body_point_indices() -> PackedInt64Array:
+func get_all_water_body_point_indices() -> PackedInt32Array:
 	return _all_water_body_point_indices
 
-func get_river_adjacent_cell_indices(river_index: int) -> PackedInt64Array:
+func get_river_adjacent_cell_indices(river_index: int) -> PackedInt32Array:
 	return _rivers_by_index[river_index].adjacent_cell_indices
 
 func get_point_eroded_depth(point_index: int) -> float:
@@ -59,16 +59,16 @@ func get_river_following_points(point_a_index: int, point_b_index: int) -> int:
 
 func _setup_rivers():
 	# Get a copy of the list of lakes (will add the sea futher down)
-	var river_points: PackedInt64Array = []
-	var lake_region_indices: PackedInt64Array = _lake_layer.get_lake_region_indices()
+	var river_points: PackedInt32Array = []
+	var lake_region_indices: PackedInt32Array = _lake_layer.get_lake_region_indices()
 	
 	# Find all the points not in the lakes OR the sea
-	var water_bodies: PackedInt64Array = lake_region_indices.duplicate()
+	var water_bodies: PackedInt32Array = lake_region_indices.duplicate()
 	water_bodies.append(_region_cell_layer.get_root_region_index())
 	_all_water_body_point_indices = (
 		_region_cell_layer.get_all_point_indices_for_region_indices_in_list(water_bodies)
 	)
-	var all_land_point_indices: PackedInt64Array = (
+	var all_land_point_indices: PackedInt32Array = (
 		_region_cell_layer.get_all_point_indices_not_in_point_index_list(_all_water_body_point_indices)
 	)
 	
@@ -93,7 +93,7 @@ func _setup_rivers():
 			river_points.append_array([exit_point_index, neighbour_point_indices[0]])
 	
 	# Pick random land points as river start points
-	ArrayUtils.shuffle_int64(_rng, all_land_point_indices)
+	ArrayUtils.shuffle_int32(_rng, all_land_point_indices)
 	for i in range(_river_count - len(_rivers_by_index)):
 		var river_index = _create_new_river()
 		var land_point_index: int = all_land_point_indices[i]
@@ -142,7 +142,7 @@ func _erode_river(river_index: int, erosion_depth: float) -> void:
 		_height_layer.edit_point_height(point_index, -erosion_depth)
 
 func _continue_river_by_index(
-	river_index: int, available_point_indices: PackedInt64Array, all_river_points: PackedInt64Array
+	river_index: int, available_point_indices: PackedInt32Array, all_river_points: PackedInt32Array
 ) -> void:
 	"""
 	Continue a river (referred by its index) until it reaches another river

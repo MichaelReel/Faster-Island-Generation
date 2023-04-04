@@ -5,7 +5,7 @@ var _lake_layer: LakeLayer
 var _region_cell_layer: RegionCellLayer
 var _height_layer: HeightLayer
 var _settlement_spread: int
-var _settlement_cell_indices: PackedInt64Array
+var _settlement_cell_indices: PackedInt32Array
 
 func _init(
 	lake_layer: LakeLayer,
@@ -29,7 +29,7 @@ func _locate_potential_settlements() -> void:
 	- beside a water body
 	"""
 	# Get a list of regions that are lakes OR the sea
-	var water_region_indices: PackedInt64Array = _lake_layer.get_lake_region_indices().duplicate()
+	var water_region_indices: PackedInt32Array = _lake_layer.get_lake_region_indices().duplicate()
 	water_region_indices.append(_region_cell_layer.get_root_region_index())
 	
 	for cell_ind in range(_region_cell_layer.get_total_cell_count()):
@@ -66,7 +66,7 @@ func _cell_is_flat(cell_ind: int) -> bool:
 		and heights[1] == heights[2]
 	)
 
-func _cell_is_beside_region_in_list(cell_index: int, region_indices: PackedInt64Array) -> bool:
+func _cell_is_beside_region_in_list(cell_index: int, region_indices: PackedInt32Array) -> bool:
 	return Array(_region_cell_layer.get_edge_sharing_neighbours(cell_index)).any(
 		func(neighbour_index): return _region_cell_layer.get_region_index_for_cell(neighbour_index) in region_indices
 	)
@@ -128,5 +128,5 @@ func _get_cell_distance_between_cells_by_indices(cell_ind: int, other_cell: int)
 func cell_is_potential_settlement(cell_ind: int) -> bool:
 	return cell_ind in _settlement_cell_indices
 
-func get_settlement_cell_indices() -> PackedInt64Array:
+func get_settlement_cell_indices() -> PackedInt32Array:
 	return _settlement_cell_indices

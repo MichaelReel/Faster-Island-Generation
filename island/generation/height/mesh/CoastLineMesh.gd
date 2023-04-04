@@ -18,7 +18,7 @@ func perform() -> void:
 	var surface_tool: SurfaceTool = SurfaceTool.new()
 	surface_tool.begin(Mesh.PRIMITIVE_LINES)
 	
-	var point_indices: PackedInt64Array = _height_layer._sealevel_point_indices
+	var point_indices: PackedInt32Array = _height_layer._sealevel_point_indices
 	var point_connections: Dictionary = _region_cell_layer.get_valid_adjacent_point_indices_from_list(point_indices)
 	
 	for point_index in point_indices:

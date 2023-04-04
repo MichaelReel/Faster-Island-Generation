@@ -7,7 +7,7 @@ var _points_per_row: int
 var _point_rows: int
 var _mesh_center: Vector2
 var _grid_points: PackedVector2Array = []
-var _connected_point_indices_by_point_index: Array[PackedInt64Array] = []
+var _connected_point_indices_by_point_index: Array[PackedInt32Array] = []
 
 func _init(tri_side: float, points_per_row: int) -> void:
 	"""
@@ -40,10 +40,10 @@ func perform() -> void:
 	for point_index in range(len(_grid_points)):
 		_connected_point_indices_by_point_index.append(_get_connected_point_indices_by_point_index(point_index))
 
-func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt64Array:
+func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt32Array:
 	return _connected_point_indices_by_point_index[point_index]
 
-func _get_connected_point_indices_by_point_index(point_index: int) -> PackedInt64Array:
+func _get_connected_point_indices_by_point_index(point_index: int) -> PackedInt32Array:
 	"""
 	There are up to six connected points, left, right, 2 above and 2 below
 	Depending on the row the point is on, the positions of the connected points can be calculated
@@ -62,7 +62,7 @@ func _get_connected_point_indices_by_point_index(point_index: int) -> PackedInt6
 	
 	var point_coords: Vector2i = get_vector2i_for_point_index(point_index)
 	var point_grid_dimensions: Vector2i = get_point_grid_dimensions()
-	var neighbours: PackedInt64Array = []
+	var neighbours: PackedInt32Array = []
 	
 	# Include point to the left, if there is one
 	if point_coords.x - 1 >= 0:
@@ -112,14 +112,14 @@ func get_point_grid_dimensions() -> Vector2i:
 func get_total_point_count() -> int:
 	return len(_grid_points)
 
-func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt64Array) -> Dictionary:
-	# -> Dictionary[int, PackedInt64Array]
+func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt32Array) -> Dictionary:
+	# -> Dictionary[int, PackedInt32Array]
 	"""Create a dictionary of each point in point_indices to each other adjacent point in point_indices"""
 	
-	var point_index_to_connects_in_list: Dictionary = {}  # Dictionary[int, PackedInt64Array]
+	var point_index_to_connects_in_list: Dictionary = {}  # Dictionary[int, PackedInt32Array]
 	for point_index in point_indices:
-		point_index_to_connects_in_list[point_index] = PackedInt64Array()
-		var directions: PackedInt64Array = _connected_point_indices_by_point_index[point_index]
+		point_index_to_connects_in_list[point_index] = PackedInt32Array()
+		var directions: PackedInt32Array = _connected_point_indices_by_point_index[point_index]
 		for direction in directions:
 			if direction in point_indices:
 				point_index_to_connects_in_list[point_index].append(direction)

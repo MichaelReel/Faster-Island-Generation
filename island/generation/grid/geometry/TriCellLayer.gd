@@ -4,10 +4,10 @@ extends Object
 var _point_layer: PointLayer
 var _tri_per_row: int
 var _tri_rows: int
-var _cells: Array[PackedInt64Array] = []
-var _edge_neighbour_indices: Array[PackedInt64Array] = []  # Links to neighbour cells by index
-var _corner_neighbours_indices: Array[PackedInt64Array] = []  # Links to touching cells by index
-var _tris_using_point_by_index: Array[PackedInt64Array] = []  # Cells touching a given point
+var _cells: Array[PackedInt32Array] = []
+var _edge_neighbour_indices: Array[PackedInt32Array] = []  # Links to neighbour cells by index
+var _corner_neighbours_indices: Array[PackedInt32Array] = []  # Links to touching cells by index
+var _tris_using_point_by_index: Array[PackedInt32Array] = []  # Cells touching a given point
 
 func _init(point_layer: PointLayer) -> void:
 	_point_layer = point_layer
@@ -15,14 +15,14 @@ func _init(point_layer: PointLayer) -> void:
 func perform() -> void:
 	"""Reference the point indices and create triangles"""
 	for point_index in range(_point_layer.get_total_point_count()):
-		_tris_using_point_by_index.append(PackedInt64Array())
+		_tris_using_point_by_index.append(PackedInt32Array())
 	
 	_tri_per_row = (_point_layer.get_points_per_row() - 1) * 2
 	_tri_rows = _point_layer.get_row_count() - 1
 	
 	for tri_row_ind in range(_tri_rows):
 		for tri_col_ind in range(_tri_per_row):
-			var new_triangle: PackedInt64Array = _create_tri_cell(Vector2i(tri_col_ind, tri_row_ind))
+			var new_triangle: PackedInt32Array = _create_tri_cell(Vector2i(tri_col_ind, tri_row_ind))
 			_cells.append(new_triangle)
 		
 	for cell_ind in range(get_total_cell_count()):
@@ -31,10 +31,10 @@ func perform() -> void:
 		for point_index in _cells[cell_ind]:
 			_tris_using_point_by_index[point_index].append(cell_ind)
 
-func get_triangle_as_point_indices(triangle_index: int) -> PackedInt64Array:
+func get_triangle_as_point_indices(triangle_index: int) -> PackedInt32Array:
 	return _cells[triangle_index]
 
-func get_triangles_using_point_by_index(point_index: int) -> PackedInt64Array:
+func get_triangles_using_point_by_index(point_index: int) -> PackedInt32Array:
 	return _tris_using_point_by_index[point_index]
 
 func get_triangles_as_vector3_arrays() -> Array:
@@ -48,7 +48,7 @@ func get_triangle_as_vector3_array_for_index(triangle_index: int) -> PackedVecto
 		get_triangle_as_point_indices(triangle_index)
 	)
 
-func get_points_as_vector3_array_for_point_indices(point_indices: PackedInt64Array) -> PackedVector3Array:
+func get_points_as_vector3_array_for_point_indices(point_indices: PackedInt32Array) -> PackedVector3Array:
 	"""Return an array from a list of point indices as an array of 3d vectors"""
 	return PackedVector3Array(Array(point_indices).map(get_point_as_vector3))
 
@@ -73,12 +73,12 @@ func get_tri_cell_horizontal_border(vector: Vector2i) -> int:
 	
 	return -1 if row_even == column_even else +1
 
-func _create_tri_cell(vector: Vector2i) -> PackedInt64Array:
+func _create_tri_cell(vector: Vector2i) -> PackedInt32Array:
 	var row: int = vector.y
 	var col: int = vector.x
 	var row_even: bool = row % 2 == 0
 	var column_even: bool = col % 2 == 0
-	var points: PackedInt64Array = []
+	var points: PackedInt32Array = []
 	if row_even:
 		if column_even:
 			points.append(_point_index(Vector2i(col/2, row)))
@@ -102,7 +102,7 @@ func _create_tri_cell(vector: Vector2i) -> PackedInt64Array:
 func _point_index(vector: Vector2i) -> int:
 	return _point_layer.get_point_index_for_vector2i(vector)
 
-func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt64Array:
+func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt32Array:
 	return _point_layer.get_connected_point_indices_by_point_index(point_index)
 
 func get_total_point_count() -> int:
@@ -114,10 +114,10 @@ func get_total_cell_count() -> int:
 func get_triangles_grid_dimensions() -> Vector2i:
 	return Vector2i(_tri_per_row, _tri_rows)
 
-func get_edge_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
+func get_edge_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
 	return _edge_neighbour_indices[cell_ind]
 
-func _get_edge_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
+func _get_edge_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
 	"""
 	Return the immediate, edge sharing, neighbours for a given cell
 	as an array of indexes of tri_cells.
@@ -127,7 +127,7 @@ func _get_edge_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
 	"""
 	var tri_cell_coords: Vector2i = get_tri_cell_vector2i_for_index(cell_ind)
 	var tri_grid_dimensions: Vector2i = get_triangles_grid_dimensions()
-	var neighbours: PackedInt64Array = []
+	var neighbours: PackedInt32Array = []
 	
 	# Include cell to the left, if there is one
 	if tri_cell_coords.x - 1 >= 0:
@@ -144,10 +144,10 @@ func _get_edge_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
 	
 	return neighbours
 
-func get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
+func get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
 	return _corner_neighbours_indices[cell_ind]
 
-func _get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
+func _get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
 	"""
 	Return the just-touching, corner sharing, neighbours for a given cell
 	as an array of indexes of tri_cells.
@@ -171,7 +171,7 @@ func _get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
 	
 	var tri_cell_coords: Vector2i = get_tri_cell_vector2i_for_index(cell_ind)
 	var tri_grid_dimensions: Vector2i = get_triangles_grid_dimensions()
-	var neighbours: PackedInt64Array = []
+	var neighbours: PackedInt32Array = []
 	
 	# Include cell to the left, if there is one
 	if tri_cell_coords.x - 2 >= 0:
@@ -202,6 +202,6 @@ func _get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
 	
 	return neighbours
 
-func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt64Array) -> Dictionary:
-	# -> Dictionary[int, PackedInt64Array]
+func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt32Array) -> Dictionary:
+	# -> Dictionary[int, PackedInt32Array]
 	return _point_layer.get_valid_adjacent_point_indices_from_list(point_indices)

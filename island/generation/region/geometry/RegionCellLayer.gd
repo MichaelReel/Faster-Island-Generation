@@ -2,11 +2,11 @@ class_name RegionCellLayer
 extends Object
 
 var _tri_cell_layer: TriCellLayer
-var _region_index_by_cell_index: PackedInt64Array = []  # Link from a cell to it's parent reference index
+var _region_index_by_cell_index: PackedInt32Array = []  # Link from a cell to it's parent reference index
 var _root_region_index: int
 var _region_by_index: Array[Region] = []  # Link from region index to the Region
-var _region_fronts_by_cell_index: Array[PackedInt64Array] = []
-var _point_to_cells_map: Array[PackedInt64Array] = []
+var _region_fronts_by_cell_index: Array[PackedInt32Array] = []
+var _point_to_cells_map: Array[PackedInt32Array] = []
 
 func _init(tri_cell_layer: TriCellLayer) -> void:
 	_tri_cell_layer = tri_cell_layer
@@ -15,7 +15,7 @@ func _init(tri_cell_layer: TriCellLayer) -> void:
 func perform() -> void:
 	for cell_ind in range(_tri_cell_layer.get_total_cell_count()):
 		_region_by_index[_root_region_index].region_cells.append(cell_ind)
-		_region_fronts_by_cell_index.append(PackedInt64Array())
+		_region_fronts_by_cell_index.append(PackedInt32Array())
 		_region_index_by_cell_index.append(_root_region_index)  # Default all cells to root region
 
 	_map_point_indices_to_connected_cell_indices()
@@ -51,17 +51,17 @@ func get_middle_triangle_index() -> int:
 func get_region_index_for_cell(cell_index: int) -> int:
 	return _region_index_by_cell_index[cell_index]
 
-func get_front_cell_indices(region_index: int) -> PackedInt64Array:
+func get_front_cell_indices(region_index: int) -> PackedInt32Array:
 	return _region_by_index[region_index].region_front
 
-func get_region_fronts_by_cell_index(cell_index: int) -> PackedInt64Array: 
+func get_region_fronts_by_cell_index(cell_index: int) -> PackedInt32Array: 
 	return _region_fronts_by_cell_index[cell_index]
 
 func get_cell_count_by_region_index(region_index: int) -> int:
 	return len(_region_by_index[region_index].region_cells)
 
-func get_region_front_point_indices_by_front_cell_index(region_index: int, front_cell_index: int) -> PackedInt64Array:
-	var front_point_indices: PackedInt64Array = []
+func get_region_front_point_indices_by_front_cell_index(region_index: int, front_cell_index: int) -> PackedInt32Array:
+	var front_point_indices: PackedInt32Array = []
 	for point_index in _tri_cell_layer.get_triangle_as_point_indices(front_cell_index):
 		for cell_index in _point_to_cells_map[point_index]:
 			if _region_index_by_cell_index[cell_index] == region_index and not point_index in front_point_indices:
@@ -126,16 +126,16 @@ func remove_cell_from_current_subregion(cell_index: int) -> void:
 	else:
 		printerr("Attempt to remove cell %d not in region %d" % [cell_index, sub_region.region_index])
 
-func get_some_triangles_in_region(count: int, region_index: int, rng: RandomNumberGenerator) -> PackedInt64Array:
+func get_some_triangles_in_region(count: int, region_index: int, rng: RandomNumberGenerator) -> PackedInt32Array:
 	"""Get upto count random cells from the region referenced by region_index"""
 	var region : Region = get_region_by_index(region_index)
 	
 	var actual_count : int = min(count, len(region.region_cells))
-	var random_cells: PackedInt64Array = region.region_cells.duplicate()
-	ArrayUtils.shuffle_int64(rng, random_cells)
+	var random_cells: PackedInt32Array = region.region_cells.duplicate()
+	ArrayUtils.shuffle_int32(rng, random_cells)
 	return random_cells.slice(0, actual_count)
 
-func get_region_cell_indices_by_region_index(region_index: int) -> PackedInt64Array:
+func get_region_cell_indices_by_region_index(region_index: int) -> PackedInt32Array:
 	return _region_by_index[region_index].region_cells
 
 func random_front_cell_index(region_index: int, rng: RandomNumberGenerator) -> int:
@@ -154,16 +154,16 @@ func random_front_cell_index(region_index: int, rng: RandomNumberGenerator) -> i
 func get_total_cell_count() -> int:
 	return _tri_cell_layer.get_total_cell_count()
 
-func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt64Array:
+func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt32Array:
 	return _tri_cell_layer.get_connected_point_indices_by_point_index(point_index)
 
-func get_edge_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
+func get_edge_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
 	return _tri_cell_layer.get_edge_sharing_neighbours(cell_ind)
 
-func get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt64Array:
+func get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
 	return _tri_cell_layer.get_corner_only_sharing_neighbours(cell_ind)
 
-func get_triangle_as_point_indices(cell_ind: int) -> PackedInt64Array:
+func get_triangle_as_point_indices(cell_ind: int) -> PackedInt32Array:
 	return _tri_cell_layer.get_triangle_as_point_indices(cell_ind)
 
 func get_total_point_count() -> int:
@@ -172,7 +172,7 @@ func get_total_point_count() -> int:
 func get_point_as_vector3(point_index: int, height: float = 0) -> Vector3:
 	return _tri_cell_layer.get_point_as_vector3(point_index, height)
 
-func get_triangles_using_point_by_index(point_index: int) -> PackedInt64Array:
+func get_triangles_using_point_by_index(point_index: int) -> PackedInt32Array:
 	return _tri_cell_layer.get_triangles_using_point_by_index(point_index)
 
 func get_vector2i_for_cell_index(cell_index: int) -> Vector2i:
@@ -184,7 +184,7 @@ func point_has_any_cell_with_parent(point_index: int, region_index: int) -> bool
 			return true
 	return false
 
-func point_has_any_cell_with_parent_in_list_get_region_index(point_index: int, region_indices: PackedInt64Array) -> int:
+func point_has_any_cell_with_parent_in_list_get_region_index(point_index: int, region_indices: PackedInt32Array) -> int:
 	"""Return the first region index found in the list that this point has a cell in"""
 	for tri_index in _point_to_cells_map[point_index]:
 		if _region_index_by_cell_index[tri_index] in region_indices:
@@ -194,7 +194,7 @@ func point_has_any_cell_with_parent_in_list_get_region_index(point_index: int, r
 func _map_point_indices_to_connected_cell_indices() -> void:
 	var total_points = _tri_cell_layer.get_total_point_count()
 	for point_index in range(total_points):
-		_point_to_cells_map.append(PackedInt64Array())
+		_point_to_cells_map.append(PackedInt32Array())
 	
 	for cell_ind in range(_tri_cell_layer.get_total_cell_count()):
 		for point_index in _tri_cell_layer.get_triangle_as_point_indices(cell_ind):
@@ -237,7 +237,7 @@ func expand_region_into_parent(region_index: int, rng: RandomNumberGenerator) ->
 
 func identify_perimeter_points_for_region(region_index: int) -> void:
 	var region: Region = get_region_by_index(region_index)
-	var region_point_indices : PackedInt64Array = _get_point_indices_in_region(region_index)
+	var region_point_indices : PackedInt32Array = _get_point_indices_in_region(region_index)
 	for point_index in region_point_indices:
 		if point_has_any_cell_with_parent(point_index, region.parent_index):
 			region.outer_perimeter_point_indices.append(point_index)
@@ -251,15 +251,15 @@ func identify_perimeter_points_for_region(region_index: int) -> void:
 			):
 				region.inner_perimeter_point_indices.append(point_index)
 
-func get_outer_perimeter_point_indices(region_index: int) -> PackedInt64Array:
+func get_outer_perimeter_point_indices(region_index: int) -> PackedInt32Array:
 	var region: Region = get_region_by_index(region_index)
 	return region.outer_perimeter_point_indices # _perimeter_points
 
-func get_inner_perimeter_point_indices(region_index: int) -> PackedInt64Array:
+func get_inner_perimeter_point_indices(region_index: int) -> PackedInt32Array:
 	var region: Region = get_region_by_index(region_index)
 	return region.inner_perimeter_point_indices # _inner_perimeter
 
-func _get_point_indices_in_region(region_index: int) -> PackedInt64Array:
+func _get_point_indices_in_region(region_index: int) -> PackedInt32Array:
 	"""Get all the point indices within the region"""
 	var region: Region = get_region_by_index(region_index)
 	if not region.point_indices_calculated:
@@ -270,18 +270,18 @@ func _get_point_indices_in_region(region_index: int) -> PackedInt64Array:
 		region.point_indices_calculated = true
 	return region.point_indices_in_region
 
-func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt64Array) -> Dictionary:
-	# -> Dictionary[int, PackedInt64Array]
+func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt32Array) -> Dictionary:
+	# -> Dictionary[int, PackedInt32Array]
 	return _tri_cell_layer.get_valid_adjacent_point_indices_from_list(point_indices)
 
-func get_all_point_indices_for_region_indices_in_list(region_indices: PackedInt64Array) -> PackedInt64Array:
-	var total_point_indices: PackedInt64Array = []
+func get_all_point_indices_for_region_indices_in_list(region_indices: PackedInt32Array) -> PackedInt32Array:
+	var total_point_indices: PackedInt32Array = []
 	for region_index in region_indices:
 		total_point_indices.append_array(_get_point_indices_in_region(region_index))
 	return total_point_indices
 
-func get_all_point_indices_not_in_point_index_list(other_point_indices: PackedInt64Array) -> PackedInt64Array:
-	return PackedInt64Array(
+func get_all_point_indices_not_in_point_index_list(other_point_indices: PackedInt32Array) -> PackedInt32Array:
+	return PackedInt32Array(
 		range(_tri_cell_layer.get_total_point_count()).filter(
 			func(point_index: int): return not point_index in other_point_indices
 		)

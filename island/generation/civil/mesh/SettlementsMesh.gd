@@ -32,7 +32,7 @@ func perform() -> void:
 	surface_tool.commit(self)
 
 func _add_settlement_debug_to_mesh(surface_tool: SurfaceTool, cell_index: int) -> void:
-	var point_indices: PackedInt64Array = _tri_cell_layer.get_triangle_as_point_indices(cell_index)
+	var point_indices: PackedInt32Array = _tri_cell_layer.get_triangle_as_point_indices(cell_index)
 	
 	for point_index in point_indices:
 		var point_height: float =  _height_layer.get_point_height(point_index) + _clearance
