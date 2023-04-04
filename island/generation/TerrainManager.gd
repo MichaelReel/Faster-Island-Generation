@@ -27,6 +27,9 @@ func _init(
 	diff_max_multi: int,
 	river_count: int,
 	erode_depth: float,
+	settlement_spread: int,
+	slope_penalty: float,
+	river_penalty: float,
 ) -> void:
 	var rng = RandomNumberGenerator.new()
 	rng.seed = random_seed
@@ -59,6 +62,9 @@ func _init(
 		_lake_manager,
 		_height_manager,
 		_river_manager,
+		settlement_spread,
+		slope_penalty,
+		river_penalty,
 		material_lib,
 		rng.randi(),
 	)

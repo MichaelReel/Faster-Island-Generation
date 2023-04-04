@@ -20,6 +20,9 @@ func _init(
 	lake_manager: LakeManager,
 	height_manager: HeightManager,
 	river_manager: RiverManager,
+	settlement_spread: int,
+	slope_penalty: float,
+	river_penalty: float,
 	material_lib: MaterialLib,
 	rng_seed: int,
 ) -> void:
@@ -35,13 +38,17 @@ func _init(
 		_lake_manager.get_lake_layer(),
 		_outline_manager.get_region_cell_layer(),
 		_height_manager.get_height_layer(),
+		settlement_spread,
 	)
 	
 	_road_layer = RoadLayer.new(
 		_lake_manager.get_lake_layer(),
 		_outline_manager.get_region_cell_layer(),
 		_height_manager.get_height_layer(),
+		_river_manager.get_river_layer(),
 		_settlement_layer,
+		slope_penalty,
+		river_penalty,
 	)
 	
 	_settlements_mesh = SettlementsMesh.new(

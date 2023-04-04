@@ -8,6 +8,7 @@ var _river_count: int
 var _erode_depth: float
 var _rng := RandomNumberGenerator.new()
 var _rivers_by_index: Array[River] = []
+var _cell_transitions_crossing_river: Dictionary = {}  # Dictionary[String, int]
 var _erosion_by_point_index: PackedFloat32Array = []
 var _all_water_body_point_indices: PackedInt64Array
 
@@ -40,6 +41,22 @@ func get_total_river_count() -> int:
 func river_starts_at_lake(river_index: int) -> bool:
 	return _rivers_by_index[river_index].starts_from_lake
 
+func get_all_water_body_point_indices() -> PackedInt64Array:
+	return _all_water_body_point_indices
+
+func get_river_adjacent_cell_indices(river_index: int) -> PackedInt64Array:
+	return _rivers_by_index[river_index].adjacent_cell_indices
+
+func get_point_eroded_depth(point_index: int) -> float:
+	return _erosion_by_point_index[point_index]
+
+func get_river_following_points(point_a_index: int, point_b_index: int) -> int:
+	"""Get the river flowing between these 2 points, else return -1 if no river present"""
+	var key: String = KeyUtils.get_combined_key(point_a_index, point_b_index)
+	if key in _cell_transitions_crossing_river:
+		return _cell_transitions_crossing_river[key]
+	return -1
+
 func _setup_rivers():
 	# Get a copy of the list of lakes (will add the sea futher down)
 	var river_points: PackedInt64Array = []
@@ -68,7 +85,7 @@ func _setup_rivers():
 		).filter(
 			func(point_index: int): return point_index in all_land_point_indices
 		)
-		neighbour_point_indices.sort_custom(ascending_by_height)
+		neighbour_point_indices.sort_custom(_ascending_by_height)
 		if len(neighbour_point_indices) > 0:
 			var river_index = _create_new_river(true)
 			_extend_river_by_point_index(river_index, exit_point_index)
@@ -84,7 +101,7 @@ func _setup_rivers():
 		river_points.append(land_point_index)
 	
 	for river_index in range(len(_rivers_by_index)):
-		continue_river_by_index(river_index, all_land_point_indices, river_points)
+		_continue_river_by_index(river_index, all_land_point_indices, river_points)
 	
 	for river_index in range(len(_rivers_by_index)):
 		_erode_river(river_index, _erode_depth)
@@ -96,6 +113,9 @@ func _create_new_river(starts_from_lake: bool = false) -> int:
 	return river_index
 
 func _extend_river_by_point_index(river_index: int, point_index: int) -> void:
+	if len(_rivers_by_index[river_index].midstream_point_indices) > 0:
+		var last_point_index : int = _rivers_by_index[river_index].midstream_point_indices[-1]
+		_update_cell_transitions_crossing_river(last_point_index, point_index, river_index)
 	_rivers_by_index[river_index].midstream_point_indices.append(point_index)
 	_update_river_adjacent_triangles(river_index, point_index)
 
@@ -110,12 +130,6 @@ func _update_river_adjacent_triangles(river_index: int, new_point_index: int) ->
 			continue
 		_rivers_by_index[river_index].adjacent_cell_indices.append(cell_index)
 
-func get_all_water_body_point_indices() -> PackedInt64Array:
-	return _all_water_body_point_indices
-
-func get_river_adjacent_cell_indices(river_index: int) -> PackedInt64Array:
-	return _rivers_by_index[river_index].adjacent_cell_indices
-
 func _get_most_downstream_point_in_river(river_index: int) -> int:
 	return _rivers_by_index[river_index].midstream_point_indices[-1]
 
@@ -127,10 +141,7 @@ func _erode_river(river_index: int, erosion_depth: float) -> void:
 		_erosion_by_point_index[point_index] = erosion_depth
 		_height_layer.edit_point_height(point_index, -erosion_depth)
 
-func get_point_eroded_depth(point_index: int) -> float:
-	return _erosion_by_point_index[point_index]
-
-func continue_river_by_index(
+func _continue_river_by_index(
 	river_index: int, available_point_indices: PackedInt64Array, all_river_points: PackedInt64Array
 ) -> void:
 	"""
@@ -144,7 +155,7 @@ func continue_river_by_index(
 		var neighbour_point_indices: Array = Array(
 			_region_cell_layer.get_connected_point_indices_by_point_index(last_river_point)
 		)
-		neighbour_point_indices.sort_custom(ascending_by_height)
+		neighbour_point_indices.sort_custom(_ascending_by_height)
 		var lowest_neighbour: int = neighbour_point_indices[0]
 		
 		# If this river has no more available land based points to flow into
@@ -160,5 +171,14 @@ func continue_river_by_index(
 		all_river_points.append(lowest_neighbour)
 		last_river_point = _get_most_downstream_point_in_river(river_index)
 
-func ascending_by_height(index_a: int, index_b: int) -> bool:
+func _ascending_by_height(index_a: int, index_b: int) -> bool:
 	return _height_layer.get_point_height(index_a) < _height_layer.get_point_height(index_b)
+
+func _update_cell_transitions_crossing_river(
+	point_a_index: int, point_b_index: int, river_index: int
+) -> void:
+	"""Update the record of edges between cells along which rivers flow"""
+	var key: String = KeyUtils.get_combined_key(point_a_index, point_b_index)
+	_cell_transitions_crossing_river[key] = river_index
+
+

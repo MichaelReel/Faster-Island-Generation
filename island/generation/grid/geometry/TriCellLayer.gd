@@ -2,7 +2,6 @@ class_name TriCellLayer
 extends Object
 
 var _point_layer: PointLayer
-var _edge_layer: EdgeLayer
 var _tri_per_row: int
 var _tri_rows: int
 var _cells: Array[PackedInt64Array] = []
@@ -10,9 +9,8 @@ var _edge_neighbour_indices: Array[PackedInt64Array] = []  # Links to neighbour 
 var _corner_neighbours_indices: Array[PackedInt64Array] = []  # Links to touching cells by index
 var _tris_using_point_by_index: Array[PackedInt64Array] = []  # Cells touching a given point
 
-func _init(point_layer: PointLayer, edge_layer: EdgeLayer) -> void:
+func _init(point_layer: PointLayer) -> void:
 	_point_layer = point_layer
-	_edge_layer = edge_layer
 
 func perform() -> void:
 	"""Reference the point indices and create triangles"""

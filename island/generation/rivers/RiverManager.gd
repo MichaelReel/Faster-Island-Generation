@@ -83,3 +83,6 @@ func get_mesh_dict() -> Dictionary:
 		"river_debug": _debug_mesh,
 		"terrain": _eroded_height_mesh,
 	}
+
+func get_river_layer() -> RiverLayer:
+	return _river_layer

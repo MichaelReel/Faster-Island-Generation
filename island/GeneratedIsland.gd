@@ -38,6 +38,11 @@ extends Node3D
 @export var river_count: int = 30
 @export var erode_depth: float = 0.1
 
+@export_category("civic_creation")
+@export var settlement_spread: int = 10
+@export var slope_penalty: float = 5.5
+@export var river_penalty: float = 10.5
+
 @export_category("debug_materials")
 @export var sub_water: Material = Material.new()
 @export var ground: Material = Material.new()
@@ -87,6 +92,9 @@ func _tool_execute(_delta: float) -> void:
 		diff_max_multi,
 		river_count,
 		erode_depth,
+		settlement_spread,
+		slope_penalty,
+		river_penalty,
 	)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
 	_terrain_manager.perform(editor_display)
@@ -105,6 +113,9 @@ func _game_execute(_delta: float) -> void:
 		diff_max_multi,
 		river_count,
 		erode_depth,
+		settlement_spread,
+		slope_penalty,
+		river_penalty,
 	)
 	var _err1 = _terrain_manager.connect("all_stages_complete", _on_all_stages_complete)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)

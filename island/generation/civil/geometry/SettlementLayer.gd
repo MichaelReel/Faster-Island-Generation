@@ -4,16 +4,19 @@ extends Object
 var _lake_layer: LakeLayer
 var _region_cell_layer: RegionCellLayer
 var _height_layer: HeightLayer
+var _settlement_spread: int
 var _settlement_cell_indices: PackedInt64Array
 
 func _init(
 	lake_layer: LakeLayer,
 	region_cell_layer: RegionCellLayer,
 	height_layer: HeightLayer, 
+	settlement_spread: int,
 ) -> void:
 	_lake_layer = lake_layer
 	_region_cell_layer = region_cell_layer
 	_height_layer = height_layer
+	_settlement_spread = settlement_spread
 
 func perform() -> void:
 	_locate_potential_settlements()
@@ -44,7 +47,7 @@ func _locate_potential_settlements() -> void:
 		var skip: bool = false
 		for other_cell in _settlement_cell_indices:
 			var cell_distance: int = _get_cell_distance_between_cells_by_indices(cell_ind, other_cell)
-			if cell_distance < 6:
+			if cell_distance <= _settlement_spread:
 				skip = true
 				break
 		if skip:

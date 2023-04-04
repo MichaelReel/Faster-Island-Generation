@@ -6,6 +6,7 @@ const _NORMAL_COST: float = 1.0
 var _lake_layer: LakeLayer
 var _region_cell_layer: RegionCellLayer
 var _height_layer: HeightLayer
+var _river_layer: RiverLayer
 var _settlement_layer: SettlementLayer
 var _slope_penalty: float
 var _river_penalty: float
@@ -20,15 +21,19 @@ var _road_paths: Array[PackedInt64Array] = []
 func _init(
 	lake_layer: LakeLayer,
 	region_cell_layer: RegionCellLayer,
-	height_layer: HeightLayer, 
-	settlement_layer: SettlementLayer
+	height_layer: HeightLayer,
+	river_layer: RiverLayer,
+	settlement_layer: SettlementLayer,
+	slope_penalty: float,
+	river_penalty: float,
 ) -> void:
 	_lake_layer = lake_layer
 	_region_cell_layer = region_cell_layer
 	_height_layer = height_layer
+	_river_layer = river_layer
 	_settlement_layer = settlement_layer
-	_slope_penalty = 2.5  # TODO: Set from args
-	_river_penalty = 5.0  # TODO: Set from args
+	_slope_penalty = slope_penalty
+	_river_penalty = river_penalty
 
 func perform() -> void:
 	_path_from_every_settlement()
@@ -83,10 +88,10 @@ func _path_from_every_settlement() -> void:
 			var journey_cost: float = _cost_to_nearest_by_cell_index[search_cell_index]
 			journey_cost += _NORMAL_COST
 			
-#			# Up the cost if crossing a river
-#			var shared_edge = search_cell.get_triangle().get_shared_edge(neighbour_tri)
-#			if shared_edge.has_river():
-#				journey_cost += _river_penalty
+			# Up the cost if crossing a river
+			var edge_points: PackedInt64Array = get_shared_edge_as_point_indices(search_cell_index, neighbour_cell_index)
+			if _river_layer.get_river_following_points(edge_points[0], edge_points[1]) >= 0:
+				journey_cost += _river_penalty
 			
 			# Up the cost a little if going up/down a slope
 			journey_cost += _get_slope_by_cell_index(neighbour_cell_index) * _slope_penalty
@@ -175,7 +180,9 @@ func _get_slope_by_cell_index(cell_index: int) -> float:
 
 func _update_smallest_path_cost_table(cell_index_a: int, cell_index_b: int) -> void:
 	var key: String = _get_cell_path_key(cell_index_a, cell_index_b)
-	var total_cost: float = _cost_to_nearest_by_cell_index[cell_index_a] + _cost_to_nearest_by_cell_index[cell_index_b]
+	var total_cost: float = (
+		_cost_to_nearest_by_cell_index[cell_index_a] + _cost_to_nearest_by_cell_index[cell_index_b]
+	)
 	var details: Dictionary = {"cell_a": cell_index_a, "cell_b": cell_index_b, "cost": total_cost}
 	if not key in _best_settlement_pair_cost.keys():
 		_best_settlement_pair_cost[key] = details
@@ -186,9 +193,9 @@ func _update_smallest_path_cost_table(cell_index_a: int, cell_index_b: int) -> v
 
 func _get_cell_path_key(cell_index_a: int, cell_index_b: int) -> String:
 	"""Get a key unique to the destination paths of the search cells, order should be unimportant"""
-	var dest_a = _destination_cell_by_cell_index[cell_index_a]
-	var dest_b = _destination_cell_by_cell_index[cell_index_b]
-	return "%d:%d" % ([dest_a, dest_b] if dest_a < dest_b else [dest_b, dest_a])
+	return KeyUtils.get_combined_key(
+		_destination_cell_by_cell_index[cell_index_a], _destination_cell_by_cell_index[cell_index_b]
+	)
 
 func _add_a_mid_point_vector_between_cells(cell_index_a: int, cell_index_b: int) -> void:
 	var shared_edge: PackedInt64Array = get_shared_edge_as_point_indices(cell_index_a, cell_index_b)
