@@ -1,6 +1,8 @@
 class_name DebugRoadMesh
 extends ArrayMesh
 
+const _MARKER_SIZE: float = 0.5
+
 var _tri_cell_layer: TriCellLayer
 var _height_layer: HeightLayer
 var _road_layer: RoadLayer
@@ -24,7 +26,7 @@ func perform() -> void:
 	surface_tool.set_material(material)
 	
 	for pos in _road_layer.get_road_mid_point_vector3s():
-		_add_mid_point_marker_debug_to_mesh(surface_tool, pos, 1.0)
+		_add_mid_point_marker_debug_to_mesh(surface_tool, pos, _MARKER_SIZE)
 	
 	surface_tool.generate_normals()
 	surface_tool.commit(self)

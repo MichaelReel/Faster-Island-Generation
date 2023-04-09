@@ -13,6 +13,7 @@ enum GlobalStageProgressStep {
 	HEIGHT,
 	RIVER,
 	CIVIL,
+	CLIFF,
 	ALL,
 }
 

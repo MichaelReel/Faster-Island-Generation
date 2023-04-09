@@ -14,6 +14,7 @@ var _lake_manager: LakeManager
 var _height_manager: HeightManager
 var _river_manager: RiverManager
 var _civil_manager: CivilManager
+var _cliff_manager: CliffManager
 
 func _init(
 	random_seed: int,
@@ -30,6 +31,7 @@ func _init(
 	settlement_spread: int,
 	slope_penalty: float,
 	river_penalty: float,
+	min_slope_to_cliff: float,
 ) -> void:
 	var rng = RandomNumberGenerator.new()
 	rng.seed = random_seed
@@ -68,6 +70,18 @@ func _init(
 		material_lib,
 		rng.randi(),
 	)
+	_cliff_manager = CliffManager.new(
+		_grid_manager,
+		_outline_manager,
+		_lake_manager,
+		_height_manager,
+		_river_manager,
+		_civil_manager,
+		min_slope_to_cliff,
+		material_lib,
+		rng.randi(),
+		
+	)
 
 func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgressStep.ALL) -> void:
 	var stages: Array[Stage] = [
@@ -77,6 +91,7 @@ func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgr
 		_height_manager,
 		_river_manager,
 		_civil_manager,
+		_cliff_manager,
 	]
 	
 	for stage in stages:
