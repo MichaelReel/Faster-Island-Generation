@@ -55,5 +55,10 @@ region_debug = SubResource("StandardMaterial3D_cmf4l")
 settlement = SubResource("StandardMaterial3D_0wty8")
 road = SubResource("StandardMaterial3D_n3gii")
 
+[node name="BoundsMesh" parent="GeneratedIsland" index="0"]
+visible = false
+
 [node name="FlyingCameraControl" parent="." instance=ExtResource("2_gt1th")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 30)
+
+[editable path="GeneratedIsland"]

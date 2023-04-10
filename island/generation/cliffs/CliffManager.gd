@@ -9,7 +9,7 @@ var _river_manager: RiverManager
 var _civil_manager: CivilManager
 var _material_lib: MaterialLib
 var _rng := RandomNumberGenerator.new()
-var _min_slope: float
+var _cliff_layer: CliffLayer
 
 func _init(
 	grid_manager: GridManager,
@@ -28,9 +28,17 @@ func _init(
 	_height_manager = height_manager
 	_river_manager = river_manager
 	_civil_manager = civil_manager
-	_min_slope = min_slope
 	_material_lib = material_lib
 	_rng.seed = rng_seed
+	
+	_cliff_layer = CliffLayer.new(
+		lake_manager.get_lake_layer(),
+		_outline_manager.get_region_cell_layer(),
+		_height_manager.get_height_layer(),
+		_river_manager.get_river_layer(),
+		_civil_manager.get_road_layer(),
+		min_slope,
+	)
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)

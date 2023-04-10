@@ -97,3 +97,9 @@ func get_mesh_dict() -> Dictionary:
 		"roads": _roads_mesh,
 		"debug": _debug_road_mesh,
 	}
+
+func get_settlement_layer() -> SettlementLayer:
+	return _settlement_layer
+
+func get_road_layer() -> RoadLayer:
+	return _road_layer
