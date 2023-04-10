@@ -1,20 +1,23 @@
 class_name SettlementLayer
 extends Object
 
-var _lake_layer: LakeLayer
+var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer
+var _lake_layer: LakeLayer
 var _height_layer: HeightLayer
 var _settlement_spread: int
 var _settlement_cell_indices: PackedInt32Array
 
 func _init(
-	lake_layer: LakeLayer,
+	tri_cell_layer: TriCellLayer,
 	region_cell_layer: RegionCellLayer,
+	lake_layer: LakeLayer,
 	height_layer: HeightLayer, 
 	settlement_spread: int,
 ) -> void:
-	_lake_layer = lake_layer
+	_tri_cell_layer = tri_cell_layer
 	_region_cell_layer = region_cell_layer
+	_lake_layer = lake_layer
 	_height_layer = height_layer
 	_settlement_spread = settlement_spread
 
@@ -52,7 +55,7 @@ func _locate_potential_settlements() -> void:
 		_settlement_cell_indices.append(cell_ind)
 
 func _cell_is_flat(cell_ind: int) -> bool:
-	var corner_indices: Array = Array(_region_cell_layer.get_triangle_as_point_indices(cell_ind))
+	var corner_indices: Array = Array(_tri_cell_layer.get_triangle_as_point_indices(cell_ind))
 	var heights: Array = corner_indices.map(
 		func(point_index) -> float: return _height_layer.get_point_height(point_index)
 	)
@@ -63,7 +66,7 @@ func _cell_is_flat(cell_ind: int) -> bool:
 	)
 
 func _cell_is_beside_region_in_list(cell_index: int, region_indices: PackedInt32Array) -> bool:
-	return Array(_region_cell_layer.get_edge_sharing_neighbours(cell_index)).any(
+	return Array(_tri_cell_layer.get_edge_sharing_neighbours(cell_index)).any(
 		func(neighbour_index): return _region_cell_layer.get_region_index_for_cell(neighbour_index) in region_indices
 	)
 
@@ -72,8 +75,8 @@ func _get_cell_distance_between_cells_by_indices(cell_ind: int, other_cell: int)
 	Calculate the number of edges that would have to be crossed 
 	to traverse from one cell to another
 	"""
-	var pos_a: Vector2i = _region_cell_layer.get_vector2i_for_cell_index(cell_ind)
-	var pos_b: Vector2i = _region_cell_layer.get_vector2i_for_cell_index(other_cell)
+	var pos_a: Vector2i = _tri_cell_layer.get_tri_cell_vector2i_for_index(cell_ind)
+	var pos_b: Vector2i = _tri_cell_layer.get_tri_cell_vector2i_for_index(other_cell)
 	var vert_diff = abs(pos_a.x - pos_b.x)
 	var hort_diff = abs(pos_a.y - pos_b.y)
 	

@@ -14,7 +14,9 @@ func _init(grid_manager: GridManager, island_cell_limit: int, material_lib: Mate
 	_rng.seed = rng_seed
 	
 	_region_cell_layer = RegionCellLayer.new(_grid_manager.get_tri_cell_layer())
-	_island_outline_layer = IslandOutlineLayer.new(_region_cell_layer, _island_cell_limit, _rng.randi())
+	_island_outline_layer = IslandOutlineLayer.new(
+		_grid_manager.get_tri_cell_layer(), _region_cell_layer, _island_cell_limit, _rng.randi()
+	)
 	_island_outline_mesh = IslandOutlineMesh.new(
 		_grid_manager.get_tri_cell_layer(), _region_cell_layer, _island_outline_layer, material_lib
 	)
@@ -42,5 +44,5 @@ func get_mesh_dict() -> Dictionary:
 func get_region_cell_layer() -> RegionCellLayer:
 	return _region_cell_layer
 
-func get_island_region_index() -> int:
-	return _island_outline_layer.get_island_region_index()
+func get_island_outline_layer() -> IslandOutlineLayer:
+	return _island_outline_layer

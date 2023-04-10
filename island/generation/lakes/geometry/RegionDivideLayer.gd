@@ -1,17 +1,25 @@
 class_name RegionDivideLayer
 extends Object
 
-var _outline_manager: OutlineManager
 var _lake_regions: int
+var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer
+var _island_outline_layer: IslandOutlineLayer
 var _region_indices: PackedInt32Array
 var _rng := RandomNumberGenerator.new()
 
-func _init(outline_manager: OutlineManager, lake_regions: int, rng_seed: int) -> void:
-	_outline_manager = outline_manager
+func _init(
+	tri_cell_layer: TriCellLayer,
+	region_cell_layer: RegionCellLayer,
+	island_outline_layer: IslandOutlineLayer,
+	lake_regions: int,
+	rng_seed: int
+) -> void:
+	_tri_cell_layer = tri_cell_layer
+	_region_cell_layer = region_cell_layer
+	_island_outline_layer = island_outline_layer
 	_lake_regions = lake_regions
 	_rng.seed = rng_seed
-	_region_cell_layer = _outline_manager.get_region_cell_layer()
 
 func perform() -> void:
 	_setup_regions()
@@ -27,15 +35,12 @@ func perform() -> void:
 	
 	for region_index in _region_indices:
 		reduce_region_and_create_margin(region_index)
-	
-#	for region in _regions:
-#		var _lines: Array[Edge] = region.get_perimeter_lines(false)
 
 func get_region_indices() -> PackedInt32Array:
 	return _region_indices
 
 func _setup_regions() -> void:
-	var parent_region_index = _outline_manager.get_island_region_index()
+	var parent_region_index = _island_outline_layer.get_island_region_index()
 	var start_triangles = _region_cell_layer.get_some_triangles_in_region(_lake_regions, parent_region_index, _rng)
 	
 	for tri_index in start_triangles:
@@ -48,7 +53,7 @@ func reduce_region_and_create_margin(region_index: int) -> void:
 	
 	# Return the border cells to the parent and mark as frontier
 	for border_cell_index in border_cell_indices:
-		_region_cell_layer.remove_cell_from_current_subregion(border_cell_index) # , _outline_manager.get_island_region_index())
+		_region_cell_layer.remove_cell_from_current_subregion(border_cell_index)
 	
 	# Recreate the frontier for this region, subset of removed cells
 	for border_cell_index in border_cell_indices:
@@ -67,7 +72,7 @@ func _find_inner_border_cell_indices(region_index: int) -> PackedInt32Array:
 
 func get_indices_of_neighbours_with_parent(cell_index: int, parent_index: int) -> PackedInt32Array:
 	var parented_neighbours: PackedInt32Array = []
-	for neighbour_index in _region_cell_layer.get_edge_sharing_neighbours(cell_index):
+	for neighbour_index in _tri_cell_layer.get_edge_sharing_neighbours(cell_index):
 		if _region_cell_layer.get_region_index_for_cell(neighbour_index) == parent_index:
 			parented_neighbours.append(neighbour_index)
 	return parented_neighbours
@@ -77,7 +82,7 @@ func count_neighbours_with_parent(cell_index: int, parent_index: int) -> int:
 
 func get_indices_of_corner_neighbours_with_parent(cell_index:int, parent_index: int) -> PackedInt32Array:
 	var parented_corner_neighbours: PackedInt32Array = []
-	for corner_neighbour in _region_cell_layer.get_corner_only_sharing_neighbours(cell_index):
+	for corner_neighbour in _tri_cell_layer.get_corner_only_sharing_neighbours(cell_index):
 		if _region_cell_layer.get_region_index_for_cell(corner_neighbour) == parent_index:
 			parented_corner_neighbours.append(corner_neighbour)
 	return parented_corner_neighbours

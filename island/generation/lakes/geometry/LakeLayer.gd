@@ -1,7 +1,7 @@
 class_name LakeLayer
 extends Object
 
-var _outline_manager: OutlineManager
+var _tri_cell_layer: TriCellLayer
 var _region_divide_layer: RegionDivideLayer
 var _lakes_per_region: int
 var _region_cell_layer: RegionCellLayer
@@ -12,12 +12,12 @@ var _water_body_cell_indices: PackedInt32Array = []  # Cells that are in a water
 var _non_water_body_cell_indices: PackedInt32Array = []  # Cells that are NOT in a water body
 var _rng := RandomNumberGenerator.new()
 
-func _init(outline_manager: OutlineManager, region_divide_layer: RegionDivideLayer, lakes_per_region: int, rng_seed: int) -> void:
-	_outline_manager = outline_manager
+func _init(tri_cell_layer: TriCellLayer, region_cell_layer: RegionCellLayer, region_divide_layer: RegionDivideLayer, lakes_per_region: int, rng_seed: int) -> void:
+	_tri_cell_layer = tri_cell_layer
+	_region_cell_layer = region_cell_layer
 	_region_divide_layer = region_divide_layer
 	_lakes_per_region = lakes_per_region
 	_rng.seed = rng_seed
-	_region_cell_layer = _outline_manager.get_region_cell_layer()
 
 func perform() -> void:
 	_setup_lake_regions()
@@ -145,13 +145,13 @@ func _frontier_cleanup() -> void:
 	There will be some frontier cells that (somehow) got left behind by the smoothing step
 	In lieu of fixing the code that doesn't remove them, just find and remove them now
 	"""
-	for cell_index in range(_region_cell_layer.get_total_cell_count()):
+	for cell_index in range(_tri_cell_layer.get_total_cell_count()):
 		var fronts_by_cell_index = _region_cell_layer.get_region_fronts_by_cell_index(cell_index)
 		if fronts_by_cell_index.is_empty():
 			continue
 		for region_index in fronts_by_cell_index:
 			var has_neighbour_in_region = false
-			for neighbour_index in _region_cell_layer.get_edge_sharing_neighbours(cell_index):
+			for neighbour_index in _tri_cell_layer.get_edge_sharing_neighbours(cell_index):
 				if _region_cell_layer.get_region_index_for_cell(neighbour_index) == region_index:
 					has_neighbour_in_region = true
 					break
@@ -167,7 +167,7 @@ func _divide_cells_by_water_body() -> void:
 	var water_region_indices: PackedInt32Array = _lake_indices.duplicate()
 	water_region_indices.append(_region_cell_layer.get_root_region_index())
 	
-	for cell_ind in range(_region_cell_layer.get_total_cell_count()):
+	for cell_ind in range(_tri_cell_layer.get_total_cell_count()):
 		# Include under water cells in water cell, else include in non water cells
 		var region_index: int = _region_cell_layer.get_region_index_for_cell(cell_ind)
 		if region_index in water_region_indices:

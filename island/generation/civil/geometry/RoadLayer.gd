@@ -3,8 +3,9 @@ extends Object
 
 const _NORMAL_COST: float = 1.0
 
-var _lake_layer: LakeLayer
+var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer
+var _lake_layer: LakeLayer
 var _height_layer: HeightLayer
 var _river_layer: RiverLayer
 var _settlement_layer: SettlementLayer
@@ -20,16 +21,18 @@ var _road_paths: Array[PackedInt32Array] = []
 var _all_road_cell_indices: PackedInt32Array = []
 
 func _init(
-	lake_layer: LakeLayer,
+	tri_cell_layer: TriCellLayer,
 	region_cell_layer: RegionCellLayer,
+	lake_layer: LakeLayer,
 	height_layer: HeightLayer,
 	river_layer: RiverLayer,
 	settlement_layer: SettlementLayer,
 	slope_penalty: float,
 	river_penalty: float,
 ) -> void:
-	_lake_layer = lake_layer
+	_tri_cell_layer = tri_cell_layer
 	_region_cell_layer = region_cell_layer
+	_lake_layer = lake_layer
 	_height_layer = height_layer
 	_river_layer = river_layer
 	_settlement_layer = settlement_layer
@@ -50,8 +53,8 @@ func get_shared_edge_as_point_indices(cell_a_index: int, cell_b_index: int) -> P
 	"""Find the 2 points shared by these cells and return as an array"""
 	var shared_point_indices: PackedInt32Array = []
 	
-	var cell_a_point_indices: PackedInt32Array = _region_cell_layer.get_triangle_as_point_indices(cell_a_index)
-	var cell_b_point_indices: PackedInt32Array = _region_cell_layer.get_triangle_as_point_indices(cell_b_index)
+	var cell_a_point_indices: PackedInt32Array = _tri_cell_layer.get_triangle_as_point_indices(cell_a_index)
+	var cell_b_point_indices: PackedInt32Array = _tri_cell_layer.get_triangle_as_point_indices(cell_b_index)
 	for cell in cell_a_point_indices:
 		if cell in cell_b_point_indices:
 			shared_point_indices.append(cell)
@@ -84,7 +87,7 @@ func _path_from_every_settlement() -> void:
 		var search_cell_index = search_front.pop_front()
 		
 		# Get neighbour cells to valid path
-		for neighbour_cell_index in _region_cell_layer.get_edge_sharing_neighbours(search_cell_index):
+		for neighbour_cell_index in _tri_cell_layer.get_edge_sharing_neighbours(search_cell_index):
 			var neighbour_region_index: int = _region_cell_layer.get_region_index_for_cell(neighbour_cell_index)
 			if neighbour_region_index in water_region_indices:
 				continue
@@ -125,7 +128,7 @@ func _path_from_every_settlement() -> void:
 	
 	# Of all the search cells, find all the best search cell pairs that link any 2 settlements
 	for search_cell_index in _cost_to_nearest_by_cell_index.keys():
-		for neighbour_cell_index in _region_cell_layer.get_edge_sharing_neighbours(search_cell_index):
+		for neighbour_cell_index in _tri_cell_layer.get_edge_sharing_neighbours(search_cell_index):
 			# If neighbour cell isn't tracked, it's not a valid path
 			if not neighbour_cell_index in _cost_to_nearest_by_cell_index.keys():
 				continue
@@ -201,10 +204,10 @@ func _add_a_mid_point_vector_between_cells(cell_index_a: int, cell_index_b: int)
 	var shared_edge: PackedInt32Array = get_shared_edge_as_point_indices(cell_index_a, cell_index_b)
 	_road_mid_points.append(
 		lerp(
-			_region_cell_layer.get_point_as_vector3(
+			_tri_cell_layer.get_point_as_vector3(
 				shared_edge[0], _height_layer.get_point_height(shared_edge[0])
 			),
-			_region_cell_layer.get_point_as_vector3(
+			_tri_cell_layer.get_point_as_vector3(
 				shared_edge[1], _height_layer.get_point_height(shared_edge[1])
 			),
 			0.5

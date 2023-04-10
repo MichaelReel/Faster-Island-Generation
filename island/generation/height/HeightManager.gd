@@ -24,15 +24,23 @@ func _init(
 	_rng.seed = rng_seed
 
 	_height_layer = HeightLayer.new(
-		_outline_manager, _lake_manager, diff_height, diff_max_multi, _rng.randi()
+		_grid_manager.get_tri_cell_layer(),
+		_outline_manager.get_region_cell_layer(),
+		_outline_manager.get_island_outline_layer(),
+		_lake_manager.get_lake_layer(), 
+		diff_height,
+		diff_max_multi,
+		_rng.randi()
 	)
 	_height_mesh = HeightMesh.new(
+		_grid_manager.get_tri_cell_layer(),
 		_outline_manager.get_region_cell_layer(),
 		_lake_manager.get_lake_layer(),
 		_height_layer,
 		material_lib
 	)
 	_coast_line_mesh = CoastLineMesh.new(
+		_grid_manager.get_tri_cell_layer(),
 		_outline_manager.get_region_cell_layer(),
 		_height_layer,
 	)

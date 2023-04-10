@@ -35,15 +35,17 @@ func _init(
 	_rng.seed = rng_seed
 	
 	_settlement_layer = SettlementLayer.new(
-		_lake_manager.get_lake_layer(),
+		_grid_manager.get_tri_cell_layer(),
 		_outline_manager.get_region_cell_layer(),
+		_lake_manager.get_lake_layer(),
 		_height_manager.get_height_layer(),
 		settlement_spread,
 	)
 	
 	_road_layer = RoadLayer.new(
-		_lake_manager.get_lake_layer(),
+		_grid_manager.get_tri_cell_layer(),
 		_outline_manager.get_region_cell_layer(),
+		_lake_manager.get_lake_layer(),
 		_height_manager.get_height_layer(),
 		_river_manager.get_river_layer(),
 		_settlement_layer,

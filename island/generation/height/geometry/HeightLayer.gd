@@ -1,9 +1,9 @@
 class_name HeightLayer
 extends Object
 
-var _outline_manager: OutlineManager
-var _lake_manager: LakeManager
+var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer
+var _island_outline_layer: IslandOutlineLayer
 var _lake_layer: LakeLayer
 var _sealevel_point_indices: PackedInt32Array = []
 var _uphill_front_indices: PackedInt32Array = []
@@ -19,13 +19,21 @@ var _diff_height_max_multiplier: int = 1
 var _uphill_height: float = _diff_height
 var _downhill_height: float = -_diff_height
 
-var _rng := RandomNumberGenerator.new()
 
-func _init(outline_manager: OutlineManager, lake_manager: LakeManager, diff_height: float, diff_max_multi: int, rng_seed: int) -> void:
-	_outline_manager = outline_manager
-	_lake_manager = lake_manager
-	_region_cell_layer = _outline_manager.get_region_cell_layer()
-	_lake_layer = _lake_manager.get_lake_layer()
+var _rng := RandomNumberGenerator.new()
+func _init(
+	tri_cell_layer: TriCellLayer,
+	region_cell_layer: RegionCellLayer,
+	island_outline_layer: IslandOutlineLayer,
+	lake_layer: LakeLayer,
+	diff_height: float,
+	diff_max_multi: int,
+	rng_seed: int
+) -> void:
+	_tri_cell_layer = tri_cell_layer
+	_region_cell_layer = region_cell_layer
+	_island_outline_layer = island_outline_layer
+	_lake_layer = lake_layer
 	_diff_height = diff_height
 	_diff_height_max_multiplier = diff_max_multi
 	_downhill_height = -_diff_height
@@ -33,8 +41,8 @@ func _init(outline_manager: OutlineManager, lake_manager: LakeManager, diff_heig
 	_rng.seed = rng_seed
 
 func perform() -> void:
-	_point_height_set.resize(_region_cell_layer.get_total_cell_count())
-	_point_height.resize(_region_cell_layer.get_total_cell_count())
+	_point_height_set.resize(_tri_cell_layer.get_total_cell_count())
+	_point_height.resize(_tri_cell_layer.get_total_cell_count())
 	
 	while not _uphill_complete:
 		if not _sealevel_started:
@@ -75,7 +83,7 @@ func edit_point_height(point_index: int, increment: float) -> void:
 
 func _setup_sealevel() -> void:
 	""" Record each point on the edges between the island region frontier and the region itself """
-	var island_region_index: int = _outline_manager.get_island_region_index()
+	var island_region_index: int = _island_outline_layer.get_island_region_index()
 	var front_cell_indices: PackedInt32Array = _region_cell_layer.get_front_cell_indices(island_region_index)
 	var temp_sealevel_point_indices: Array[int] = []
 	for front_cell_index in front_cell_indices:
@@ -89,7 +97,7 @@ func _setup_sealevel() -> void:
 func _setup_height_fronts() -> void:
 	"""Create the initial uphill and downhill point frontiers"""
 	for center_point in _sealevel_point_indices:
-		for point_index in _region_cell_layer.get_connected_point_indices_by_point_index(center_point):
+		for point_index in _tri_cell_layer.get_connected_point_indices_by_point_index(center_point):
 			if not is_point_height_set(point_index):
 				# Uphill or downhill neighbour?
 				if not _region_cell_layer.point_has_any_cell_with_parent(point_index, _region_cell_layer.get_root_region_index()):
@@ -103,7 +111,7 @@ func _step_downhill() -> void:
 	_downhill_height -= _diff_height * (_rng.randi() % _diff_height_max_multiplier + 1) 
 	var new_downhill_front_indices: PackedInt32Array = []
 	for center_point in _downhill_front_indices:
-		for point_index in _region_cell_layer.get_connected_point_indices_by_point_index(center_point):
+		for point_index in _tri_cell_layer.get_connected_point_indices_by_point_index(center_point):
 			if not is_point_height_set(point_index):
 				set_point_height(point_index, _downhill_height)
 				new_downhill_front_indices.append(point_index)
@@ -114,7 +122,7 @@ func _step_uphill() -> void:
 	_uphill_height += _diff_height * (_rng.randi() % _diff_height_max_multiplier + 1) 
 	var new_uphill_front_indices: PackedInt32Array = []
 	for center_point in _uphill_front_indices:
-		for point_index in _region_cell_layer.get_connected_point_indices_by_point_index(center_point):
+		for point_index in _tri_cell_layer.get_connected_point_indices_by_point_index(center_point):
 			if not is_point_height_set(point_index):
 				new_uphill_front_indices.append(point_index)
 				# If this point is on a sub-region lake,
@@ -150,12 +158,12 @@ func get_total_cell_count() -> int:
 
 func get_triangle_as_vector3_array_for_index_with_heights(cell_index) -> PackedVector3Array:
 	var triangle_as_point_indices: PackedInt32Array = (
-		_region_cell_layer.get_triangle_as_point_indices(cell_index)
+		_tri_cell_layer.get_triangle_as_point_indices(cell_index)
 	)
 	return Array(triangle_as_point_indices).map(get_vector3_with_height_for_point_index)
 
 func get_vector3_with_height_for_point_index(point_index: int) -> Vector3:
-	return _region_cell_layer.get_point_as_vector3(point_index, _point_height[point_index])
+	return _tri_cell_layer.get_point_as_vector3(point_index, _point_height[point_index])
 
 func get_slope_by_cell_index(cell_index: int) -> float:
 	"""
@@ -163,7 +171,7 @@ func get_slope_by_cell_index(cell_index: int) -> float:
 	between the lowest and highest of the 3 corners of the cell
 	"""
 	var heights: Array = Array(
-		_region_cell_layer.get_triangle_as_point_indices(cell_index)
+		_tri_cell_layer.get_triangle_as_point_indices(cell_index)
 	).map(func(point_index): return _point_height[point_index])
 	heights.sort()
 	return heights[2] - heights[0]
@@ -173,7 +181,7 @@ func get_lower_edge_slope_by_cell_index(cell_index: int) -> float:
 	Get the difference in height between the 2 lowest points in this cell
 	"""
 	var heights: Array = Array(
-		_region_cell_layer.get_triangle_as_point_indices(cell_index)
+		_tri_cell_layer.get_triangle_as_point_indices(cell_index)
 	).map(func(point_index): return _point_height[point_index])
 	heights.sort()
 	return heights[1] - heights[0]
@@ -184,10 +192,10 @@ func get_cell_as_point_indices_ordered_by_height(cell_index: int) -> PackedInt32
 	where the cells are ordered by height ascending
 	"""
 	var heights_to_point_map: Dictionary = {}
-	for point_ind in _region_cell_layer.get_triangle_as_point_indices(cell_index):
+	for point_ind in _tri_cell_layer.get_triangle_as_point_indices(cell_index):
 		heights_to_point_map[_point_height[point_ind]] = point_ind
 	var heights: Array = Array(
-		_region_cell_layer.get_triangle_as_point_indices(cell_index)
+		_tri_cell_layer.get_triangle_as_point_indices(cell_index)
 	).map(func(point_index: int): return _point_height[point_index])
 	heights.sort()
 	return PackedInt32Array(heights.map(func(height: float): return heights_to_point_map[height]))

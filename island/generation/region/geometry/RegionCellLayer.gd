@@ -149,35 +149,6 @@ func random_front_cell_index(region_index: int, rng: RandomNumberGenerator) -> i
 	
 	return random_cell_index
 
-# TODO: Remove pass-through functions and just return the underlying TriCellLayer
-
-func get_total_cell_count() -> int:
-	return _tri_cell_layer.get_total_cell_count()
-
-func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt32Array:
-	return _tri_cell_layer.get_connected_point_indices_by_point_index(point_index)
-
-func get_edge_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
-	return _tri_cell_layer.get_edge_sharing_neighbours(cell_ind)
-
-func get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
-	return _tri_cell_layer.get_corner_only_sharing_neighbours(cell_ind)
-
-func get_triangle_as_point_indices(cell_ind: int) -> PackedInt32Array:
-	return _tri_cell_layer.get_triangle_as_point_indices(cell_ind)
-
-func get_total_point_count() -> int:
-	return _tri_cell_layer.get_total_point_count()
-
-func get_point_as_vector3(point_index: int, height: float = 0) -> Vector3:
-	return _tri_cell_layer.get_point_as_vector3(point_index, height)
-
-func get_triangles_using_point_by_index(point_index: int) -> PackedInt32Array:
-	return _tri_cell_layer.get_triangles_using_point_by_index(point_index)
-
-func get_vector2i_for_cell_index(cell_index: int) -> Vector2i:
-	return _tri_cell_layer.get_tri_cell_vector2i_for_index(cell_index)
-
 func point_has_any_cell_with_parent(point_index: int, region_index: int) -> bool:
 	for tri_index in _point_to_cells_map[point_index]:
 		if _region_index_by_cell_index[tri_index] == region_index:
@@ -228,7 +199,7 @@ func expand_region_into_parent(region_index: int, rng: RandomNumberGenerator) ->
 	
 	var random_cell_index = random_front_cell_index(region_index, rng)
 	
-	for neighbour_index in get_edge_sharing_neighbours(random_cell_index):
+	for neighbour_index in _tri_cell_layer.get_edge_sharing_neighbours(random_cell_index):
 		if get_region_index_for_cell(neighbour_index) == parent_index:
 			add_cell_to_subregion_front(neighbour_index, region_index)
 	
@@ -243,7 +214,7 @@ func identify_perimeter_points_for_region(region_index: int) -> void:
 			region.outer_perimeter_point_indices.append(point_index)
 	
 	for outer_point_index in region.outer_perimeter_point_indices:
-		for point_index in get_connected_point_indices_by_point_index(outer_point_index):
+		for point_index in _tri_cell_layer.get_connected_point_indices_by_point_index(outer_point_index):
 			if (
 				not point_index in region.outer_perimeter_point_indices 
 				and point_index in region_point_indices

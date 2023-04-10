@@ -20,12 +20,22 @@ func _init(
 	_outline_manager = outline_manager
 	_rng.seed = rng_seed
 	
-	_region_divide_layer = RegionDivideLayer.new(outline_manager, lake_regions, _rng.randi())
-	_lake_layer = LakeLayer.new(outline_manager, _region_divide_layer, lakes_per_region, _rng.randi())
+	_region_divide_layer = RegionDivideLayer.new(
+		_grid_manager.get_tri_cell_layer(),
+		_outline_manager.get_region_cell_layer(),
+		_outline_manager.get_island_outline_layer(),
+		lake_regions, _rng.randi()
+	)
+	_lake_layer = LakeLayer.new(
+		_grid_manager.get_tri_cell_layer(),
+		_outline_manager.get_region_cell_layer(),
+		_region_divide_layer,
+		lakes_per_region,
+		_rng.randi())
 	_lake_debug_mesh = LakeDebugMesh.new(
 		_grid_manager.get_tri_cell_layer(),
 		_outline_manager.get_region_cell_layer(),
-		_outline_manager.get_island_region_index(),
+		_outline_manager.get_island_outline_layer(),
 		_region_divide_layer.get_region_indices(),
 		_lake_layer.get_lake_region_indices(),
 		material_lib

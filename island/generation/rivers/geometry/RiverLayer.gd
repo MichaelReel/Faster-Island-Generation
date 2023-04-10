@@ -1,8 +1,9 @@
 class_name RiverLayer
 extends Object
 
-var _lake_layer: LakeLayer
+var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer
+var _lake_layer: LakeLayer
 var _height_layer: HeightLayer
 var _river_count: int
 var _erode_depth: float
@@ -14,22 +15,24 @@ var _all_water_body_point_indices: PackedInt32Array = []
 var _all_adjacent_cell_indices: PackedInt32Array = []
 
 func _init(
-	lake_layer: LakeLayer,
+	tri_cell_layer: TriCellLayer,
 	region_cell_layer: RegionCellLayer,
+	lake_layer: LakeLayer,
 	height_layer: HeightLayer, 
 	river_count: int,
 	erode_depth: float,
 	rng_seed: int,
 ) -> void:
-	_lake_layer = lake_layer
+	_tri_cell_layer = tri_cell_layer
 	_region_cell_layer = region_cell_layer
+	_lake_layer = lake_layer
 	_height_layer = height_layer
 	_river_count = river_count
 	_erode_depth = erode_depth
 	_rng.seed = rng_seed
 
 func perform() -> void:
-	_erosion_by_point_index.resize(_region_cell_layer.get_total_point_count())
+	_erosion_by_point_index.resize(_tri_cell_layer.get_total_point_count())
 	
 	_setup_rivers()
 
@@ -85,7 +88,7 @@ func _setup_rivers():
 		
 		# Check we can extend to the second point immediately, it'll be the lowest non water point
 		var neighbour_point_indices: Array = Array(
-			_region_cell_layer.get_connected_point_indices_by_point_index(exit_point_index)
+			_tri_cell_layer.get_connected_point_indices_by_point_index(exit_point_index)
 		).filter(
 			func(point_index: int): return point_index in all_land_point_indices
 		)
@@ -124,7 +127,7 @@ func _extend_river_by_point_index(river_index: int, point_index: int) -> void:
 	_update_river_adjacent_triangles(river_index, point_index)
 
 func _update_river_adjacent_triangles(river_index: int, new_point_index: int) -> void:
-	for cell_index in _region_cell_layer.get_triangles_using_point_by_index(new_point_index):
+	for cell_index in _tri_cell_layer.get_triangles_using_point_by_index(new_point_index):
 		if cell_index in _rivers_by_index[river_index].adjacent_cell_indices:
 			continue
 		var region_index: int = _region_cell_layer.get_region_index_for_cell(cell_index)
@@ -159,7 +162,7 @@ func _continue_river_by_index(
 	var river_complete: bool = false
 	while not river_complete:
 		var neighbour_point_indices: Array = Array(
-			_region_cell_layer.get_connected_point_indices_by_point_index(last_river_point)
+			_tri_cell_layer.get_connected_point_indices_by_point_index(last_river_point)
 		)
 		neighbour_point_indices.sort_custom(_ascending_by_height)
 		var lowest_neighbour: int = neighbour_point_indices[0]
