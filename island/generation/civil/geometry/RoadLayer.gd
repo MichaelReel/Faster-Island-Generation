@@ -17,6 +17,7 @@ var _destination_cell_by_cell_index: Dictionary = {}  # Dictionary[int, int]
 var _best_settlement_pair_cost: Dictionary = {}  # Dictionary[String, Dictionary{String, int | float}]
 var _road_mid_points: PackedVector3Array = []
 var _road_paths: Array[PackedInt32Array] = []
+var _all_road_cell_indices: PackedInt32Array = []
 
 func _init(
 	lake_layer: LakeLayer,
@@ -37,6 +38,7 @@ func _init(
 
 func perform() -> void:
 	_path_from_every_settlement()
+	_record_all_road_cells()
 
 func get_road_paths() -> Array[PackedInt32Array]:
 	return _road_paths
@@ -58,6 +60,9 @@ func get_shared_edge_as_point_indices(cell_a_index: int, cell_b_index: int) -> P
 		printerr("%d points shared between cells %d and %d (should be 2)" % [len(shared_point_indices), cell_a_index, cell_b_index])
 	
 	return shared_point_indices
+
+func cell_has_road(cell_ind: int) -> bool:
+	return cell_ind in _all_road_cell_indices
 
 func _path_from_every_settlement() -> void:
 	var water_region_indices: PackedInt32Array = _lake_layer.get_lake_region_indices().duplicate()
@@ -94,7 +99,7 @@ func _path_from_every_settlement() -> void:
 				journey_cost += _river_penalty
 			
 			# Up the cost a little if going up/down a slope
-			journey_cost += _get_slope_by_cell_index(neighbour_cell_index) * _slope_penalty
+			journey_cost += _height_layer.get_slope_by_cell_index(neighbour_cell_index) * _slope_penalty
 			
 			# Check if this cell has been visited before
 			if neighbour_cell_index in _cost_to_nearest_by_cell_index:
@@ -164,19 +169,14 @@ func _path_from_every_settlement() -> void:
 		road_path.append(to_dest_index)
 		_road_paths.append(road_path)
 
+func _record_all_road_cells() -> void:
+	for road_path in _road_paths:
+		for cell_ind in road_path:
+			if not cell_ind in _all_road_cell_indices:
+				_all_road_cell_indices.append(cell_ind)
+
 func _sort_by_cost(cell_index_a: int, cell_index_b: int) -> bool:
 	return _cost_to_nearest_by_cell_index[cell_index_a] < _cost_to_nearest_by_cell_index[cell_index_b]
-
-func _get_slope_by_cell_index(cell_index: int) -> float:
-	"""
-	Not a real slope calculation, just return the difference in height
-	between the lowest and highest of the 3 corners of the cell
-	"""
-	var heights: Array = Array(
-		_region_cell_layer.get_triangle_as_point_indices(cell_index)
-	).map(func(point_index): return _height_layer.get_point_height(point_index))
-	heights.sort()
-	return heights[2] - heights[0]
 
 func _update_smallest_path_cost_table(cell_index_a: int, cell_index_b: int) -> void:
 	var key: String = _get_cell_path_key(cell_index_a, cell_index_b)

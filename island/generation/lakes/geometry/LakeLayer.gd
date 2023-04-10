@@ -6,8 +6,10 @@ var _region_divide_layer: RegionDivideLayer
 var _lakes_per_region: int
 var _region_cell_layer: RegionCellLayer
 var _lake_indices: PackedInt32Array
-var _exit_point_index_by_lake_index: Dictionary = {} # Map from lake's region_index to the exit point_index
-var _lake_height_by_region_index: Dictionary = {} # Map from lake's region_index to the exit point_index
+var _exit_point_index_by_lake_index: Dictionary = {}  # Map from lake's region_index to the exit point_index
+var _lake_height_by_region_index: Dictionary = {}  # Map from lake's region_index to the exit point_index
+var _water_body_cell_indices: PackedInt32Array = []  # Cells that are in a water body
+var _non_water_body_cell_indices: PackedInt32Array = []  # Cells that are NOT in a water body
 var _rng := RandomNumberGenerator.new()
 
 func _init(outline_manager: OutlineManager, region_divide_layer: RegionDivideLayer, lakes_per_region: int, rng_seed: int) -> void:
@@ -33,7 +35,7 @@ func perform() -> void:
 		_region_divide_layer.reduce_region_and_create_margin(lake_index)
 		_perform_lake_smoothing(lake_index)
 	
-	frontier_cleanup()
+	_frontier_cleanup()
 	
 	# Discover the inner and outer point perimeters
 	_identify_perimeter_points()
@@ -57,6 +59,16 @@ func get_lake_height_by_region_index(region_index: int) -> float:
 
 func set_lake_height_by_region_index(height: float, region_index: int) -> void:
 	_lake_height_by_region_index[region_index] = height
+
+func get_water_body_cell_indices() -> PackedInt32Array:
+	if len(_water_body_cell_indices) == 0:
+		_divide_cells_by_water_body()
+	return _water_body_cell_indices
+
+func get_non_water_body_cell_indices() -> PackedInt32Array:
+	if len(_non_water_body_cell_indices) == 0:
+		_divide_cells_by_water_body()
+	return _non_water_body_cell_indices
 
 func _setup_lake_regions() -> void:
 	var region_indices: PackedInt32Array = _region_divide_layer.get_region_indices()
@@ -128,7 +140,7 @@ func _move_cell_from_inner_front_to_outer_front(
 		if not neighbour_ind in inner_front:
 			inner_front.append(neighbour_ind)
 
-func frontier_cleanup() -> void:
+func _frontier_cleanup() -> void:
 	"""
 	There will be some frontier cells that (somehow) got left behind by the smoothing step
 	In lieu of fixing the code that doesn't remove them, just find and remove them now
@@ -150,3 +162,15 @@ func frontier_cleanup() -> void:
 func _identify_perimeter_points() -> void:
 	for region_index in _lake_indices:
 		_region_cell_layer.identify_perimeter_points_for_region(region_index)
+
+func _divide_cells_by_water_body() -> void:
+	var water_region_indices: PackedInt32Array = _lake_indices.duplicate()
+	water_region_indices.append(_region_cell_layer.get_root_region_index())
+	
+	for cell_ind in range(_region_cell_layer.get_total_cell_count()):
+		# Include under water cells in water cell, else include in non water cells
+		var region_index: int = _region_cell_layer.get_region_index_for_cell(cell_ind)
+		if region_index in water_region_indices:
+			_water_body_cell_indices.append(cell_ind)
+		else:
+			_non_water_body_cell_indices.append(cell_ind)

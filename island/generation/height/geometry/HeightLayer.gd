@@ -156,3 +156,39 @@ func get_triangle_as_vector3_array_for_index_with_heights(cell_index) -> PackedV
 
 func get_vector3_with_height_for_point_index(point_index: int) -> Vector3:
 	return _region_cell_layer.get_point_as_vector3(point_index, _point_height[point_index])
+
+func get_slope_by_cell_index(cell_index: int) -> float:
+	"""
+	Not a "real" slope calculation, just return the difference in height
+	between the lowest and highest of the 3 corners of the cell
+	"""
+	var heights: Array = Array(
+		_region_cell_layer.get_triangle_as_point_indices(cell_index)
+	).map(func(point_index): return _point_height[point_index])
+	heights.sort()
+	return heights[2] - heights[0]
+
+func get_lower_edge_slope_by_cell_index(cell_index: int) -> float:
+	"""
+	Get the difference in height between the 2 lowest points in this cell
+	"""
+	var heights: Array = Array(
+		_region_cell_layer.get_triangle_as_point_indices(cell_index)
+	).map(func(point_index): return _point_height[point_index])
+	heights.sort()
+	return heights[1] - heights[0]
+
+func get_cell_as_point_indices_ordered_by_height(cell_index: int) -> PackedInt32Array:
+	"""
+	For the given cell index, return the point indices for this cell 
+	where the cells are ordered by height ascending
+	"""
+	var heights_to_point_map: Dictionary = {}
+	for point_ind in _region_cell_layer.get_triangle_as_point_indices(cell_index):
+		heights_to_point_map[_point_height[point_ind]] = point_ind
+	var heights: Array = Array(
+		_region_cell_layer.get_triangle_as_point_indices(cell_index)
+	).map(func(point_index: int): return _point_height[point_index])
+	heights.sort()
+	return PackedInt32Array(heights.map(func(height: float): return heights_to_point_map[height]))
+	

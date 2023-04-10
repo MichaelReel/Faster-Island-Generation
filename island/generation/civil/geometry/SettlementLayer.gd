@@ -32,13 +32,9 @@ func _locate_potential_settlements() -> void:
 	var water_region_indices: PackedInt32Array = _lake_layer.get_lake_region_indices().duplicate()
 	water_region_indices.append(_region_cell_layer.get_root_region_index())
 	
-	for cell_ind in range(_region_cell_layer.get_total_cell_count()):
+	for cell_ind in _lake_layer.get_non_water_body_cell_indices():
 		# Only accept plain areas for settlements
 		if not _cell_is_flat(cell_ind):
-			continue
-		# Don't have settlments under water
-		var region_index: int = _region_cell_layer.get_region_index_for_cell(cell_ind)
-		if region_index in water_region_indices:
 			continue
 		# But only accept settlements near to water
 		if not _cell_is_beside_region_in_list(cell_ind, water_region_indices):

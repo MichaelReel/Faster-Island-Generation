@@ -42,6 +42,7 @@ func _init(
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
+	_cliff_layer.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
