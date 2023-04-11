@@ -62,7 +62,7 @@ func get_river_following_points(point_a_index: int, point_b_index: int) -> int:
 	return -1
 
 func cell_touches_river(cell_ind: int) -> bool:
-	return cell_ind in _all_water_body_point_indices
+	return cell_ind in _all_adjacent_cell_indices
 
 func _setup_rivers():
 	# Get a copy of the list of lakes (will add the sea further down)
@@ -92,7 +92,7 @@ func _setup_rivers():
 		).filter(
 			func(point_index: int): return point_index in all_land_point_indices
 		)
-		neighbour_point_indices.sort_custom(_ascending_by_height)
+		neighbour_point_indices.sort_custom(_height_layer.ascending_by_height)
 		if len(neighbour_point_indices) > 0:
 			var river_index = _create_new_river(true)
 			_extend_river_by_point_index(river_index, exit_point_index)
@@ -136,8 +136,8 @@ func _update_river_adjacent_triangles(river_index: int, new_point_index: int) ->
 		if region_index == _region_cell_layer.get_root_region_index():
 			continue
 		_rivers_by_index[river_index].adjacent_cell_indices.append(cell_index)
-		if not cell_index in _all_water_body_point_indices:
-			_all_water_body_point_indices.append(cell_index)
+		if not cell_index in _all_adjacent_cell_indices:
+			_all_adjacent_cell_indices.append(cell_index)
 
 func _get_most_downstream_point_in_river(river_index: int) -> int:
 	return _rivers_by_index[river_index].midstream_point_indices[-1]
@@ -164,7 +164,7 @@ func _continue_river_by_index(
 		var neighbour_point_indices: Array = Array(
 			_tri_cell_layer.get_connected_point_indices_by_point_index(last_river_point)
 		)
-		neighbour_point_indices.sort_custom(_ascending_by_height)
+		neighbour_point_indices.sort_custom(_height_layer.ascending_by_height)
 		var lowest_neighbour: int = neighbour_point_indices[0]
 		
 		# If this river has no more available land based points to flow into
@@ -179,9 +179,6 @@ func _continue_river_by_index(
 		_extend_river_by_point_index(river_index, lowest_neighbour)
 		all_river_points.append(lowest_neighbour)
 		last_river_point = _get_most_downstream_point_in_river(river_index)
-
-func _ascending_by_height(index_a: int, index_b: int) -> bool:
-	return _height_layer.get_point_height(index_a) < _height_layer.get_point_height(index_b)
 
 func _update_edges_following_river(
 	point_a_index: int, point_b_index: int, river_index: int

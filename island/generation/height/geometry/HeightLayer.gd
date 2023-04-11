@@ -191,12 +191,9 @@ func get_cell_as_point_indices_ordered_by_height(cell_index: int) -> PackedInt32
 	For the given cell index, return the point indices for this cell 
 	where the cells are ordered by height ascending
 	"""
-	var heights_to_point_map: Dictionary = {}
-	for point_ind in _tri_cell_layer.get_triangle_as_point_indices(cell_index):
-		heights_to_point_map[_point_height[point_ind]] = point_ind
-	var heights: Array = Array(
-		_tri_cell_layer.get_triangle_as_point_indices(cell_index)
-	).map(func(point_index: int): return _point_height[point_index])
-	heights.sort()
-	return PackedInt32Array(heights.map(func(height: float): return heights_to_point_map[height]))
+	var point_indices = Array(_tri_cell_layer.get_triangle_as_point_indices(cell_index))
+	point_indices.sort_custom(ascending_by_height)
+	return PackedInt32Array(point_indices)
 	
+func ascending_by_height(index_a: int, index_b: int) -> bool:
+	return _point_height[index_a] < _point_height[index_b]

@@ -76,9 +76,11 @@ func _get_all_the_cliff_chains() -> void:
 			# Map the edge to the cliff TOP cell
 			_edge_cliff_top_cell_ind_map[edge_as_ordered_key] = cell_ind
 	
-#	# Find all the cliff chains
-#	var chains: Array[Array] = CliffStage._extract_chains_from_edges(cliff_edges)  # Array[Array[Edge]]
-#
+	# Find all the cliff chains
+	var chains: Array[PackedInt32Array] = CliffLayer._extract_chains_from_edges(cliff_edges_keys_to_array)
+
+	print(chains)
+
 #	for chain in chains:
 #		# Only keep chains longer than 3 edges
 #		if len(chain) > 2:
@@ -238,58 +240,80 @@ func _put_cliff_point_top_cell(point_ind: int, cell_ind: int) -> void:
 #		Triangle.new([top_b, bottom_b, bottom_a])
 #	]
 
-#static func _extract_chains_from_edges(all_edges: Array[Edge]) -> Array[Array]:  # -> Array[Array[Edge]]
-#	"""
-#	Given an array of unordered Edges
-#	Return an array, each element of which is an array of Edges ordered by connection.
-#
-#	This is destructive and will leave the input array empty.
-#	"""
-#
-#	# Identify chains by tracking each point in series of perimeter lines
-#	var chains: Array[Array] = []  # Array[Array[Edge]]
-#	while not all_edges.is_empty():
-#		# Setup the next chain, pick the end of a line
-#		var chain_done = false
-#		var chain_flipped = false
-#		var chain: Array[Edge] = []
-#		var next_chain_line: Edge = all_edges.pop_back()
-#		var start_chain_point: Vertex = next_chain_line.get_points().front()
-#		var next_chain_point: Vertex = next_chain_line.other_point(start_chain_point)
-#		# Follow the lines until we run out of edges
-#		while not chain_done:
-#			chain.append(next_chain_line)
-#
-#			# Which directions can we go from here?
-#			var connections = next_chain_point.get_connections()
-#			var directions: Array[Edge] = []
-#			for line in connections:
-#				if all_edges.has(line):
-#					directions.append(line)
-#
-#			# If there's too many ways to go, something probably went wrong
-#			if len(directions) > 1:
-#				printerr("FFS: This line goes everywhere!")
-#
-#			# If there's only one way to go, go that way
-#			elif len(directions) == 1:
-#				next_chain_line = directions.front()
-#				next_chain_point = next_chain_line.other_point(next_chain_point)
-#				all_edges.erase(next_chain_line)
-#
-#			else:
-#				# There are no ways to go
-#				if chain_flipped:
-#					# This chain has previously been flipped, both ends are now found
-#					# Push this chain back into the output list
-#					chains.append(chain)
-#					chain_done = true
-#					continue
-#
-#				# One end has been found, so flip it around and go the other way
-#				chain.reverse()
-#				next_chain_line = chain.pop_back()
-#				next_chain_point = start_chain_point
-#				chain_flipped = true
-#
-#	return chains
+static func _extract_chains_from_edges(cliff_edges_keys_to_array: Dictionary) -> Array[PackedInt32Array]: 
+	# (cliff_edges_keys_to_array: Dictionary[String, PackedInt32Array])
+	"""
+	Given an dictionary of unordered Edges
+	Return an array, each element of which is an array of Edges ordered by connection.
+	"""
+	# TODO: Add to doc if: This is destructive and will leave the input dictionary empty.
+	
+	# Re-index the edges dictionary as a search dictionary of points to keys
+	var point_indices_to_edge_keys: Dictionary = {}  # Dictionary[int, Array[String]]
+	var all_edge_keys: Array = cliff_edges_keys_to_array.keys().duplicate()  # Array[String]
+	for edge_key in all_edge_keys:
+		var edge: PackedInt32Array = cliff_edges_keys_to_array[edge_key]
+		for point_ind in edge:
+			if point_ind in point_indices_to_edge_keys:
+				point_indices_to_edge_keys[point_ind].append(edge_key)
+			else:
+				point_indices_to_edge_keys[point_ind] = [edge_key]
+	
+	# Identify chains by tracking each point in series of perimeter lines
+	var chains: Array[PackedInt32Array] = []
+	while not all_edge_keys.is_empty():
+		# Setup the next chain, pick the end of a line
+		var chain_done = false
+		var chain_flipped = false
+		var chain: PackedInt32Array = []
+		var next_chain_edge_key: String = all_edge_keys.pop_back()
+		var next_chain_edge: PackedInt32Array = cliff_edges_keys_to_array[next_chain_edge_key]
+		var start_chain_point_ind: int = next_chain_edge[0]
+		var next_chain_point_ind: int = next_chain_edge[1]
+		
+		# Follow the lines until we run out of edges
+		chain.append(start_chain_point_ind)
+		while not chain_done:
+			chain.append(next_chain_point_ind)
+			
+			# Along which edge can we go from this point?
+			# - excluding current edge and 
+			# - including unvisited edges
+			var connection_edge_keys: Array = point_indices_to_edge_keys[next_chain_point_ind].filter(
+				func (key: String): return key != next_chain_edge_key and key in all_edge_keys
+			)
+			
+			# If there's too many ways to go, something probably went wrong
+			if len(connection_edge_keys) > 1:
+				printerr("Error: Too many available directions! ")
+			
+			# If there's only one way to go, go that way
+			elif len(connection_edge_keys) == 1:
+				next_chain_edge_key = connection_edge_keys.front()
+				next_chain_edge = cliff_edges_keys_to_array[next_chain_edge_key]
+				next_chain_point_ind = (
+					next_chain_edge[0]
+					if next_chain_point_ind != next_chain_edge[0]
+					else next_chain_edge[1]
+				)
+				all_edge_keys.erase(next_chain_edge_key)
+			
+			else:
+				# There are no ways to go
+				if chain_flipped:
+					# This chain has previously been flipped, both ends are now found
+					# Push this chain back into the output list
+					chains.append(chain)
+					chain_done = true
+					continue
+				
+				# One end has been found, so flip it around and go the other way
+				chain.reverse()
+				var last_2_keys: PackedInt32Array = chain.slice(-2)
+				next_chain_edge_key = KeyUtils.get_combined_key_for_int32_array(last_2_keys)
+				next_chain_edge = cliff_edges_keys_to_array[next_chain_edge_key]
+				next_chain_point_ind = chain[-1]
+				chain.remove_at(len(chain)-1)
+				chain_flipped = true
+	
+	return chains
