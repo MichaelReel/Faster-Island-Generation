@@ -9,6 +9,7 @@ var _road_layer: RoadLayer
 var _min_slope: float
 var _point_cliff_top_cell_map: Dictionary = {}  # Dictionary[int, PackedInt32Array]
 var _edge_cliff_top_cell_ind_map: Dictionary = {}  # Edge key to cell index
+var _cliff_base_chains: Array[PackedInt32Array] = []
 
 func _init(
 	lake_layer: LakeLayer,
@@ -26,15 +27,18 @@ func _init(
 	_min_slope = min_slope
 
 func perform() -> void:
-	_get_all_the_cliff_chains()
+	_get_all_the_cliff_base_chains()
 #	_setup_debug_draw()
 #	_split_grid_along_cliff_lines()
 #	_create_cliff_polygons()
 
+func get_cliff_base_lines() -> Array[PackedInt32Array]:
+	return _cliff_base_chains
+
 #func get_cliff_surfaces() -> Array[Array]:  # -> Array[Array[Triangle]]
 #	return _cliff_surface_triangles
 
-func _get_all_the_cliff_chains() -> void:
+func _get_all_the_cliff_base_chains() -> void:
 	"""
 	Identify and record likely places we can extend the landscape to create cliffs
 	Scan the above water cells for steep faces
@@ -81,10 +85,10 @@ func _get_all_the_cliff_chains() -> void:
 
 	print(chains)
 
-#	for chain in chains:
-#		# Only keep chains longer than 3 edges
-#		if len(chain) > 2:
-#			_cliff_chains.append(chain)
+	for chain in chains:
+		# Don't keep any chains that are too short to draw
+		if len(chain) > 3:
+			_cliff_base_chains.append(chain)
 
 func _put_cliff_point_top_cell(point_ind: int, cell_ind: int) -> void:
 	if point_ind in _point_cliff_top_cell_map.keys():
@@ -100,7 +104,7 @@ func _put_cliff_point_top_cell(point_ind: int, cell_ind: int) -> void:
 #	return top_triangles
 
 #func _setup_debug_draw() -> void:
-#	for cliff_chain in _cliff_chains:
+#	for cliff_chain in _cliff_base_chains:
 #		# Setup the debug draw
 #		for i in range(len(cliff_chain)):
 #			var cliff_edge: Edge = cliff_chain[i]
@@ -115,7 +119,7 @@ func _put_cliff_point_top_cell(point_ind: int, cell_ind: int) -> void:
 #	Separate the grid where the cliffs are located
 #	"""
 #	# This is likely to break so much stuff. This will be interesting.
-#	for cliff_chain in _cliff_chains:
+#	for cliff_chain in _cliff_base_chains:
 #		_cliff_vertex_chain_pairs.append(_split_grid_along_cliff_line(cliff_chain))
 
 #func _split_grid_along_cliff_line(cliff_chain: Array[Edge]) -> Array[Array]:  # -> Array[Array[Vertex]]

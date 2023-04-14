@@ -10,6 +10,7 @@ var _civil_manager: CivilManager
 var _material_lib: MaterialLib
 var _rng := RandomNumberGenerator.new()
 var _cliff_layer: CliffLayer
+var _cliff_line_mesh: CliffLineMesh
 
 func _init(
 	grid_manager: GridManager,
@@ -39,10 +40,18 @@ func _init(
 		_civil_manager.get_road_layer(),
 		min_slope,
 	)
+	
+	_cliff_line_mesh = CliffLineMesh.new(
+		_grid_manager.get_tri_cell_layer(),
+		_height_manager.get_height_layer(),
+		_cliff_layer
+	)
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
 	_cliff_layer.perform()
+	emit_signal("percent_complete", self, 50.0)
+	_cliff_line_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -53,4 +62,5 @@ func _to_string() -> String:
 
 func get_mesh_dict() -> Dictionary:
 	return {
+		"cliff_bases": _cliff_line_mesh
 	}
