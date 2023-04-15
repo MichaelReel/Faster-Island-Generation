@@ -48,6 +48,7 @@ shadow_enabled = true
 editor_display = 3
 bounds_side = 100.0
 island_cell_count = 6000
+max_cliff_height = 0.6
 sub_water = SubResource("StandardMaterial3D_582fk")
 ground = SubResource("StandardMaterial3D_g3d72")
 water_surface = SubResource("StandardMaterial3D_ui302")

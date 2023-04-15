@@ -20,6 +20,7 @@ func _init(
 	river_manager: RiverManager,
 	civil_manager: CivilManager,
 	min_slope: float,
+	max_cliff_height: float,
 	material_lib: MaterialLib,
 	rng_seed: int,
 ) -> void:
@@ -39,6 +40,7 @@ func _init(
 		_river_manager.get_river_layer(),
 		_civil_manager.get_road_layer(),
 		min_slope,
+		max_cliff_height,
 	)
 	
 	_cliff_line_mesh = CliffLineMesh.new(

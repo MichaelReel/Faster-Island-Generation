@@ -32,6 +32,7 @@ func _init(
 	slope_penalty: float,
 	river_penalty: float,
 	min_slope_to_cliff: float,
+	max_cliff_height: float,
 ) -> void:
 	var rng = RandomNumberGenerator.new()
 	rng.seed = random_seed
@@ -82,6 +83,7 @@ func _init(
 		_river_manager,
 		_civil_manager,
 		min_slope_to_cliff,
+		max_cliff_height,
 		material_lib,
 		rng.randi(),
 		

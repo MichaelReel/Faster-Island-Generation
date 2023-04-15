@@ -45,6 +45,7 @@ extends Node3D
 
 @export_category("cliff_creation")
 @export var min_slope_to_cliff: float = 0.5
+@export var max_cliff_height: float = 1.0
 
 @export_category("debug_materials")
 @export var sub_water: Material = Material.new()
@@ -99,6 +100,7 @@ func _tool_execute(_delta: float) -> void:
 		slope_penalty,
 		river_penalty,
 		min_slope_to_cliff,
+		max_cliff_height,
 	)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)
 	_terrain_manager.perform(editor_display)
@@ -121,6 +123,7 @@ func _game_execute(_delta: float) -> void:
 		slope_penalty,
 		river_penalty,
 		min_slope_to_cliff,
+		max_cliff_height,
 	)
 	var _err1 = _terrain_manager.connect("all_stages_complete", _on_all_stages_complete)
 	var _err2 = _terrain_manager.connect("stage_complete", _on_stage_complete)

@@ -7,9 +7,12 @@ var _height_layer: HeightLayer
 var _river_layer: RiverLayer
 var _road_layer: RoadLayer
 var _min_slope: float
+var _cliff_max_height: float
 var _point_cliff_top_cell_map: Dictionary = {}  # Dictionary[int, PackedInt32Array]
 var _edge_cliff_top_cell_ind_map: Dictionary = {}  # Edge key to cell index
 var _cliff_base_chains: Array[PackedInt32Array] = []
+var _cliff_base_elevations: Array[PackedFloat32Array] = []
+var _cliff_top_elevations: Array[PackedFloat32Array] = []
 
 func _init(
 	lake_layer: LakeLayer,
@@ -18,6 +21,7 @@ func _init(
 	river_layer: RiverLayer,
 	road_layer: RoadLayer,
 	min_slope: float,
+	cliff_max_height: float,
 ) -> void:
 	_lake_layer = lake_layer
 	_region_cell_layer = region_cell_layer
@@ -25,18 +29,24 @@ func _init(
 	_river_layer = river_layer
 	_road_layer = road_layer
 	_min_slope = min_slope
+	_cliff_max_height = cliff_max_height
 
 func perform() -> void:
 	_get_all_the_cliff_base_chains()
-#	_setup_debug_draw()
-#	_split_grid_along_cliff_lines()
+	_split_grid_along_cliff_lines()
+	
 #	_create_cliff_polygons()
 
 func get_cliff_base_lines() -> Array[PackedInt32Array]:
+	"""
+	Return all the cliff point indices as an array of point_index arrays
+	The index of each sub array in the returned array can be considered to be the `cliff_index`
+	"""
 	return _cliff_base_chains
 
-#func get_cliff_surfaces() -> Array[Array]:  # -> Array[Array[Triangle]]
-#	return _cliff_surface_triangles
+func get_cliff_elevation_lines(cliff_index: int) -> Array[PackedFloat32Array]:
+	"""Return the base and top elevations for the given cliff index"""
+	return [_cliff_base_elevations[cliff_index], _cliff_top_elevations[cliff_index]]
 
 func _get_all_the_cliff_base_chains() -> void:
 	"""
@@ -44,7 +54,6 @@ func _get_all_the_cliff_base_chains() -> void:
 	Scan the above water cells for steep faces
 	Find chains of steep faces that don't cross roads, rivers
 	"""
-	pass
 	var cliff_edges_keys_to_array: Dictionary = {}  # Dictionary[String, PackedInt32Array]
 	for cell_ind in _lake_layer.get_non_water_body_cell_indices():
 		var slope_height_diff: float = _height_layer.get_slope_by_cell_index(cell_ind)
@@ -83,8 +92,6 @@ func _get_all_the_cliff_base_chains() -> void:
 	# Find all the cliff chains
 	var chains: Array[PackedInt32Array] = CliffLayer._extract_chains_from_edges(cliff_edges_keys_to_array)
 
-	print(chains)
-
 	for chain in chains:
 		# Don't keep any chains that are too short to draw
 		if len(chain) > 3:
@@ -103,31 +110,42 @@ func _put_cliff_point_top_cell(point_ind: int, cell_ind: int) -> void:
 #		top_triangles.append_array(_point_cliff_top_triangles_map[key])
 #	return top_triangles
 
-#func _setup_debug_draw() -> void:
-#	for cliff_chain in _cliff_base_chains:
-#		# Setup the debug draw
-#		for i in range(len(cliff_chain)):
-#			var cliff_edge: Edge = cliff_chain[i]
-#			_edge_cliff_top_triangle_map[cliff_edge].set_cliff_edge(cliff_edge)
-#			if i + 1 < len(cliff_chain):
-#				var cliff_point: Vertex = cliff_edge.shared_point(cliff_chain[i + 1])
-#				for triangle in _get_cliff_point_top_triangles(cliff_point):
-#					triangle.set_cliff_point(cliff_point)
+func _split_grid_along_cliff_lines() -> void:
+	"""
+	Separate the grid where the cliffs are located
+	"""
+	for cliff_chain in _cliff_base_chains:
+		_split_grid_along_cliff_line(cliff_chain)
 
-#func _split_grid_along_cliff_lines() -> void:
-#	"""
-#	Separate the grid where the cliffs are located
-#	"""
-#	# This is likely to break so much stuff. This will be interesting.
-#	for cliff_chain in _cliff_base_chains:
-#		_cliff_vertex_chain_pairs.append(_split_grid_along_cliff_line(cliff_chain))
+func _split_grid_along_cliff_line(cliff_chain: PackedInt32Array) -> void:
+	"""
+	Create a set of new heights for the tops of the cliffs,
+	these should be made discoverable by referencing the combination of cell and point
+	"""
+	var cliff_bottom_heights = PackedFloat32Array(
+		Array(cliff_chain).map(
+			func (point_ind: int): return _height_layer.get_point_height(point_ind)
+		)
+	)
+	var cliff_top_heights: PackedFloat32Array = []
+	var cliff_length: int = len(cliff_chain)
+	for cliff_index in range(cliff_length):
+		if cliff_index == 0 or cliff_index == cliff_length - 1:
+			# Just set the ends to the same height as the bottoms
+			# The algoritm below might hav got close, but just to avoid float precision errors
+			cliff_top_heights.append(cliff_bottom_heights[cliff_index])
+			continue
+		
+		# To work out the cliff "curve" the following algorithm will give a reasonable curve:
+		# https://www.desmos.com/calculator/lajhzxtfl0
+		# height = cos( PI * (x - length * 0.5) / length ) * max_height
+		var length = cliff_length - 1
+		var cliff_height = cos(PI * (cliff_index - 0.5 * length) / length) * _cliff_max_height
+		cliff_top_heights.append(cliff_bottom_heights[cliff_index] + cliff_height)
+		
+	_cliff_base_elevations.append(cliff_bottom_heights)
+	_cliff_top_elevations.append(cliff_top_heights)
 
-#func _split_grid_along_cliff_line(cliff_chain: Array[Edge]) -> Array[Array]:  # -> Array[Array[Vertex]]
-#	"""
-#	Split the cliff points in the grid and separate the cliff chain by height
-#
-#	Return both the top chain and the bottom chain of vertices
-#	"""
 #	var top_vertex_chain: Array[Vertex] = []
 #	var bottom_vertex_chain: Array[Vertex] = []
 #	# for each non-end point in the cliff line, we need to 
