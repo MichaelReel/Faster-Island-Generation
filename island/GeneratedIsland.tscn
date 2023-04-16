@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://qyqjsv6gy5sa"]
+[gd_scene load_steps=11 format=3 uid="uid://qyqjsv6gy5sa"]
 
 [ext_resource type="Script" path="res://island/GeneratedIsland.gd" id="1_v0fho"]
 [ext_resource type="Shader" path="res://island/material/debug_outline.gdshader" id="2_fcc08"]
@@ -11,11 +11,19 @@ resource_name = ""
 resource_local_to_scene = false
 resource_name = ""
 
-[sub_resource type="Material" id="Material_8f78n"]
+[sub_resource type="Material" id="Material_bwvvt"]
 resource_local_to_scene = false
 resource_name = ""
 
 [sub_resource type="Material" id="Material_7ocas"]
+resource_local_to_scene = false
+resource_name = ""
+
+[sub_resource type="Material" id="Material_4yewd"]
+resource_local_to_scene = false
+resource_name = ""
+
+[sub_resource type="Material" id="Material_uoiw4"]
 resource_local_to_scene = false
 resource_name = ""
 
@@ -31,8 +39,10 @@ size = Vector2(50, 50)
 script = ExtResource("1_v0fho")
 sub_water = SubResource("Material_6k20l")
 ground = SubResource("Material_5jwn0")
-lake_debug = SubResource("Material_8f78n")
+water_surface = SubResource("Material_bwvvt")
 region_debug = SubResource("Material_7ocas")
+settlement = SubResource("Material_4yewd")
+road = SubResource("Material_uoiw4")
 
 [node name="BoundsMesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("PlaneMesh_qw12c")

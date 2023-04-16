@@ -75,6 +75,6 @@ func _to_string() -> String:
 
 func get_mesh_dict() -> Dictionary:
 	return {
-		"cliff_bases": _cliff_line_mesh,
+#		"cliff_bases": _cliff_line_mesh,
 		"terrain": _cliff_terrain_mesh,
 	}

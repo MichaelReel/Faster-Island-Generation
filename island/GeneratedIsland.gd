@@ -54,6 +54,7 @@ extends Node3D
 @export var region_debug: Material = Material.new()
 @export var settlement: Material = Material.new()
 @export var road: Material = Material.new()
+@export var cliff: Material = Material.new()
 
 @onready var bounds : Mesh = $BoundsMesh.mesh
 @onready var material_lib: MaterialLib = MaterialLib.new()
@@ -69,6 +70,7 @@ func _ready() -> void:
 	material_lib.set_material("region_debug", region_debug)
 	material_lib.set_material("settlement", settlement)
 	material_lib.set_material("road", road)
+	material_lib.set_material("cliff", cliff)
 
 func _process(delta: float) -> void:
 	if not _changes_pending:

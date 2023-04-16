@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://ti6hvbnvt6l7"]
+[gd_scene load_steps=13 format=3 uid="uid://ti6hvbnvt6l7"]
 
 [ext_resource type="PackedScene" uid="uid://qyqjsv6gy5sa" path="res://island/GeneratedIsland.tscn" id="1_77t7i"]
 [ext_resource type="PackedScene" uid="uid://dux6616n2uxn" path="res://camera/FlyingCameraControl.tscn" id="2_gt1th"]
@@ -35,6 +35,8 @@ albedo_color = Color(0.329412, 0.305882, 0.305882, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n3gii"]
 albedo_color = Color(0.403922, 0.454902, 0.403922, 1)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f5ket"]
+
 [node name="Main" type="Node3D"]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -55,6 +57,7 @@ water_surface = SubResource("StandardMaterial3D_ui302")
 region_debug = SubResource("StandardMaterial3D_cmf4l")
 settlement = SubResource("StandardMaterial3D_0wty8")
 road = SubResource("StandardMaterial3D_n3gii")
+cliff = SubResource("StandardMaterial3D_f5ket")
 
 [node name="BoundsMesh" parent="GeneratedIsland" index="0"]
 visible = false
