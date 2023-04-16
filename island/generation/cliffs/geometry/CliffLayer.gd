@@ -9,10 +9,10 @@ var _road_layer: RoadLayer
 var _min_slope: float
 var _cliff_max_height: float
 var _point_cliff_top_cell_map: Dictionary = {}  # Dictionary[int, PackedInt32Array]
-var _edge_cliff_top_cell_ind_map: Dictionary = {}  # Edge key to cell index
 var _cliff_base_chains: Array[PackedInt32Array] = []
 var _cliff_base_elevations: Array[PackedFloat32Array] = []
 var _cliff_top_elevations: Array[PackedFloat32Array] = []
+var _cell_and_point_to_cliff_top_height: Dictionary = {}  # Dictionary[String, float]
 
 func _init(
 	lake_layer: LakeLayer,
@@ -34,8 +34,7 @@ func _init(
 func perform() -> void:
 	_get_all_the_cliff_base_chains()
 	_split_grid_along_cliff_lines()
-	
-#	_create_cliff_polygons()
+	_record_deviations_from_height_layer()
 
 func get_cliff_base_lines() -> Array[PackedInt32Array]:
 	"""
@@ -47,6 +46,12 @@ func get_cliff_base_lines() -> Array[PackedInt32Array]:
 func get_cliff_elevation_lines(cliff_index: int) -> Array[PackedFloat32Array]:
 	"""Return the base and top elevations for the given cliff index"""
 	return [_cliff_base_elevations[cliff_index], _cliff_top_elevations[cliff_index]]
+
+func get_height_from_cell_and_point_indices(cell_ind: int , point_ind: int) -> float:
+	var key = KeyUtils.key_for_cell_and_point(cell_ind, point_ind)
+	if key in _cell_and_point_to_cliff_top_height:
+		return _cell_and_point_to_cliff_top_height[key]
+	return _height_layer.get_point_height(point_ind)
 
 func _get_all_the_cliff_base_chains() -> void:
 	"""
@@ -86,8 +91,9 @@ func _get_all_the_cliff_base_chains() -> void:
 			cliff_edges_keys_to_array.erase(edge_as_ordered_key)
 		else:
 			cliff_edges_keys_to_array[edge_as_ordered_key] = lower_edge_as_point_indices
-			# Map the edge to the cliff TOP cell
-			_edge_cliff_top_cell_ind_map[edge_as_ordered_key] = cell_ind
+			# Map the edge points to the cliff TOP cell
+			_put_cliff_point_top_cell(lower_edge_as_point_indices[0], cell_ind)
+			_put_cliff_point_top_cell(lower_edge_as_point_indices[1], cell_ind)
 	
 	# Find all the cliff chains
 	var chains: Array[PackedInt32Array] = CliffLayer._extract_chains_from_edges(cliff_edges_keys_to_array)
@@ -102,13 +108,6 @@ func _put_cliff_point_top_cell(point_ind: int, cell_ind: int) -> void:
 		_point_cliff_top_cell_map[point_ind].append(cell_ind)
 	else:
 		_point_cliff_top_cell_map[point_ind] = PackedInt32Array([cell_ind])
-
-#func _get_cliff_point_top_triangles(cliff_point: Vertex) -> Array[Triangle]:
-#	var key = cliff_point.get_instance_id()
-#	var top_triangles: Array[Triangle] = []
-#	if key in _point_cliff_top_triangles_map.keys():
-#		top_triangles.append_array(_point_cliff_top_triangles_map[key])
-#	return top_triangles
 
 func _split_grid_along_cliff_lines() -> void:
 	"""
@@ -146,121 +145,22 @@ func _split_grid_along_cliff_line(cliff_chain: PackedInt32Array) -> void:
 	_cliff_base_elevations.append(cliff_bottom_heights)
 	_cliff_top_elevations.append(cliff_top_heights)
 
-#	var top_vertex_chain: Array[Vertex] = []
-#	var bottom_vertex_chain: Array[Vertex] = []
-#	# for each non-end point in the cliff line, we need to 
-#	#  - create an extra point
-#	#  - create an extra edge
-#	#  - separate the points vertically
-#	#  - possibly link it with it's twin point in some funky way?
-#
-#	for i in range(len(cliff_chain) - 1):
-#		# Gather info about the existing terrain elements
-#		# Get a pair of edges
-#		var previous_edge: Edge = cliff_chain[i]
-#		var next_edge: Edge = cliff_chain[i + 1]
-#
-#		# Find the shared point and end points
-#		var mid_point: Vertex = previous_edge.shared_point(next_edge)
-#		var previous_point: Vertex = previous_edge.other_point(mid_point)
-#		var next_point: Vertex = next_edge.other_point(mid_point)
-#
-#		# Identify the top and the base triangles around the mid point
-#		var previous_cliff_top_edge_triangle: Triangle = _edge_cliff_top_triangle_map[previous_edge]
-#		var previous_cliff_base_edge_triangle: Triangle = previous_edge.other_triangle(previous_cliff_top_edge_triangle)
-#		var next_cliff_top_edge_triangle: Triangle = _edge_cliff_top_triangle_map[next_edge]
-#		var next_cliff_base_edge_triangle: Triangle = next_edge.other_triangle(next_cliff_top_edge_triangle)
-#		var cliff_top_point_triangles: Array[Triangle] = _get_cliff_point_top_triangles(mid_point)
-#		var known_triangles: Array[Triangle] = cliff_top_point_triangles
-#		known_triangles.append_array([
-#			previous_cliff_top_edge_triangle, 
-#			previous_cliff_base_edge_triangle, 
-#			next_cliff_top_edge_triangle, 
-#			next_cliff_base_edge_triangle
-#		])
-#		var cliff_base_point_triangles: Array[Triangle] = []
-#		for triangle in mid_point.get_triangles():
-#			if not triangle in known_triangles:
-#				cliff_base_point_triangles.append(triangle)
-#
-#		# Create a new edge and replace the edge from the previous point 
-#		# to the mid point at the bottom of this cliff
-#		var new_previous_point: Vertex = previous_point
-#		if not bottom_vertex_chain.is_empty():
-#			new_previous_point = bottom_vertex_chain.back()
-#		else:
-#			bottom_vertex_chain.append(previous_point)
-#			top_vertex_chain.append(previous_point)
-#
-#		top_vertex_chain.append(mid_point)
-#		var new_cliff_base_mid_point = mid_point.duplicate_to(Vertex.new())
-#		bottom_vertex_chain.append(new_cliff_base_mid_point)
-#
-#		var new_cliff_base_prev_edge: Edge = Edge.new(new_previous_point, new_cliff_base_mid_point)
-#		previous_cliff_base_edge_triangle.replace_existing_edge_with(previous_edge, new_cliff_base_prev_edge)
-#
-#		# Also have to replace the point in the triangle "touching" the base of the cliff
-#		for triangle in cliff_base_point_triangles:
-#			triangle.replace_existing_point_with(mid_point, new_cliff_base_mid_point)
-#
-#		# If we're at the end of the chain, we also need to replace the edge on the next (last) edge
-#		if next_edge == cliff_chain.back():
-#			# next point is the last point, can just reuse
-#			var new_cliff_base_next_edge: Edge = Edge.new(new_cliff_base_mid_point, next_point)
-#			next_cliff_base_edge_triangle.replace_existing_edge_with(next_edge, new_cliff_base_next_edge)
-#			bottom_vertex_chain.append(next_point)
-#			top_vertex_chain.append(next_point)
-#
-#		# Raise the top of cliff point upwards
-#		var additional_height: float = 5.0  # TODO: Need more rules around this
-#		mid_point.raise_terrain(additional_height)
-#
-#	return [top_vertex_chain, bottom_vertex_chain]
+func _record_deviations_from_height_layer() -> void:
+	"""Make it easy to get the correct height for a given cell and corner point"""
+	# _cell_and_point_to_cliff_top_height
 
-#func _create_cliff_polygons() -> void:
-#	"""Create the polygons that can be used to render the cliff"""
-#
-#	for cliff_chain_pair in _cliff_vertex_chain_pairs:
-#		var cliff_polygons: Array[Triangle] = []
-#		var top_chain: Array[Vertex] = cliff_chain_pair[0]
-#		var bottom_chain: Array[Vertex] = cliff_chain_pair[1]
-#
-#		# Debug check, chains should be the same length
-#		assert(len(top_chain) == len(bottom_chain), "Top and bottom chains should be the same length")
-#
-#		# Need to figure out the draw order.
-#		# It will be reverse of the point draw direction in the existing linked triangles
-#		var first_top_edge: Edge = top_chain[0].get_connection_to_point(top_chain[1])
-#		if first_top_edge.get_bordering_triangles()[0].points_in_draw_order(top_chain[0], top_chain[1]):
-#			# The point order needs to be the reverse of the edge in the adjoining triangle
-#			top_chain.reverse()
-#			bottom_chain.reverse()
-#
-#		for i in range(len(top_chain) - 1):
-#			# Find the draw direction of the top and bottom edge in their respective triangles
-#			cliff_polygons.append_array(
-#				_get_cliff_polygons_for_vertices(
-#					top_chain[i], top_chain[i + 1], bottom_chain[i], bottom_chain[i + 1]
-#				)
-#			)
-#		_cliff_surface_triangles.append(cliff_polygons)
-
-#func _get_cliff_polygons_for_vertices(top_a: Vertex, top_b: Vertex, bottom_a: Vertex, bottom_b: Vertex) -> Array[Triangle]:
-#	"""Create and return the polygons required to fill this section of cliff"""
-#	# When the first or last points match, we only need a single triangle
-#	if top_a == bottom_a:
-#		var _conn_a = Edge.new(top_b, bottom_b)
-#		return [Triangle.new([top_a, top_b, bottom_b])]
-#
-#	if top_b == bottom_b:
-#		return [Triangle.new([top_a, top_b, bottom_a])]
-#
-#	var _conn_a = Edge.new(top_b, bottom_b)
-#	var _conn_b = Edge.new(top_b, bottom_a)
-#	return [
-#		Triangle.new([top_a, top_b, bottom_a]),
-#		Triangle.new([top_b, bottom_b, bottom_a])
-#	]
+	# Go through all the cliff points
+	for cliff_index in range(len(_cliff_base_chains)):
+		var cliff_point_indices: PackedInt32Array = _cliff_base_chains[cliff_index]
+		for cliff_sequence_ind in range(len(cliff_point_indices)):
+			var cliff_point_ind: int = cliff_point_indices[cliff_sequence_ind]
+			# Make a record of the cells connected by top points
+			if cliff_point_ind in _point_cliff_top_cell_map:
+				for point_cell_ind in _point_cliff_top_cell_map[cliff_point_ind]:
+					var key = KeyUtils.key_for_cell_and_point(point_cell_ind, cliff_point_ind)
+					_cell_and_point_to_cliff_top_height[key] = (
+						_cliff_top_elevations[cliff_index][cliff_sequence_ind]
+					)
 
 static func _extract_chains_from_edges(cliff_edges_keys_to_array: Dictionary) -> Array[PackedInt32Array]: 
 	# (cliff_edges_keys_to_array: Dictionary[String, PackedInt32Array])
