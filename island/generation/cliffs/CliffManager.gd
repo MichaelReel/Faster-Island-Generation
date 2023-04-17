@@ -35,8 +35,8 @@ func _init(
 	_rng.seed = rng_seed
 	
 	_cliff_layer = CliffLayer.new(
-		lake_manager.get_lake_layer(),
-		_outline_manager.get_region_cell_layer(),
+		_grid_manager.get_tri_cell_layer(),
+		_lake_manager.get_lake_layer(),
 		_height_manager.get_height_layer(),
 		_river_manager.get_river_layer(),
 		_civil_manager.get_road_layer(),
@@ -75,6 +75,6 @@ func _to_string() -> String:
 
 func get_mesh_dict() -> Dictionary:
 	return {
-#		"cliff_bases": _cliff_line_mesh,
+		"cliff_debug": _cliff_line_mesh,
 		"terrain": _cliff_terrain_mesh,
 	}

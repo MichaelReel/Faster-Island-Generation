@@ -1,8 +1,8 @@
 class_name CliffLayer
 extends Object
 
+var _tri_cell_layer: TriCellLayer
 var _lake_layer: LakeLayer
-var _region_cell_layer: RegionCellLayer
 var _height_layer: HeightLayer
 var _river_layer: RiverLayer
 var _road_layer: RoadLayer
@@ -15,16 +15,16 @@ var _cliff_top_elevations: Array[PackedFloat32Array] = []
 var _cell_and_point_to_cliff_top_height: Dictionary = {}  # Dictionary[String, float]
 
 func _init(
+	tri_cell_layer: TriCellLayer,
 	lake_layer: LakeLayer,
-	region_cell_layer: RegionCellLayer,
 	height_layer: HeightLayer,
 	river_layer: RiverLayer,
 	road_layer: RoadLayer,
 	min_slope: float,
 	cliff_max_height: float,
 ) -> void:
+	_tri_cell_layer = tri_cell_layer
 	_lake_layer = lake_layer
-	_region_cell_layer = region_cell_layer
 	_height_layer = height_layer
 	_river_layer = river_layer
 	_road_layer = road_layer
@@ -100,8 +100,25 @@ func _get_all_the_cliff_base_chains() -> void:
 
 	for chain in chains:
 		# Don't keep any chains that are too short to draw
-		if len(chain) > 3:
-			_cliff_base_chains.append(chain)
+		if len(chain) <= 3:
+			continue
+		
+		# Which cliff top cell do both points belong to?
+		var cell_indices: Array = Array(_point_cliff_top_cell_map[chain[0]]).filter(
+			func (cell_ind: int): return cell_ind in _point_cliff_top_cell_map[chain[1]]
+		)
+		if len(cell_indices) != 1:
+			printerr("Can't find single cliff top cell sharing points %d and %d (found %s)" % [chain[0], chain[1], cell_indices])
+		var cell_index: int = cell_indices[0]
+		
+		# Do the first 2 points go "clockwise" or "anticlockwise" along the top of cliff cell?
+		var cell_rotation = _tri_cell_layer.get_rotation_direction_around_cell(chain[0], chain[1], cell_index)
+		
+		# Reverse any chains that orient the wrong way to keep faces outwards
+		if cell_rotation == 1:
+			chain.reverse()
+		
+		_cliff_base_chains.append(chain)
 
 func _put_cliff_point_top_cell(point_ind: int, cell_ind: int) -> void:
 	if point_ind in _point_cliff_top_cell_map.keys():

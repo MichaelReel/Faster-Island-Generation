@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://qyqjsv6gy5sa"]
+[gd_scene load_steps=12 format=3 uid="uid://qyqjsv6gy5sa"]
 
 [ext_resource type="Script" path="res://island/GeneratedIsland.gd" id="1_v0fho"]
 [ext_resource type="Shader" path="res://island/material/debug_outline.gdshader" id="2_fcc08"]
@@ -27,6 +27,10 @@ resource_name = ""
 resource_local_to_scene = false
 resource_name = ""
 
+[sub_resource type="Material" id="Material_xa6nx"]
+resource_local_to_scene = false
+resource_name = ""
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_54e7f"]
 render_priority = 0
 shader = ExtResource("2_fcc08")
@@ -43,6 +47,7 @@ water_surface = SubResource("Material_bwvvt")
 region_debug = SubResource("Material_7ocas")
 settlement = SubResource("Material_4yewd")
 road = SubResource("Material_uoiw4")
+cliff = SubResource("Material_xa6nx")
 
 [node name="BoundsMesh" type="MeshInstance3D" parent="."]
 mesh = SubResource("PlaneMesh_qw12c")

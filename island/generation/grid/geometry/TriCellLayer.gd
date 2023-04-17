@@ -73,6 +73,22 @@ func get_tri_cell_horizontal_border(vector: Vector2i) -> int:
 	
 	return -1 if row_even == column_even else +1
 
+func get_rotation_direction_around_cell(point_ind_a: int, point_ind_b: int, cell_ind: int) -> int:
+	"""
+	Get the rotation of the points, in the given order, around the cell
+	+1 and -1 for CW and ACW rotations respectively.
+	0 for no rotation; I.e.: input error, etc.
+	"""
+	# This relies on the order of the cells on creation in _create_tri_cell
+	var ordered_points_in_the_cell: PackedInt32Array = _cells[cell_ind]
+	var index_a_in_order: int = ordered_points_in_the_cell.find(point_ind_a)
+	if ordered_points_in_the_cell[(index_a_in_order + 1) % 3] == point_ind_b:
+		return 1
+	if ordered_points_in_the_cell[(index_a_in_order + 2) % 3] == point_ind_b:
+		return -1
+	return 0
+	
+
 func _create_tri_cell(vector: Vector2i) -> PackedInt32Array:
 	var row: int = vector.y
 	var col: int = vector.x
