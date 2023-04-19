@@ -1,7 +1,7 @@
 class_name LakeOutlineMesh
 extends ArrayMesh
 """
-Mesh for height map portion of the island generation
+Line mesh for base outline of lakes
 """
 
 var _tri_cell_layer: TriCellLayer

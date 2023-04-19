@@ -6,7 +6,6 @@ var _outline_manager: OutlineManager
 var _lake_manager: LakeManager
 var _height_layer: HeightLayer
 var _height_mesh: HeightMesh
-var _coast_line_mesh: CoastLineMesh
 var _rng := RandomNumberGenerator.new()
 
 func _init(
@@ -39,19 +38,12 @@ func _init(
 		_height_layer,
 		material_lib
 	)
-	_coast_line_mesh = CoastLineMesh.new(
-		_grid_manager.get_tri_cell_layer(),
-		_outline_manager.get_region_cell_layer(),
-		_height_layer,
-	)
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
 	_height_layer.perform()
-	emit_signal("percent_complete", self, 33.3)
+	emit_signal("percent_complete", self, 50.0)
 	_height_mesh.perform()
-	emit_signal("percent_complete", self, 66.6)
-	_coast_line_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -63,7 +55,6 @@ func _to_string() -> String:
 func get_mesh_dict() -> Dictionary:
 	return {
 		"terrain": _height_mesh,
-		"coast_line": _coast_line_mesh,
 	}
 
 func get_height_layer() -> HeightLayer:

@@ -12,7 +12,6 @@ var _settlement_layer: SettlementLayer
 var _road_layer: RoadLayer
 var _settlements_mesh: SettlementsMesh
 var _roads_mesh: RoadsMesh
-var _debug_road_mesh: DebugRoadMesh
 
 func _init(
 	grid_manager: GridManager,
@@ -66,25 +65,16 @@ func _init(
 		_road_layer,
 		material_lib,
 	)
-	
-	_debug_road_mesh = DebugRoadMesh.new(
-		_grid_manager.get_tri_cell_layer(),
-		_height_manager.get_height_layer(),
-		_road_layer,
-		material_lib,
-	)
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
 	_settlement_layer.perform()
-	emit_signal("percent_complete", self, 20.0)
+	emit_signal("percent_complete", self, 25.0)
 	_road_layer.perform()
-	emit_signal("percent_complete", self, 40.0)
+	emit_signal("percent_complete", self, 50.0)
 	_settlements_mesh.perform()
-	emit_signal("percent_complete", self, 60.0)
+	emit_signal("percent_complete", self, 75.0)
 	_roads_mesh.perform()
-	emit_signal("percent_complete", self, 80.0)
-	_debug_road_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -97,7 +87,6 @@ func get_mesh_dict() -> Dictionary:
 	return {
 		"settlements": _settlements_mesh,
 		"roads": _roads_mesh,
-		"debug": _debug_road_mesh,
 	}
 
 func get_settlement_layer() -> SettlementLayer:

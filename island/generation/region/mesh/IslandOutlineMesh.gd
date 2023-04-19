@@ -1,39 +1,33 @@
 class_name IslandOutlineMesh
 extends ArrayMesh
+"""
+Line mesh for outline of the island region
+"""
 
 var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer
-var _material_lib: MaterialLib
 var _island_outline_layer: IslandOutlineLayer
 
 func _init(
-	tri_cell_layer: TriCellLayer, region_cell_layer: RegionCellLayer, island_outline_layer: IslandOutlineLayer, material_lib: MaterialLib
+	tri_cell_layer: TriCellLayer,
+	regional_cell_layer: RegionCellLayer,
+	island_outline_layer: IslandOutlineLayer,
 ) -> void:
 	_tri_cell_layer = tri_cell_layer
-	_region_cell_layer = region_cell_layer
+	_region_cell_layer = regional_cell_layer
 	_island_outline_layer = island_outline_layer
-	_material_lib = material_lib
 
 func perform() -> void:
-	var sub_surface_tool: SurfaceTool = SurfaceTool.new()
-	var ground_surface_tool: SurfaceTool = SurfaceTool.new()
-	sub_surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	ground_surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	sub_surface_tool.set_material(_material_lib.get_material("sub_water"))
-	ground_surface_tool.set_material(_material_lib.get_material("ground"))
+	var surface_tool: SurfaceTool = SurfaceTool.new()
+	surface_tool.begin(Mesh.PRIMITIVE_LINES)
 	
-	for cell_index in range(_tri_cell_layer.get_total_cell_count()):
-		var surface_tool = sub_surface_tool
-		
-		var region_index = _region_cell_layer.get_region_index_for_cell(cell_index)
-		if region_index == _island_outline_layer.get_island_region_index():
-			surface_tool = ground_surface_tool
-		
-		var triangle_vertices = _tri_cell_layer.get_triangle_as_vector3_array_for_index(cell_index)
-		for vertex in triangle_vertices:
-			surface_tool.add_vertex(vertex)
+	var island_ind: int = _island_outline_layer.get_island_region_index()
+	var point_indices: PackedInt32Array = _region_cell_layer.get_outer_perimeter_point_indices(island_ind)
+	var point_connections: Dictionary = _region_cell_layer.get_valid_adjacent_point_indices_from_list(point_indices)
 	
-	sub_surface_tool.generate_normals()
-	ground_surface_tool.generate_normals()
-	sub_surface_tool.commit(self)
-	ground_surface_tool.commit(self)
+	for point_index in point_indices:
+		for other_point_index in point_connections[point_index]:
+			surface_tool.add_vertex(_tri_cell_layer.get_point_as_vector3(point_index, 0.05))
+			surface_tool.add_vertex(_tri_cell_layer.get_point_as_vector3(other_point_index, 0.05))
+
+	surface_tool.commit(self)

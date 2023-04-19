@@ -21,6 +21,7 @@ func perform() -> void:
 	var start_triangle_index = _region_cell_layer.get_middle_triangle_index()
 	_region_cell_layer.add_cell_to_subregion_front(start_triangle_index, _island_region_index)
 	_expand_region_up_to_cell_count()
+	_region_cell_layer.identify_perimeter_points_for_region(_island_region_index)
 
 func get_island_region_index() -> int:
 	return _island_region_index
