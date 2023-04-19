@@ -82,7 +82,10 @@ func _process(delta: float) -> void:
 	_changes_pending = false
 
 func get_height_at_xz(xz: Vector2) -> float:
-	return 10.0
+	if _terrain_manager:
+		return _terrain_manager.get_height_at_xz(xz)
+	else:
+		return 0.0
 
 func _tool_execute(_delta: float) -> void:
 	for mesh_name in _mesh_instance_dict.keys().duplicate():

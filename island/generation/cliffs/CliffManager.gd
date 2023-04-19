@@ -78,3 +78,6 @@ func get_mesh_dict() -> Dictionary:
 		"cliff_debug": _cliff_line_mesh,
 		"terrain": _cliff_terrain_mesh,
 	}
+
+func get_cliff_layer() -> CliffLayer:
+	return _cliff_layer
