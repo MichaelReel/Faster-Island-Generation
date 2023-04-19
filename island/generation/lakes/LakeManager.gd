@@ -6,6 +6,7 @@ var _outline_manager: OutlineManager
 var _region_divide_layer: RegionDivideLayer
 var _lake_layer: LakeLayer
 var _lake_debug_mesh: LakeDebugMesh
+var _lake_outline_mesh: LakeOutlineMesh
 var _rng := RandomNumberGenerator.new()
 
 func _init(
@@ -24,30 +25,38 @@ func _init(
 		_grid_manager.get_tri_cell_layer(),
 		_outline_manager.get_region_cell_layer(),
 		_outline_manager.get_island_outline_layer(),
-		lake_regions, _rng.randi()
+		lake_regions, _rng.randi(),
 	)
 	_lake_layer = LakeLayer.new(
 		_grid_manager.get_tri_cell_layer(),
 		_outline_manager.get_region_cell_layer(),
 		_region_divide_layer,
 		lakes_per_region,
-		_rng.randi())
+		_rng.randi(),
+	)
 	_lake_debug_mesh = LakeDebugMesh.new(
 		_grid_manager.get_tri_cell_layer(),
 		_outline_manager.get_region_cell_layer(),
 		_outline_manager.get_island_outline_layer(),
 		_region_divide_layer.get_region_indices(),
 		_lake_layer.get_lake_region_indices(),
-		material_lib
+		material_lib,
+	)
+	_lake_outline_mesh = LakeOutlineMesh.new(
+		_grid_manager.get_tri_cell_layer(),
+		_outline_manager.get_region_cell_layer(),
+		_lake_layer
 	)
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
 	_region_divide_layer.perform()
-	emit_signal("percent_complete", self, 33.3)
+	emit_signal("percent_complete", self, 25.0)
 	_lake_layer.perform()
-	emit_signal("percent_complete", self, 66.6)
+	emit_signal("percent_complete", self, 50.0)
 	_lake_debug_mesh.perform()
+	emit_signal("percent_complete", self, 75.0)
+	_lake_outline_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -61,5 +70,6 @@ func get_lake_layer() -> LakeLayer:
 
 func get_mesh_dict() -> Dictionary:
 	return {
-		"terrain": _lake_debug_mesh
+		"terrain": _lake_debug_mesh,
+		"lake_outlines": _lake_outline_mesh,
 	}
