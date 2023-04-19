@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://dw0quuf6nbjos"]
+
+[ext_resource type="Script" path="res://marker/MarkerPin.gd" id="1_c6rxp"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_vjf1m"]
+bottom_radius = 0.0
+height = 1.0
+radial_segments = 8
+rings = 1
+
+[node name="MarkerPin" type="Node3D"]
+script = ExtResource("1_c6rxp")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+mesh = SubResource("CylinderMesh_vjf1m")

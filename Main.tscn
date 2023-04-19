@@ -1,7 +1,8 @@
-[gd_scene load_steps=13 format=3 uid="uid://ti6hvbnvt6l7"]
+[gd_scene load_steps=14 format=3 uid="uid://ti6hvbnvt6l7"]
 
 [ext_resource type="PackedScene" uid="uid://qyqjsv6gy5sa" path="res://island/GeneratedIsland.tscn" id="1_77t7i"]
 [ext_resource type="PackedScene" uid="uid://dux6616n2uxn" path="res://camera/FlyingCameraControl.tscn" id="2_gt1th"]
+[ext_resource type="PackedScene" uid="uid://dw0quuf6nbjos" path="res://marker/MarkerPin.tscn" id="3_878kg"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sj2kk"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -65,5 +66,9 @@ visible = false
 
 [node name="FlyingCameraControl" parent="." instance=ExtResource("2_gt1th")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 30)
+
+[node name="MarkerPin" parent="." node_paths=PackedStringArray("data_source") instance=ExtResource("3_878kg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.11025, 0)
+data_source = NodePath("../GeneratedIsland")
 
 [editable path="GeneratedIsland"]
