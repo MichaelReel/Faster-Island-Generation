@@ -121,7 +121,7 @@ func _get_cell_vector2i_surrounding_xz(xz: Vector2) -> Vector2i:
 	var internal_xz = xz + _point_layer.get_mesh_center_xz()
 	
 	var row : int = int(floor(internal_xz.y / _tri_height))
-	if row > 0 and row < _tri_rows:
+	if row >= 0 and row < _tri_rows:
 		var even_row: bool = row % 2 == 0
 		# col is trickier than row as it relies on both x and z
 		var col := int(floor(internal_xz.x / (_tri_side * 0.5)))
@@ -139,7 +139,7 @@ func _get_cell_vector2i_surrounding_xz(xz: Vector2) -> Vector2i:
 		else:
 			if scaled_y < (1.0 - scaled_x):
 				col -= 1
-		if col > 0 and col < _tri_per_row:
+		if col >= 0 and col < _tri_per_row:
 			return Vector2i(col, row)
 	return Vector2i(-1,-1)
 
