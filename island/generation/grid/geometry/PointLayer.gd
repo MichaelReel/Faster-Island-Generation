@@ -40,8 +40,40 @@ func perform() -> void:
 	for point_index in range(len(_grid_points)):
 		_connected_point_indices_by_point_index.append(_get_connected_point_indices_by_point_index(point_index))
 
+func get_mesh_center_xz() -> Vector2:
+	return _mesh_center
+
+func get_point_index_for_vector2i(vector: Vector2i) -> int:
+	return vector.x + (vector.y * _points_per_row)
+
+func get_point_for_index(index: int) -> Vector2:
+	return _grid_points[index]
+
+func get_points_per_row() -> int:
+	return _points_per_row
+
+func get_row_count() -> int:
+	return _point_rows
+
+func get_total_point_count() -> int:
+	return len(_grid_points)
+
 func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt32Array:
 	return _connected_point_indices_by_point_index[point_index]
+
+func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt32Array) -> Dictionary:
+	# -> Dictionary[int, PackedInt32Array]
+	"""Create a dictionary of each point in point_indices to each other adjacent point in point_indices"""
+	
+	var point_index_to_connects_in_list: Dictionary = {}  # Dictionary[int, PackedInt32Array]
+	for point_index in point_indices:
+		point_index_to_connects_in_list[point_index] = PackedInt32Array()
+		var directions: PackedInt32Array = _connected_point_indices_by_point_index[point_index]
+		for direction in directions:
+			if direction in point_indices:
+				point_index_to_connects_in_list[point_index].append(direction)
+	
+	return point_index_to_connects_in_list
 
 func _get_connected_point_indices_by_point_index(point_index: int) -> PackedInt32Array:
 	"""
@@ -60,8 +92,8 @@ func _get_connected_point_indices_by_point_index(point_index: int) -> PackedInt3
 	#      |   \  /  \  /  \  /  \  /
 	#  3   |   0\/___1\/___2\/___3\/
 	
-	var point_coords: Vector2i = get_vector2i_for_point_index(point_index)
-	var point_grid_dimensions: Vector2i = get_point_grid_dimensions()
+	var point_coords: Vector2i = _get_vector2i_for_point_index(point_index)
+	var point_grid_dimensions: Vector2i = _get_point_grid_dimensions()
 	var neighbours: PackedInt32Array = []
 	
 	# Include point to the left, if there is one
@@ -88,40 +120,8 @@ func _get_connected_point_indices_by_point_index(point_index: int) -> PackedInt3
 	
 	return neighbours
 
-func get_point_index_for_vector2i(vector: Vector2i) -> int:
-	return vector.x + (vector.y * _points_per_row)
-
-func get_point_for_index(index: int) -> Vector2:
-	return _grid_points[index]
-
-func get_point_for_vector2i(vector: Vector2i) -> Vector2:
-	return get_point_for_index(get_point_index_for_vector2i(vector))
-
-func get_vector2i_for_point_index(index: int) -> Vector2i:
-	return Vector2i(index % _points_per_row, index / _points_per_row)
-
-func get_points_per_row() -> int:
-	return _points_per_row
-
-func get_row_count() -> int:
-	return _point_rows
-
-func get_point_grid_dimensions() -> Vector2i:
+func _get_point_grid_dimensions() -> Vector2i:
 	return Vector2i(_points_per_row, _point_rows)
 
-func get_total_point_count() -> int:
-	return len(_grid_points)
-
-func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt32Array) -> Dictionary:
-	# -> Dictionary[int, PackedInt32Array]
-	"""Create a dictionary of each point in point_indices to each other adjacent point in point_indices"""
-	
-	var point_index_to_connects_in_list: Dictionary = {}  # Dictionary[int, PackedInt32Array]
-	for point_index in point_indices:
-		point_index_to_connects_in_list[point_index] = PackedInt32Array()
-		var directions: PackedInt32Array = _connected_point_indices_by_point_index[point_index]
-		for direction in directions:
-			if direction in point_indices:
-				point_index_to_connects_in_list[point_index].append(direction)
-	
-	return point_index_to_connects_in_list
+func _get_vector2i_for_point_index(index: int) -> Vector2i:
+	return Vector2i(index % _points_per_row, index / _points_per_row)

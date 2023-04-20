@@ -2,6 +2,8 @@ class_name TriCellLayer
 extends Object
 
 var _point_layer: PointLayer
+var _tri_side: float
+var _tri_height: float
 var _tri_per_row: int
 var _tri_rows: int
 var _cells: Array[PackedInt32Array] = []
@@ -9,8 +11,10 @@ var _edge_neighbour_indices: Array[PackedInt32Array] = []  # Links to neighbour 
 var _corner_neighbours_indices: Array[PackedInt32Array] = []  # Links to touching cells by index
 var _tris_using_point_by_index: Array[PackedInt32Array] = []  # Cells touching a given point
 
-func _init(point_layer: PointLayer) -> void:
+func _init(point_layer: PointLayer, tri_side: float) -> void:
 	_point_layer = point_layer
+	_tri_side = tri_side
+	_tri_height = sqrt(0.75) * _tri_side
 
 func perform() -> void:
 	"""Reference the point indices and create triangles"""
@@ -39,18 +43,14 @@ func get_triangles_using_point_by_index(point_index: int) -> PackedInt32Array:
 
 func get_triangles_as_vector3_arrays() -> Array:
 	"""Return each triangle as an array of 3d vectors for surface creation"""
-	var vec3_array: Array = _cells.map(get_points_as_vector3_array_for_point_indices)
+	var vec3_array: Array = _cells.map(_get_points_as_vector3_array_for_point_indices)
 	return vec3_array
 
 func get_triangle_as_vector3_array_for_index(triangle_index: int) -> PackedVector3Array:
 	"""Return the points of triangle, by index, as an array of 3d vectors"""
-	return get_points_as_vector3_array_for_point_indices(
+	return _get_points_as_vector3_array_for_point_indices(
 		get_triangle_as_point_indices(triangle_index)
 	)
-
-func get_points_as_vector3_array_for_point_indices(point_indices: PackedInt32Array) -> PackedVector3Array:
-	"""Return an array from a list of point indices as an array of 3d vectors"""
-	return PackedVector3Array(Array(point_indices).map(get_point_as_vector3))
 
 func get_point_as_vector3(point_index: int, height: float = 0) -> Vector3:
 	var vec2d: Vector2 = _point_layer.get_point_for_index(point_index)
@@ -61,6 +61,31 @@ func get_tri_cell_index_for_vector2i(vector: Vector2i) -> int:
 
 func get_tri_cell_vector2i_for_index(index: int) -> Vector2i:
 	return Vector2i(index % _tri_per_row, index / _tri_per_row)
+
+func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt32Array:
+	return _point_layer.get_connected_point_indices_by_point_index(point_index)
+
+func get_total_point_count() -> int:
+	return _point_layer.get_total_point_count()
+
+func get_total_cell_count() -> int:
+	return len(_cells)
+
+func get_triangles_grid_dimensions() -> Vector2i:
+	return Vector2i(_tri_per_row, _tri_rows)
+
+func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt32Array) -> Dictionary:
+	# -> Dictionary[int, PackedInt32Array]
+	return _point_layer.get_valid_adjacent_point_indices_from_list(point_indices)
+	
+func get_edge_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
+	return _edge_neighbour_indices[cell_ind]
+
+func get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
+	return _corner_neighbours_indices[cell_ind]
+
+func get_cell_index_at_xz_position(xz: Vector2) -> int:
+	return get_tri_cell_index_for_vector2i(_get_cell_vector2i_surrounding_xz(xz))
 
 func get_tri_cell_horizontal_border(vector: Vector2i) -> int:
 	"""This indicates the side of the triangle which is a flat edge connection to another row
@@ -87,7 +112,36 @@ func get_rotation_direction_around_cell(point_ind_a: int, point_ind_b: int, cell
 	if ordered_points_in_the_cell[(index_a_in_order + 2) % 3] == point_ind_b:
 		return -1
 	return 0
+
+func _get_points_as_vector3_array_for_point_indices(point_indices: PackedInt32Array) -> PackedVector3Array:
+	"""Return an array from a list of point indices as an array of 3d vectors"""
+	return PackedVector3Array(Array(point_indices).map(get_point_as_vector3))
+
+func _get_cell_vector2i_surrounding_xz(xz: Vector2) -> Vector2i:
+	var internal_xz = xz + _point_layer.get_mesh_center_xz()
 	
+	var row : int = int(floor(internal_xz.y / _tri_height))
+	if row > 0 and row < _tri_rows:
+		var even_row: bool = row % 2 == 0
+		# col is trickier than row as it relies on both x and z
+		var col := int(floor(internal_xz.x / (_tri_side * 0.5)))
+		var even_raw_col: bool = col % 2 == 0
+		# Get internal positions in row and raw_col
+		var y_in_row: float = internal_xz.y - (row * _tri_height)
+		var x_in_raw_col: float = internal_xz.x - (col * 0.5 * _tri_side)
+		# Get scaled position of point in the row and raw_col
+		var scaled_y: float = y_in_row / _tri_height
+		var scaled_x: float = x_in_raw_col / (0.5 * _tri_side)
+		# Modify col depending on polarity
+		if even_row == even_raw_col:
+			if scaled_y > scaled_x:
+				col -= 1
+		else:
+			if scaled_y < (1.0 - scaled_x):
+				col -= 1
+		if col > 0 and col < _tri_per_row:
+			return Vector2i(col, row)
+	return Vector2i(-1,-1)
 
 func _create_tri_cell(vector: Vector2i) -> PackedInt32Array:
 	var row: int = vector.y
@@ -118,21 +172,6 @@ func _create_tri_cell(vector: Vector2i) -> PackedInt32Array:
 func _point_index(vector: Vector2i) -> int:
 	return _point_layer.get_point_index_for_vector2i(vector)
 
-func get_connected_point_indices_by_point_index(point_index: int) -> PackedInt32Array:
-	return _point_layer.get_connected_point_indices_by_point_index(point_index)
-
-func get_total_point_count() -> int:
-	return _point_layer.get_total_point_count()
-
-func get_total_cell_count() -> int:
-	return len(_cells)
-
-func get_triangles_grid_dimensions() -> Vector2i:
-	return Vector2i(_tri_per_row, _tri_rows)
-
-func get_edge_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
-	return _edge_neighbour_indices[cell_ind]
-
 func _get_edge_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
 	"""
 	Return the immediate, edge sharing, neighbours for a given cell
@@ -159,9 +198,6 @@ func _get_edge_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
 		neighbours.append(get_tri_cell_index_for_vector2i(tri_cell_coords + Vector2i(0, inter_row_dir)))
 	
 	return neighbours
-
-func get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
-	return _corner_neighbours_indices[cell_ind]
 
 func _get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
 	"""
@@ -217,7 +253,3 @@ func _get_corner_only_sharing_neighbours(cell_ind: int) -> PackedInt32Array:
 			neighbours.append(get_tri_cell_index_for_vector2i(Vector2i(x, three_cell_row)))
 	
 	return neighbours
-
-func get_valid_adjacent_point_indices_from_list(point_indices: PackedInt32Array) -> Dictionary:
-	# -> Dictionary[int, PackedInt32Array]
-	return _point_layer.get_valid_adjacent_point_indices_from_list(point_indices)

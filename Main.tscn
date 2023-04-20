@@ -69,6 +69,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 30)
 
 [node name="MarkerPin" parent="." node_paths=PackedStringArray("data_source") instance=ExtResource("3_878kg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.11025, 0)
+pin_speed = 1.0
 data_source = NodePath("../GeneratedIsland")
 
 [editable path="GeneratedIsland"]

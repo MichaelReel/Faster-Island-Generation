@@ -7,7 +7,7 @@ var _grid_mesh: GridMesh
 
 func _init(tri_side: float, points_per_row: int, material_lib: MaterialLib) -> void:
 	_point_layer = PointLayer.new(tri_side, points_per_row)
-	_tri_cell_layer = TriCellLayer.new(_point_layer)
+	_tri_cell_layer = TriCellLayer.new(_point_layer, tri_side)
 	_grid_mesh = GridMesh.new(_point_layer, _tri_cell_layer, material_lib)
 
 func perform() -> void:
