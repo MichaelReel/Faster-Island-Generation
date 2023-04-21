@@ -1,4 +1,4 @@
-class_name Outputlayer
+class_name BaseContinuityLayer
 extends Stage
 
 var readied: bool = false

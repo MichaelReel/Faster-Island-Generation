@@ -15,7 +15,7 @@ var _height_manager: HeightManager
 var _river_manager: RiverManager
 var _civil_manager: CivilManager
 var _cliff_manager: CliffManager
-var _output_layer: Outputlayer
+var _base_continuity_layer: BaseContinuityLayer
 
 func _init(
 	random_seed: int,
@@ -88,7 +88,7 @@ func _init(
 		material_lib,
 		rng.randi(),
 	)
-	_output_layer = Outputlayer.new(
+	_base_continuity_layer = BaseContinuityLayer.new(
 		_grid_manager.get_tri_cell_layer(),
 		_height_manager.get_height_layer(),
 		_cliff_manager.get_cliff_layer(),
@@ -103,7 +103,7 @@ func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgr
 		_river_manager,
 		_civil_manager,
 		_cliff_manager,
-		_output_layer,
+		_base_continuity_layer,
 	]
 	
 	for stage in stages:
@@ -117,8 +117,8 @@ func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgr
 	emit_signal("all_stages_complete")
 
 func get_height_at_xz(xz: Vector2) -> float:
-	if _output_layer:
-		return _output_layer.get_height_at_xz(xz)
+	if _base_continuity_layer:
+		return _base_continuity_layer.get_height_at_xz(xz)
 	else:
 		return 0.0
 
