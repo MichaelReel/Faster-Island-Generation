@@ -1,5 +1,10 @@
-class_name CliffLayer
 extends Object
+
+const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
+const LakeLayer = preload("../../lakes/geometry/LakeLayer.gd")
+const HeightLayer = preload("../../height/geometry/HeightLayer.gd")
+const RiverLayer = preload("../../rivers/geometry/RiverLayer.gd")
+const RoadLayer = preload("../../civil/geometry/RoadLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _lake_layer: LakeLayer
@@ -81,7 +86,7 @@ func _get_all_the_cliff_base_chains() -> void:
 		if _river_layer.cell_touches_river(cell_ind):
 			# Ignore cells with rivers
 			continue
-
+		
 		# Include the bottom edges of steep slopes
 		var lower_edge_as_point_indices: PackedInt32Array = point_indices_in_height_order.slice(0,2)
 		var edge_as_ordered_key: String = KeyUtils.get_combined_key_for_int32_array(lower_edge_as_point_indices)
@@ -96,8 +101,8 @@ func _get_all_the_cliff_base_chains() -> void:
 			_put_cliff_point_top_cell(lower_edge_as_point_indices[1], cell_ind)
 	
 	# Find all the cliff chains
-	var chains: Array[PackedInt32Array] = CliffLayer._extract_chains_from_edges(cliff_edges_keys_to_array)
-
+	var chains: Array[PackedInt32Array] = _extract_chains_from_edges(cliff_edges_keys_to_array)
+	
 	for chain in chains:
 		# Don't keep any chains that are too short to draw
 		if len(chain) <= 3:
@@ -179,14 +184,12 @@ func _record_deviations_from_height_layer() -> void:
 						_cliff_top_elevations[cliff_index][cliff_sequence_ind]
 					)
 
-static func _extract_chains_from_edges(cliff_edges_keys_to_array: Dictionary) -> Array[PackedInt32Array]: 
+func _extract_chains_from_edges(cliff_edges_keys_to_array: Dictionary) -> Array[PackedInt32Array]: 
 	# (cliff_edges_keys_to_array: Dictionary[String, PackedInt32Array])
 	"""
 	Given an dictionary of unordered Edges
 	Return an array, each element of which is an array of Edges ordered by connection.
 	"""
-	# TODO: Add to doc if: This is destructive and will leave the input dictionary empty.
-	
 	# Re-index the edges dictionary as a search dictionary of points to keys
 	var point_indices_to_edge_keys: Dictionary = {}  # Dictionary[int, Array[String]]
 	var all_edge_keys: Array = cliff_edges_keys_to_array.keys().duplicate()  # Array[String]

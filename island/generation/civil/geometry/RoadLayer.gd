@@ -1,5 +1,11 @@
-class_name RoadLayer
 extends Object
+
+const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
+const RegionCellLayer = preload("../../region/geometry/RegionCellLayer.gd")
+const LakeLayer = preload("../../lakes/geometry/LakeLayer.gd")
+const HeightLayer = preload("../../height/geometry/HeightLayer.gd")
+const RiverLayer = preload("../../rivers/geometry/RiverLayer.gd")
+const SettlementLayer = preload("../geometry/SettlementLayer.gd")
 
 const _NORMAL_COST: float = 1.0
 

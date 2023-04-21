@@ -1,6 +1,11 @@
 class_name LakeManager
 extends Stage
 
+const RegionDivideLayer = preload("geometry/RegionDivideLayer.gd")
+const LakeLayer = preload("geometry/LakeLayer.gd")
+const LakeDebugMesh = preload("mesh/LakeDebugMesh.gd")
+const LakeOutlineMesh = preload("mesh/LakeOutlineMesh.gd")
+
 var _grid_manager: GridManager
 var _outline_manager: OutlineManager
 var _region_divide_layer: RegionDivideLayer

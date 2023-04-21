@@ -1,5 +1,9 @@
-class_name HeightLayer
 extends Object
+
+const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
+const IslandOutlineLayer = preload("../../region/geometry/IslandOutlineLayer.gd")
+const RegionCellLayer = preload("../../region/geometry/RegionCellLayer.gd")
+const LakeLayer = preload("../../lakes/geometry/LakeLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer

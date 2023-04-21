@@ -1,6 +1,9 @@
 class_name HeightManager
 extends Stage
 
+const HeightLayer = preload("geometry/HeightLayer.gd")
+const HeightMesh = preload("mesh/HeightMesh.gd")
+
 var _grid_manager: GridManager
 var _outline_manager: OutlineManager
 var _lake_manager: LakeManager

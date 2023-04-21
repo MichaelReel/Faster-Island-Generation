@@ -1,6 +1,11 @@
 class_name RiverManager
 extends Stage
 
+const HeightMesh = preload("../height/mesh/HeightMesh.gd")
+const RiverLayer = preload("geometry/RiverLayer.gd")
+const WaterMesh = preload("mesh/WaterMesh.gd")
+const DebugRiverMesh = preload("mesh/DebugRiverMesh.gd")
+
 var _grid_manager: GridManager
 var _outline_manager: OutlineManager
 var _lake_manager: LakeManager
@@ -52,7 +57,6 @@ func _init(
 	)
 	_debug_mesh = DebugRiverMesh.new(
 		_grid_manager.get_tri_cell_layer(),
-		_outline_manager.get_region_cell_layer(),
 		_height_manager.get_height_layer(),
 		_river_layer
 	)

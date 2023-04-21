@@ -1,5 +1,10 @@
-class_name RiverLayer
 extends Object
+
+const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
+const RegionCellLayer = preload("../../region/geometry/RegionCellLayer.gd")
+const LakeLayer = preload("../../lakes/geometry/LakeLayer.gd")
+const HeightLayer = preload("../../height/geometry/HeightLayer.gd")
+const River = preload("River.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer

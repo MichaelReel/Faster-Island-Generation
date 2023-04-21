@@ -1,6 +1,11 @@
 class_name CivilManager
 extends Stage
 
+const SettlementLayer = preload("geometry/SettlementLayer.gd")
+const RoadLayer = preload("geometry/RoadLayer.gd")
+const SettlementsMesh = preload("mesh/SettlementsMesh.gd")
+const RoadsMesh = preload("mesh/RoadsMesh.gd")
+
 var _grid_manager: GridManager
 var _outline_manager: OutlineManager
 var _lake_manager: LakeManager

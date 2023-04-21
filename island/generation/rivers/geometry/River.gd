@@ -1,4 +1,3 @@
-class_name River
 extends Object
 """
 This is just a data structure for specific river data

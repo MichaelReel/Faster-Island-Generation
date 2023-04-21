@@ -4,6 +4,8 @@ extends Object
 This is the primary interface for generating a terrain and returning the generated features.
 """
 
+const BaseContinuityLayer = preload("continuous/geometry/BaseContinuityLayer.gd")
+
 signal stage_percent_complete(stage, percent)
 signal stage_complete(stage, duration_us)
 signal all_stages_complete()
@@ -90,7 +92,6 @@ func _init(
 	)
 	_base_continuity_layer = BaseContinuityLayer.new(
 		_grid_manager.get_tri_cell_layer(),
-		_height_manager.get_height_layer(),
 		_cliff_manager.get_cliff_layer(),
 	)
 

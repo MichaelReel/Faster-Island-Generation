@@ -1,4 +1,3 @@
-class_name Region
 extends Object
 """
 This is just a data structure for specific region data

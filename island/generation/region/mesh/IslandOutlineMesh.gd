@@ -1,8 +1,11 @@
-class_name IslandOutlineMesh
 extends ArrayMesh
 """
 Line mesh for outline of the island region
 """
+
+const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
+const IslandOutlineLayer = preload("../geometry/IslandOutlineLayer.gd")
+const RegionCellLayer = preload("../geometry/RegionCellLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer

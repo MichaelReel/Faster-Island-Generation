@@ -1,4 +1,3 @@
-class_name PointLayer
 extends Object
 
 var _tri_side: float

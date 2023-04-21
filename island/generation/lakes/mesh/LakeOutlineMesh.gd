@@ -1,8 +1,11 @@
-class_name LakeOutlineMesh
 extends ArrayMesh
 """
 Line mesh for base outline of lakes
 """
+
+const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
+const RegionCellLayer = preload("../../region/geometry/RegionCellLayer.gd")
+const LakeLayer = preload("../geometry/LakeLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer

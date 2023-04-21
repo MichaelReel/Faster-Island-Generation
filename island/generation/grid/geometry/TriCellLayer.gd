@@ -1,5 +1,6 @@
-class_name TriCellLayer
 extends Object
+
+const PointLayer = preload("PointLayer.gd")
 
 var _point_layer: PointLayer
 var _tri_side: float

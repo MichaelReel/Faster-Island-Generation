@@ -1,6 +1,10 @@
 class_name CliffManager
 extends Stage
 
+const CliffLayer = preload("geometry/CliffLayer.gd")
+const CliffLineMesh = preload("mesh/CliffLineMesh.gd")
+const CliffTerrainMesh = preload("mesh/CliffTerrainMesh.gd")
+
 var _grid_manager: GridManager
 var _outline_manager: OutlineManager
 var _lake_manager: LakeManager
@@ -46,7 +50,6 @@ func _init(
 	
 	_cliff_line_mesh = CliffLineMesh.new(
 		_grid_manager.get_tri_cell_layer(),
-		_height_manager.get_height_layer(),
 		_cliff_layer
 	)
 	

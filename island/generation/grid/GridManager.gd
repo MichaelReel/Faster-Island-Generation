@@ -1,6 +1,10 @@
 class_name GridManager
 extends Stage
 
+const PointLayer = preload("geometry/PointLayer.gd")
+const TriCellLayer = preload("geometry/TriCellLayer.gd")
+const GridMesh = preload("mesh/GridMesh.gd")
+
 var _point_layer: PointLayer
 var _tri_cell_layer: TriCellLayer
 var _grid_mesh: GridMesh

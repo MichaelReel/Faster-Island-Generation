@@ -1,22 +1,22 @@
-class_name DebugRiverMesh
 extends ArrayMesh
 """
 Mesh for height map portion of the island generation
 """
 
+const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
+const HeightLayer = preload("../../height/geometry/HeightLayer.gd")
+const RiverLayer = preload("../geometry/RiverLayer.gd")
+
 var _tri_cell_layer: TriCellLayer
-var _region_cell_layer: RegionCellLayer
 var _height_layer: HeightLayer
 var _river_layer: RiverLayer
 
 func _init(
 	tri_cell_layer: TriCellLayer,
-	regional_cell_layer: RegionCellLayer,
 	height_layer: HeightLayer,
 	river_layer: RiverLayer,
 ) -> void:
 	_tri_cell_layer = tri_cell_layer
-	_region_cell_layer = regional_cell_layer
 	_height_layer = height_layer
 	_river_layer = river_layer
 

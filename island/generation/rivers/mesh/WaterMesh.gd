@@ -1,8 +1,13 @@
-class_name WaterMesh
 extends ArrayMesh
 """
 Mesh for height map portion of the island generation
 """
+
+const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
+const RegionCellLayer = preload("../../region/geometry/RegionCellLayer.gd")
+const LakeLayer = preload("../../lakes/geometry/LakeLayer.gd")
+const HeightLayer = preload("../../height/geometry/HeightLayer.gd")
+const RiverLayer = preload("../geometry/RiverLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer

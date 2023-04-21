@@ -1,5 +1,8 @@
-class_name LakeLayer
 extends Object
+
+const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
+const RegionCellLayer = preload("../../region/geometry/RegionCellLayer.gd")
+const RegionDivideLayer = preload("RegionDivideLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _region_divide_layer: RegionDivideLayer

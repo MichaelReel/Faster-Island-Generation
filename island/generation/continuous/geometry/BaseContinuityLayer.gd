@@ -1,19 +1,18 @@
-class_name BaseContinuityLayer
 extends Stage
+
+const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
+const CliffLayer = preload("../../cliffs/geometry/CliffLayer.gd")
 
 var readied: bool = false
 
 var _tri_cell_layer: TriCellLayer
-var _height_layer: HeightLayer
 var _cliff_layer: CliffLayer
 
 func _init(
 	tri_cell_layer: TriCellLayer,
-	height_layer: HeightLayer,
 	cliff_layer: CliffLayer,
 ) -> void:
 	_tri_cell_layer = tri_cell_layer
-	_height_layer = height_layer
 	_cliff_layer = cliff_layer
 
 func perform() -> void:
