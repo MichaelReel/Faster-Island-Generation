@@ -1,7 +1,7 @@
 extends Object
 
-const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
-const Region = preload("Region.gd")
+const TriCellLayer: GDScript = preload("../../grid/geometry/TriCellLayer.gd")
+const Region: GDScript = preload("Region.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _region_index_by_cell_index: PackedInt32Array = []  # Link from a cell to it's parent reference index

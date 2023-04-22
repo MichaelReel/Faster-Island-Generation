@@ -1,7 +1,7 @@
 extends ArrayMesh
 
-const PointLayer = preload("../geometry/PointLayer.gd")
-const TriCellLayer = preload("../geometry/TriCellLayer.gd")
+const PointLayer: GDScript = preload("../geometry/PointLayer.gd")
+const TriCellLayer: GDScript = preload("../geometry/TriCellLayer.gd")
 
 var _point_layer: PointLayer
 var _tri_cell_layer: TriCellLayer

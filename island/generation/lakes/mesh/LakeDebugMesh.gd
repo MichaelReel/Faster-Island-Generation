@@ -3,9 +3,9 @@ extends ArrayMesh
 Mesh for debugging the region and lake portion of the island generation
 """
 
-const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
-const IslandOutlineLayer = preload("../../region/geometry/IslandOutlineLayer.gd")
-const RegionCellLayer = preload("../../region/geometry/RegionCellLayer.gd")
+const TriCellLayer: GDScript = preload("../../grid/geometry/TriCellLayer.gd")
+const IslandOutlineLayer: GDScript = preload("../../region/geometry/IslandOutlineLayer.gd")
+const RegionCellLayer: GDScript = preload("../../region/geometry/RegionCellLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer

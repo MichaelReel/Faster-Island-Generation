@@ -1,13 +1,14 @@
-class_name LakeManager
 extends Stage
 
-const RegionDivideLayer = preload("geometry/RegionDivideLayer.gd")
-const LakeLayer = preload("geometry/LakeLayer.gd")
-const LakeDebugMesh = preload("mesh/LakeDebugMesh.gd")
-const LakeOutlineMesh = preload("mesh/LakeOutlineMesh.gd")
+const GridManager: GDScript = preload("../grid/GridManager.gd")
+const RegionManager: GDScript = preload("../region/RegionManager.gd")
+const RegionDivideLayer: GDScript = preload("geometry/RegionDivideLayer.gd")
+const LakeLayer: GDScript = preload("geometry/LakeLayer.gd")
+const LakeDebugMesh: GDScript = preload("mesh/LakeDebugMesh.gd")
+const LakeOutlineMesh: GDScript = preload("mesh/LakeOutlineMesh.gd")
 
 var _grid_manager: GridManager
-var _outline_manager: OutlineManager
+var _region_manager: RegionManager
 var _region_divide_layer: RegionDivideLayer
 var _lake_layer: LakeLayer
 var _lake_debug_mesh: LakeDebugMesh
@@ -16,40 +17,40 @@ var _rng := RandomNumberGenerator.new()
 
 func _init(
 	grid_manager: GridManager,
-	outline_manager: OutlineManager,
+	outline_manager: RegionManager,
 	lake_regions: int, 
 	lakes_per_region: int,
 	material_lib: MaterialLib,
 	rng_seed: int
 ) -> void:
 	_grid_manager = grid_manager
-	_outline_manager = outline_manager
+	_region_manager = outline_manager
 	_rng.seed = rng_seed
 	
 	_region_divide_layer = RegionDivideLayer.new(
 		_grid_manager.get_tri_cell_layer(),
-		_outline_manager.get_region_cell_layer(),
-		_outline_manager.get_island_outline_layer(),
+		_region_manager.get_region_cell_layer(),
+		_region_manager.get_island_outline_layer(),
 		lake_regions, _rng.randi(),
 	)
 	_lake_layer = LakeLayer.new(
 		_grid_manager.get_tri_cell_layer(),
-		_outline_manager.get_region_cell_layer(),
+		_region_manager.get_region_cell_layer(),
 		_region_divide_layer,
 		lakes_per_region,
 		_rng.randi(),
 	)
 	_lake_debug_mesh = LakeDebugMesh.new(
 		_grid_manager.get_tri_cell_layer(),
-		_outline_manager.get_region_cell_layer(),
-		_outline_manager.get_island_outline_layer(),
+		_region_manager.get_region_cell_layer(),
+		_region_manager.get_island_outline_layer(),
 		_region_divide_layer.get_region_indices(),
 		_lake_layer.get_lake_region_indices(),
 		material_lib,
 	)
 	_lake_outline_mesh = LakeOutlineMesh.new(
 		_grid_manager.get_tri_cell_layer(),
-		_outline_manager.get_region_cell_layer(),
+		_region_manager.get_region_cell_layer(),
 		_lake_layer
 	)
 

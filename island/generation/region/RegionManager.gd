@@ -1,10 +1,10 @@
-class_name OutlineManager
 extends Stage
 
-const IslandOutlineLayer = preload("geometry/IslandOutlineLayer.gd")
-const RegionCellLayer = preload("geometry/RegionCellLayer.gd")
-const IslandDebugMesh = preload("mesh/IslandDebugMesh.gd")
-const IslandOutlineMesh = preload("mesh/IslandOutlineMesh.gd")
+const GridManager: GDScript = preload("../grid/GridManager.gd")
+const IslandOutlineLayer: GDScript = preload("geometry/IslandOutlineLayer.gd")
+const RegionCellLayer: GDScript = preload("geometry/RegionCellLayer.gd")
+const IslandDebugMesh: GDScript = preload("mesh/IslandDebugMesh.gd")
+const IslandOutlineMesh: GDScript = preload("mesh/IslandOutlineMesh.gd")
 
 var _grid_manager: GridManager
 var _island_cell_limit: int

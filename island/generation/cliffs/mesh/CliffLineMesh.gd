@@ -3,8 +3,8 @@ extends ArrayMesh
 Mesh for height map portion of the island generation
 """
 
-const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
-const CliffLayer = preload("../geometry/CliffLayer.gd")
+const TriCellLayer: GDScript = preload("../../grid/geometry/TriCellLayer.gd")
+const CliffLayer: GDScript = preload("../geometry/CliffLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _cliff_layer: CliffLayer

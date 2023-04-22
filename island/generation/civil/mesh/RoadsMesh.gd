@@ -1,8 +1,8 @@
 extends ArrayMesh
 
-const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
-const HeightLayer = preload("../../height/geometry/HeightLayer.gd")
-const RoadLayer = preload("../geometry/RoadLayer.gd")
+const TriCellLayer: GDScript = preload("../../grid/geometry/TriCellLayer.gd")
+const HeightLayer: GDScript = preload("../../height/geometry/HeightLayer.gd")
+const RoadLayer: GDScript = preload("../geometry/RoadLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _height_layer: HeightLayer

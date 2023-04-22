@@ -1,10 +1,10 @@
 extends Object
 
-const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
-const LakeLayer = preload("../../lakes/geometry/LakeLayer.gd")
-const HeightLayer = preload("../../height/geometry/HeightLayer.gd")
-const RiverLayer = preload("../../rivers/geometry/RiverLayer.gd")
-const RoadLayer = preload("../../civil/geometry/RoadLayer.gd")
+const TriCellLayer: GDScript = preload("../../grid/geometry/TriCellLayer.gd")
+const LakeLayer: GDScript = preload("../../lakes/geometry/LakeLayer.gd")
+const HeightLayer: GDScript = preload("../../height/geometry/HeightLayer.gd")
+const RiverLayer: GDScript = preload("../../rivers/geometry/RiverLayer.gd")
+const RoadLayer: GDScript = preload("../../civil/geometry/RoadLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _lake_layer: LakeLayer

@@ -1,8 +1,8 @@
 extends Object
 
-const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
-const IslandOutlineLayer = preload("../../region/geometry/IslandOutlineLayer.gd")
-const RegionCellLayer = preload("../../region/geometry/RegionCellLayer.gd")
+const TriCellLayer: GDScript = preload("../../grid/geometry/TriCellLayer.gd")
+const IslandOutlineLayer: GDScript = preload("../../region/geometry/IslandOutlineLayer.gd")
+const RegionCellLayer: GDScript = preload("../../region/geometry/RegionCellLayer.gd")
 
 var _lake_regions: int
 var _tri_cell_layer: TriCellLayer

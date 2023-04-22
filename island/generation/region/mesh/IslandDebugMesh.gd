@@ -1,8 +1,8 @@
 extends ArrayMesh
 
-const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
-const IslandOutlineLayer = preload("../geometry/IslandOutlineLayer.gd")
-const RegionCellLayer = preload("../geometry/RegionCellLayer.gd")
+const TriCellLayer: GDScript = preload("../../grid/geometry/TriCellLayer.gd")
+const IslandOutlineLayer: GDScript = preload("../geometry/IslandOutlineLayer.gd")
+const RegionCellLayer: GDScript = preload("../geometry/RegionCellLayer.gd")
 
 var _tri_cell_layer: TriCellLayer
 var _region_cell_layer: RegionCellLayer

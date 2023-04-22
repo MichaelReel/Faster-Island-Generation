@@ -1,12 +1,17 @@
-class_name CliffManager
 extends Stage
 
-const CliffLayer = preload("geometry/CliffLayer.gd")
-const CliffLineMesh = preload("mesh/CliffLineMesh.gd")
-const CliffTerrainMesh = preload("mesh/CliffTerrainMesh.gd")
+const GridManager: GDScript = preload("../grid/GridManager.gd")
+const RegionManager: GDScript = preload("../region/RegionManager.gd")
+const LakeManager: GDScript = preload("../lakes/LakeManager.gd")
+const HeightManager: GDScript = preload("../height/HeightManager.gd")
+const RiverManager: GDScript = preload("../rivers/RiverManager.gd")
+const CivilManager: GDScript = preload("../civil/CivilManager.gd")
+const CliffLayer: GDScript = preload("geometry/CliffLayer.gd")
+const CliffLineMesh: GDScript = preload("mesh/CliffLineMesh.gd")
+const CliffTerrainMesh: GDScript = preload("mesh/CliffTerrainMesh.gd")
 
 var _grid_manager: GridManager
-var _outline_manager: OutlineManager
+var _region_manager: RegionManager
 var _lake_manager: LakeManager
 var _height_manager: HeightManager
 var _river_manager: RiverManager
@@ -19,7 +24,7 @@ var _cliff_terrain_mesh: CliffTerrainMesh
 
 func _init(
 	grid_manager: GridManager,
-	outline_manager: OutlineManager,
+	outline_manager: RegionManager,
 	lake_manager: LakeManager,
 	height_manager: HeightManager,
 	river_manager: RiverManager,
@@ -30,7 +35,7 @@ func _init(
 	rng_seed: int,
 ) -> void:
 	_grid_manager = grid_manager
-	_outline_manager = outline_manager
+	_region_manager = outline_manager
 	_lake_manager = lake_manager
 	_height_manager = height_manager
 	_river_manager = river_manager
@@ -55,7 +60,7 @@ func _init(
 	
 	_cliff_terrain_mesh = CliffTerrainMesh.new(
 		_grid_manager.get_tri_cell_layer(),
-		_outline_manager.get_region_cell_layer(),
+		_region_manager.get_region_cell_layer(),
 		_lake_manager.get_lake_layer(),
 		_cliff_layer,
 		_material_lib,

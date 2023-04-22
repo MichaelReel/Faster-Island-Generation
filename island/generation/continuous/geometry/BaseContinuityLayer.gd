@@ -1,7 +1,7 @@
 extends Stage
 
-const TriCellLayer = preload("../../grid/geometry/TriCellLayer.gd")
-const CliffLayer = preload("../../cliffs/geometry/CliffLayer.gd")
+const TriCellLayer: GDScript = preload("../../grid/geometry/TriCellLayer.gd")
+const CliffLayer: GDScript = preload("../../cliffs/geometry/CliffLayer.gd")
 
 var readied: bool = false
 

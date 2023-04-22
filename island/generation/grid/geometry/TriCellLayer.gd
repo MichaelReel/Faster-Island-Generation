@@ -1,6 +1,6 @@
 extends Object
 
-const PointLayer = preload("PointLayer.gd")
+const PointLayer: GDScript = preload("PointLayer.gd")
 
 var _point_layer: PointLayer
 var _tri_side: float

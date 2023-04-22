@@ -4,14 +4,21 @@ extends Object
 This is the primary interface for generating a terrain and returning the generated features.
 """
 
-const BaseContinuityLayer = preload("continuous/geometry/BaseContinuityLayer.gd")
+const GridManager: GDScript = preload("grid/GridManager.gd")
+const RegionManager: GDScript = preload("region/RegionManager.gd")
+const LakeManager: GDScript = preload("lakes/LakeManager.gd")
+const HeightManager: GDScript = preload("height/HeightManager.gd")
+const RiverManager: GDScript = preload("rivers/RiverManager.gd")
+const CivilManager: GDScript = preload("civil/CivilManager.gd")
+const CliffManager: GDScript = preload("cliffs/CliffManager.gd")
+const BaseContinuityLayer: GDScript = preload("continuous/geometry/BaseContinuityLayer.gd")
 
 signal stage_percent_complete(stage, percent)
 signal stage_complete(stage, duration_us)
 signal all_stages_complete()
 
 var _grid_manager: GridManager
-var _outline_manager: OutlineManager
+var _region_manager: RegionManager
 var _lake_manager: LakeManager
 var _height_manager: HeightManager
 var _river_manager: RiverManager
@@ -41,15 +48,15 @@ func _init(
 	rng.seed = random_seed
 	var points_per_row = int(bounds_side / tri_side)
 	_grid_manager = GridManager.new(tri_side, points_per_row, material_lib)
-	_outline_manager = OutlineManager.new(
+	_region_manager = RegionManager.new(
 		_grid_manager, island_cell_limit, material_lib, rng.randi()
 	)
 	_lake_manager = LakeManager.new(
-		_grid_manager, _outline_manager, lake_regions, lakes_per_region, material_lib, rng.randi()
+		_grid_manager, _region_manager, lake_regions, lakes_per_region, material_lib, rng.randi()
 	)
 	_height_manager = HeightManager.new(
 		_grid_manager,
-		_outline_manager,
+		_region_manager,
 		_lake_manager,
 		diff_height,
 		diff_max_multi,
@@ -58,7 +65,7 @@ func _init(
 	)
 	_river_manager = RiverManager.new(
 		_grid_manager,
-		_outline_manager,
+		_region_manager,
 		_lake_manager,
 		_height_manager,
 		river_count,
@@ -68,7 +75,7 @@ func _init(
 	)
 	_civil_manager = CivilManager.new(
 		_grid_manager,
-		_outline_manager,
+		_region_manager,
 		_lake_manager,
 		_height_manager,
 		_river_manager,
@@ -80,7 +87,7 @@ func _init(
 	)
 	_cliff_manager = CliffManager.new(
 		_grid_manager,
-		_outline_manager,
+		_region_manager,
 		_lake_manager,
 		_height_manager,
 		_river_manager,
@@ -98,7 +105,7 @@ func _init(
 func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgressStep.ALL) -> void:
 	var stages: Array[Stage] = [
 		_grid_manager,
-		_outline_manager,
+		_region_manager,
 		_lake_manager,
 		_height_manager,
 		_river_manager,

@@ -1,13 +1,16 @@
-class_name RiverManager
 extends Stage
 
-const HeightMesh = preload("../height/mesh/HeightMesh.gd")
-const RiverLayer = preload("geometry/RiverLayer.gd")
-const WaterMesh = preload("mesh/WaterMesh.gd")
-const DebugRiverMesh = preload("mesh/DebugRiverMesh.gd")
+const GridManager: GDScript = preload("../grid/GridManager.gd")
+const RegionManager: GDScript = preload("../region/RegionManager.gd")
+const LakeManager: GDScript = preload("../lakes/LakeManager.gd")
+const HeightManager: GDScript = preload("../height/HeightManager.gd")
+const RiverLayer: GDScript = preload("geometry/RiverLayer.gd")
+const WaterMesh: GDScript = preload("mesh/WaterMesh.gd")
+const DebugRiverMesh: GDScript = preload("mesh/DebugRiverMesh.gd")
+const HeightMesh: GDScript = preload("../height/mesh/HeightMesh.gd")
 
 var _grid_manager: GridManager
-var _outline_manager: OutlineManager
+var _region_manager: RegionManager
 var _lake_manager: LakeManager
 var _height_manager: HeightManager
 var _river_count: int
@@ -21,7 +24,7 @@ var _eroded_height_mesh: HeightMesh
 
 func _init(
 	grid_manager: GridManager,
-	outline_manager: OutlineManager,
+	outline_manager: RegionManager,
 	lake_manager: LakeManager,
 	height_manager: HeightManager,
 	river_count: int,
@@ -30,7 +33,7 @@ func _init(
 	rng_seed: int
 ) -> void:
 	_grid_manager = grid_manager
-	_outline_manager = outline_manager
+	_region_manager = outline_manager
 	_lake_manager = lake_manager
 	_height_manager = height_manager
 	_river_count = river_count
@@ -40,7 +43,7 @@ func _init(
 	
 	_river_layer = RiverLayer.new(
 		_grid_manager.get_tri_cell_layer(),
-		_outline_manager.get_region_cell_layer(),
+		_region_manager.get_region_cell_layer(),
 		_lake_manager.get_lake_layer(),
 		_height_manager.get_height_layer(),
 		_river_count,
@@ -49,7 +52,7 @@ func _init(
 	)
 	_water_mesh = WaterMesh.new(
 		_grid_manager.get_tri_cell_layer(),
-		_outline_manager.get_region_cell_layer(),
+		_region_manager.get_region_cell_layer(),
 		_lake_manager.get_lake_layer(),
 		_height_manager.get_height_layer(),
 		_river_layer,
@@ -62,7 +65,7 @@ func _init(
 	)
 	_eroded_height_mesh = HeightMesh.new(
 		_grid_manager.get_tri_cell_layer(),
-		_outline_manager.get_region_cell_layer(),
+		_region_manager.get_region_cell_layer(),
 		_lake_manager.get_lake_layer(),
 		_height_manager.get_height_layer(),
 		material_lib
