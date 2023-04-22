@@ -11,7 +11,7 @@ const HeightManager: GDScript = preload("height/HeightManager.gd")
 const RiverManager: GDScript = preload("rivers/RiverManager.gd")
 const CivilManager: GDScript = preload("civil/CivilManager.gd")
 const CliffManager: GDScript = preload("cliffs/CliffManager.gd")
-const BaseContinuityLayer: GDScript = preload("continuous/geometry/BaseContinuityLayer.gd")
+const LocalManager: GDScript = preload("local/LocalManager.gd")
 
 signal stage_percent_complete(stage, percent)
 signal stage_complete(stage, duration_us)
@@ -24,7 +24,7 @@ var _height_manager: HeightManager
 var _river_manager: RiverManager
 var _civil_manager: CivilManager
 var _cliff_manager: CliffManager
-var _base_continuity_layer: BaseContinuityLayer
+var _local_manager: LocalManager
 
 func _init(
 	random_seed: int,
@@ -97,9 +97,16 @@ func _init(
 		material_lib,
 		rng.randi(),
 	)
-	_base_continuity_layer = BaseContinuityLayer.new(
-		_grid_manager.get_tri_cell_layer(),
-		_cliff_manager.get_cliff_layer(),
+	_local_manager = LocalManager.new(
+		_grid_manager,
+		_region_manager,
+		_lake_manager,
+		_height_manager,
+		_river_manager,
+		_civil_manager,
+		_cliff_manager,
+		material_lib,
+		rng.randi(),
 	)
 
 func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgressStep.ALL) -> void:
@@ -111,7 +118,7 @@ func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgr
 		_river_manager,
 		_civil_manager,
 		_cliff_manager,
-		_base_continuity_layer,
+		_local_manager,
 	]
 	
 	for stage in stages:
@@ -125,8 +132,8 @@ func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgr
 	emit_signal("all_stages_complete")
 
 func get_height_at_xz(xz: Vector2) -> float:
-	if _base_continuity_layer:
-		return _base_continuity_layer.get_height_at_xz(xz)
+	if _local_manager:
+		return _local_manager.get_height_at_xz(xz)
 	else:
 		return 0.0
 

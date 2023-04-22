@@ -24,7 +24,7 @@ var _roads_mesh: RoadsMesh
 
 func _init(
 	grid_manager: GridManager,
-	outline_manager: RegionManager,
+	region_manager: RegionManager,
 	lake_manager: LakeManager,
 	height_manager: HeightManager,
 	river_manager: RiverManager,
@@ -35,7 +35,7 @@ func _init(
 	rng_seed: int,
 ) -> void:
 	_grid_manager = grid_manager
-	_region_manager = outline_manager
+	_region_manager = region_manager
 	_lake_manager = lake_manager
 	_height_manager = height_manager
 	_river_manager = river_manager

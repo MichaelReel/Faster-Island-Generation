@@ -14,6 +14,7 @@ enum GlobalStageProgressStep {
 	RIVER,
 	CIVIL,
 	CLIFF,
+	LOCAL,
 	ALL,
 }
 

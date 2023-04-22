@@ -17,14 +17,14 @@ var _rng := RandomNumberGenerator.new()
 
 func _init(
 	grid_manager: GridManager,
-	outline_manager: RegionManager,
+	region_manager: RegionManager,
 	lake_regions: int, 
 	lakes_per_region: int,
 	material_lib: MaterialLib,
 	rng_seed: int
 ) -> void:
 	_grid_manager = grid_manager
-	_region_manager = outline_manager
+	_region_manager = region_manager
 	_rng.seed = rng_seed
 	
 	_region_divide_layer = RegionDivideLayer.new(

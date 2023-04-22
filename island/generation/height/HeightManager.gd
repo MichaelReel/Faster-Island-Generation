@@ -15,7 +15,7 @@ var _rng := RandomNumberGenerator.new()
 
 func _init(
 	grid_manager: GridManager,
-	outline_manager: RegionManager,
+	region_manager: RegionManager,
 	lake_manager: LakeManager,
 	diff_height: float,
 	diff_max_multi: int,
@@ -23,7 +23,7 @@ func _init(
 	rng_seed: int
 ) -> void:
 	_grid_manager = grid_manager
-	_region_manager = outline_manager
+	_region_manager = region_manager
 	_lake_manager = lake_manager
 	_rng.seed = rng_seed
 
