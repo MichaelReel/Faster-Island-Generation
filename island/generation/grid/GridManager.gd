@@ -33,5 +33,8 @@ func get_mesh_dict() -> Dictionary:
 		"terrain": _grid_mesh
 	}
 
+func get_point_layer() -> PointLayer:
+	return _point_layer
+
 func get_tri_cell_layer() -> TriCellLayer:
 	return _tri_cell_layer

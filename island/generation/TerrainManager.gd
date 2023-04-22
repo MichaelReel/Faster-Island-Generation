@@ -43,6 +43,8 @@ func _init(
 	river_penalty: float,
 	min_slope_to_cliff: float,
 	max_cliff_height: float,
+	noise_height: float,
+	upper_ground_cell_size: float,
 ) -> void:
 	var rng = RandomNumberGenerator.new()
 	rng.seed = random_seed
@@ -105,6 +107,10 @@ func _init(
 		_river_manager,
 		_civil_manager,
 		_cliff_manager,
+		tri_side,
+		bounds_side,
+		noise_height,
+		upper_ground_cell_size,
 		material_lib,
 		rng.randi(),
 	)
