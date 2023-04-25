@@ -21,6 +21,6 @@ func perform() -> void:
 	pass
 
 func get_height_at_xz(xz: Vector2) -> float:
-	var base_height = _base_continuity_layer.get_height_at_xz(xz)
-	var noise = _noise.get_noise_2dv(xz) * _noise_height
+	var base_height: float = _base_continuity_layer.get_height_at_xz(xz)
+	var noise: float = (_noise.get_noise_2dv(xz) * _noise_height) + 0.5 * _noise_height
 	return base_height + noise

@@ -33,9 +33,10 @@ func perform() -> void:
 	upper_ground_surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	upper_ground_surface_tool.set_material(_material_lib.get_material("ground"))
 	
-	var limit_bounds: float = (_tri_side * _bounds_side - _tri_side) * 0.5
-	var start_xz: Vector2 = Vector2.ONE * -limit_bounds
-	var end_xz: Vector2 =  Vector2.ONE * limit_bounds
+	var x_limit_bounds: float = (_tri_side * _bounds_side - 2 * _tri_side) * 0.5
+	var z_limit_bounds: float = (_tri_side * _bounds_side - _tri_side) * 0.5
+	var start_xz: Vector2 = Vector2(-x_limit_bounds, -z_limit_bounds)
+	var end_xz: Vector2 =  Vector2(x_limit_bounds, z_limit_bounds)
 	
 	var z: float = start_xz.y
 	while z < end_xz.y:
