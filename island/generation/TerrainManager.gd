@@ -124,7 +124,7 @@ func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgr
 		_river_manager,
 		_civil_manager,
 		_cliff_manager,
-		_local_manager,
+		#_local_manager,
 	]
 	
 	for stage in stages:
