@@ -24,3 +24,6 @@ func get_height_at_xz(xz: Vector2) -> float:
 	var base_height: float = _base_continuity_layer.get_height_at_xz(xz)
 	var noise: float = (_noise.get_noise_2dv(xz) * _noise_height) + 0.5 * _noise_height
 	return base_height + noise
+
+func _to_string() -> String:
+	return "Noise Stage"

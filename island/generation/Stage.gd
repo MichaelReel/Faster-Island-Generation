@@ -1,9 +1,10 @@
-class_name Stage
+@abstract class_name Stage
 extends Object
 """
 Base interface for each stage
 """
 
+@warning_ignore("unused_signal")
 signal percent_complete(stage, percent)
 
 enum GlobalStageProgressStep {
@@ -18,8 +19,7 @@ enum GlobalStageProgressStep {
 	ALL,
 }
 
-func perform() -> void:
-	pass
+@abstract func perform() -> void
 
 func get_mesh_dict() -> Dictionary:
 	return {}
@@ -27,5 +27,4 @@ func get_mesh_dict() -> Dictionary:
 func get_progess_step() -> GlobalStageProgressStep:
 	return GlobalStageProgressStep.ALL
 
-func _to_string() -> String:
-	return "Unnamed Stage"
+@abstract func _to_string() -> String

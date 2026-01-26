@@ -121,8 +121,8 @@ func _path_from_every_settlement() -> void:
 					# Remove and re-insert, but at an appropriate position in the queue
 					if neighbour_cell_index in search_front:
 						search_front.erase(neighbour_cell_index)
-					var ind = search_front.bsearch_custom(neighbour_cell_index, _sort_by_cost)
-					search_front.insert(ind, neighbour_cell_index)
+					var insert_ind = search_front.bsearch_custom(neighbour_cell_index, _sort_by_cost)
+					search_front.insert(insert_ind, neighbour_cell_index)
 				continue
 			
 			# Insert a new search cell into the queue, sorted by journey cost

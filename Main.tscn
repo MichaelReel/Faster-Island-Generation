@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://ti6hvbnvt6l7"]
+[gd_scene format=3 uid="uid://ti6hvbnvt6l7"]
 
 [ext_resource type="PackedScene" uid="uid://qyqjsv6gy5sa" path="res://island/GeneratedIsland.tscn" id="1_77t7i"]
 [ext_resource type="PackedScene" uid="uid://dux6616n2uxn" path="res://camera/FlyingCameraControl.tscn" id="2_gt1th"]
@@ -39,16 +39,16 @@ albedo_color = Color(0.403922, 0.454902, 0.403922, 1)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_f5ket"]
 albedo_color = Color(0.72549, 0.576471, 0.498039, 1)
 
-[node name="Main" type="Node3D"]
+[node name="Main" type="Node3D" unique_id=507902566]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1390490072]
 environment = SubResource("Environment_ilkrt")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=284455468]
 transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 0, 0)
 shadow_enabled = true
 
-[node name="GeneratedIsland" parent="." instance=ExtResource("1_77t7i")]
+[node name="GeneratedIsland" parent="." unique_id=743848335 instance=ExtResource("1_77t7i")]
 editor_display = 3
 bounds_side = 100.0
 island_cell_count = 6000
@@ -64,10 +64,10 @@ cliff = SubResource("StandardMaterial3D_f5ket")
 [node name="BoundsMesh" parent="GeneratedIsland" index="0"]
 visible = false
 
-[node name="FlyingCameraControl" parent="." instance=ExtResource("2_gt1th")]
+[node name="FlyingCameraControl" parent="." unique_id=2044408306 instance=ExtResource("2_gt1th")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 30)
 
-[node name="MarkerPin" parent="." node_paths=PackedStringArray("data_source") instance=ExtResource("3_878kg")]
+[node name="MarkerPin" parent="." unique_id=1503548141 node_paths=PackedStringArray("data_source") instance=ExtResource("3_878kg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.11025, 0)
 pin_speed = 1.0
 data_source = NodePath("../GeneratedIsland")
