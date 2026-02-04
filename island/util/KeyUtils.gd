@@ -13,7 +13,8 @@ static func get_combined_key_for_int32_array(key_array: PackedInt32Array) -> Str
 	the order should be unimportant
 	"""
 	return get_combined_key(key_array[0], key_array[1])
-	
+
+
 static func key_for_cell_and_point(cell_ind: int, point_ind: int) -> String:
 	"""Get a key unique to the cell and the point used within that cell"""
 	return "%d:%d" % [cell_ind, point_ind]

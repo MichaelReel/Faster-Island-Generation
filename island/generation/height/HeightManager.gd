@@ -1,54 +1,46 @@
 extends Stage
 
-const GridManager: GDScript = preload("../grid/GridManager.gd")
-const RegionManager: GDScript = preload("../region/RegionManager.gd")
-const LakeManager: GDScript = preload("../lakes/LakeManager.gd")
 const HeightLayer: GDScript = preload("geometry/HeightLayer.gd")
 const HeightMesh: GDScript = preload("mesh/HeightMesh.gd")
 
-var _grid_manager: GridManager
-var _region_manager: RegionManager
-var _lake_manager: LakeManager
-var _height_layer: HeightLayer
-var _height_mesh: HeightMesh
+var _data: TerrainData
+var _meshes: TerrainMeshes
 var _rng := RandomNumberGenerator.new()
 
 func _init(
-	grid_manager: GridManager,
-	region_manager: RegionManager,
-	lake_manager: LakeManager,
 	diff_height: float,
 	diff_max_multi: int,
 	material_lib: MaterialLib,
-	rng_seed: int
+	rng_seed: int,
+	terrain_data: TerrainData,
+	terrain_meshes: TerrainMeshes,
 ) -> void:
-	_grid_manager = grid_manager
-	_region_manager = region_manager
-	_lake_manager = lake_manager
+	_data = terrain_data
+	_meshes = terrain_meshes
 	_rng.seed = rng_seed
 
-	_height_layer = HeightLayer.new(
-		_grid_manager.get_tri_cell_layer(),
-		_region_manager.get_region_cell_layer(),
-		_region_manager.get_island_outline_layer(),
-		_lake_manager.get_lake_layer(), 
+	_data.height_layer = HeightLayer.new(
+		_data.grid_tri_cell_layer,
+		_data.region_cell_layer,
+		_data.island_outline_layer,
+		_data.lake_layer,
 		diff_height,
 		diff_max_multi,
 		_rng.randi()
 	)
-	_height_mesh = HeightMesh.new(
-		_grid_manager.get_tri_cell_layer(),
-		_region_manager.get_region_cell_layer(),
-		_lake_manager.get_lake_layer(),
-		_height_layer,
+	_meshes.height_mesh = HeightMesh.new(
+		_data.grid_tri_cell_layer,
+		_data.region_cell_layer,
+		_data.lake_layer,
+		_data.height_layer,
 		material_lib
 	)
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
-	_height_layer.perform()
+	_data.height_layer.perform()
 	emit_signal("percent_complete", self, 50.0)
-	_height_mesh.perform()
+	_meshes.height_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -59,8 +51,5 @@ func _to_string() -> String:
 
 func get_mesh_dict() -> Dictionary:
 	return {
-		"terrain": _height_mesh,
+		"terrain": _meshes.height_mesh,
 	}
-
-func get_height_layer() -> HeightLayer:
-	return _height_layer

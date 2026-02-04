@@ -17,6 +17,9 @@ signal stage_percent_complete(stage, percent)
 signal stage_complete(stage, duration_us)
 signal all_stages_complete()
 
+var _terrain_data: TerrainData
+var _terrain_meshes: TerrainMeshes
+
 var _grid_manager: GridManager
 var _region_manager: RegionManager
 var _lake_manager: LakeManager
@@ -46,73 +49,53 @@ func _init(
 	noise_height: float,
 	upper_ground_cell_size: float,
 ) -> void:
+	_terrain_data = TerrainData.new()
+	_terrain_meshes = TerrainMeshes.new()
+
 	var rng = RandomNumberGenerator.new()
 	rng.seed = random_seed
 	var points_per_row = int(bounds_side / tri_side)
-	_grid_manager = GridManager.new(tri_side, points_per_row, material_lib)
+	_grid_manager = GridManager.new(
+		tri_side, points_per_row, material_lib, _terrain_data, _terrain_meshes,
+	)
 	_region_manager = RegionManager.new(
-		_grid_manager, island_cell_limit, material_lib, rng.randi()
+		island_cell_limit, material_lib, rng.randi(), _terrain_data, _terrain_meshes,
 	)
 	_lake_manager = LakeManager.new(
-		_grid_manager, _region_manager, lake_regions, lakes_per_region, material_lib, rng.randi()
+		lake_regions, lakes_per_region, material_lib, rng.randi(), _terrain_data, _terrain_meshes,
 	)
 	_height_manager = HeightManager.new(
-		_grid_manager,
-		_region_manager,
-		_lake_manager,
-		diff_height,
-		diff_max_multi,
-		material_lib,
-		rng.randi(),
+		diff_height, diff_max_multi, material_lib, rng.randi(), _terrain_data, _terrain_meshes,
 	)
 	_river_manager = RiverManager.new(
-		_grid_manager,
-		_region_manager,
-		_lake_manager,
-		_height_manager,
-		river_count,
-		erode_depth,
-		material_lib,
-		rng.randi(),
+		river_count, erode_depth, material_lib, rng.randi(), _terrain_data, _terrain_meshes,
 	)
 	_civil_manager = CivilManager.new(
-		_grid_manager,
-		_region_manager,
-		_lake_manager,
-		_height_manager,
-		_river_manager,
 		settlement_spread,
 		slope_penalty,
 		river_penalty,
 		material_lib,
 		rng.randi(),
+		_terrain_data,
+		_terrain_meshes,
 	)
 	_cliff_manager = CliffManager.new(
-		_grid_manager,
-		_region_manager,
-		_lake_manager,
-		_height_manager,
-		_river_manager,
-		_civil_manager,
 		min_slope_to_cliff,
 		max_cliff_height,
 		material_lib,
 		rng.randi(),
+		_terrain_data,
+		_terrain_meshes,
 	)
 	_local_manager = LocalManager.new(
-		_grid_manager,
-		_region_manager,
-		_lake_manager,
-		_height_manager,
-		_river_manager,
-		_civil_manager,
-		_cliff_manager,
 		tri_side,
 		bounds_side,
 		noise_height,
 		upper_ground_cell_size,
 		material_lib,
 		rng.randi(),
+		_terrain_data,
+		_terrain_meshes,
 	)
 
 func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgressStep.ALL) -> void:
@@ -124,7 +107,7 @@ func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgr
 		_river_manager,
 		_civil_manager,
 		_cliff_manager,
-		#_local_manager,
+		_local_manager,
 	]
 	
 	for stage in stages:

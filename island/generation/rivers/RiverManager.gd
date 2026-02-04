@@ -1,85 +1,65 @@
 extends Stage
 
-const GridManager: GDScript = preload("../grid/GridManager.gd")
-const RegionManager: GDScript = preload("../region/RegionManager.gd")
-const LakeManager: GDScript = preload("../lakes/LakeManager.gd")
-const HeightManager: GDScript = preload("../height/HeightManager.gd")
 const RiverLayer: GDScript = preload("geometry/RiverLayer.gd")
 const WaterMesh: GDScript = preload("mesh/WaterMesh.gd")
 const DebugRiverMesh: GDScript = preload("mesh/DebugRiverMesh.gd")
 const HeightMesh: GDScript = preload("../height/mesh/HeightMesh.gd")
 
-var _grid_manager: GridManager
-var _region_manager: RegionManager
-var _lake_manager: LakeManager
-var _height_manager: HeightManager
-var _river_count: int
-var _erode_depth: float
-var _material_lib: MaterialLib
+var _data: TerrainData
+var _meshes: TerrainMeshes
 var _rng := RandomNumberGenerator.new()
-var _river_layer: RiverLayer
-var _water_mesh: WaterMesh
-var _debug_mesh: DebugRiverMesh
-var _eroded_height_mesh: HeightMesh
 
 func _init(
-	grid_manager: GridManager,
-	region_manager: RegionManager,
-	lake_manager: LakeManager,
-	height_manager: HeightManager,
 	river_count: int,
 	erode_depth: float,
 	material_lib: MaterialLib,
-	rng_seed: int
+	rng_seed: int,
+	terrain_data: TerrainData,
+	terrain_meshes: TerrainMeshes,
 ) -> void:
-	_grid_manager = grid_manager
-	_region_manager = region_manager
-	_lake_manager = lake_manager
-	_height_manager = height_manager
-	_river_count = river_count
-	_erode_depth = erode_depth
-	_material_lib = material_lib
+	_data = terrain_data
+	_meshes = terrain_meshes
 	_rng.seed = rng_seed
 	
-	_river_layer = RiverLayer.new(
-		_grid_manager.get_tri_cell_layer(),
-		_region_manager.get_region_cell_layer(),
-		_lake_manager.get_lake_layer(),
-		_height_manager.get_height_layer(),
-		_river_count,
-		_erode_depth,
+	_data.river_layer = RiverLayer.new(
+		_data.grid_tri_cell_layer,
+		_data.region_cell_layer,
+		_data.lake_layer,
+		_data.height_layer,
+		river_count,
+		erode_depth,
 		_rng.randi(),
 	)
-	_water_mesh = WaterMesh.new(
-		_grid_manager.get_tri_cell_layer(),
-		_region_manager.get_region_cell_layer(),
-		_lake_manager.get_lake_layer(),
-		_height_manager.get_height_layer(),
-		_river_layer,
+	_meshes.water_mesh = WaterMesh.new(
+		_data.grid_tri_cell_layer,
+		_data.region_cell_layer,
+		_data.lake_layer,
+		_data.height_layer,
+		_data.river_layer,
 		material_lib
 	)
-	_debug_mesh = DebugRiverMesh.new(
-		_grid_manager.get_tri_cell_layer(),
-		_height_manager.get_height_layer(),
-		_river_layer
+	_meshes.debug_river_mesh = DebugRiverMesh.new(
+		_data.grid_tri_cell_layer,
+		_data.height_layer,
+		_data.river_layer
 	)
-	_eroded_height_mesh = HeightMesh.new(
-		_grid_manager.get_tri_cell_layer(),
-		_region_manager.get_region_cell_layer(),
-		_lake_manager.get_lake_layer(),
-		_height_manager.get_height_layer(),
+	_meshes.eroded_height_mesh = HeightMesh.new(
+		_data.grid_tri_cell_layer,
+		_data.region_cell_layer,
+		_data.lake_layer,
+		_data.height_layer,
 		material_lib
 	)
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
-	_river_layer.perform()
+	_data.river_layer.perform()
 	emit_signal("percent_complete", self, 25.0)
-	_water_mesh.perform()
+	_meshes.water_mesh.perform()
 	emit_signal("percent_complete", self, 50.0)
-	_debug_mesh.perform()
+	_meshes.debug_river_mesh.perform()
 	emit_signal("percent_complete", self, 75.0)
-	_eroded_height_mesh.perform()
+	_meshes.eroded_height_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -90,10 +70,7 @@ func _to_string() -> String:
 
 func get_mesh_dict() -> Dictionary:
 	return {
-		"rivers": _water_mesh,
-		"river_debug": _debug_mesh,
-		"terrain": _eroded_height_mesh,
+		"rivers": _meshes.water_mesh,
+		"river_debug": _meshes.debug_river_mesh,
+		"terrain": _meshes.eroded_height_mesh,
 	}
-
-func get_river_layer() -> RiverLayer:
-	return _river_layer
