@@ -11,7 +11,7 @@ var _meshes: TerrainMeshes
 var _rng := RandomNumberGenerator.new()
 
 func _init(
-	island_cell_limit: int,
+	terrain_config: TerrainConfig,
 	material_lib: MaterialLib,
 	rng_seed: int,
 	terrain_data: TerrainData,
@@ -23,7 +23,7 @@ func _init(
 	
 	_data.region_cell_layer = RegionCellLayer.new(_data.grid_tri_cell_layer)
 	_data.island_outline_layer = IslandOutlineLayer.new(
-		_data.grid_tri_cell_layer, _data.region_cell_layer, island_cell_limit, _rng.randi()
+		_data.grid_tri_cell_layer, _data.region_cell_layer, terrain_config.island_cell_limit, _rng.randi()
 	)
 	_meshes.island_debug_mesh = IslandDebugMesh.new(
 		_data.grid_tri_cell_layer, _data.region_cell_layer, _data.island_outline_layer, material_lib

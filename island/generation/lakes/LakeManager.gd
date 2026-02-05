@@ -11,8 +11,7 @@ var _meshes: TerrainMeshes
 var _rng := RandomNumberGenerator.new()
 
 func _init(
-	lake_regions: int, 
-	lakes_per_region: int,
+	terrain_config: TerrainConfig,
 	material_lib: MaterialLib,
 	rng_seed: int,
 	terrain_data: TerrainData,
@@ -26,14 +25,14 @@ func _init(
 		_data.grid_tri_cell_layer,
 		_data.region_cell_layer,
 		_data.island_outline_layer,
-		lake_regions,
+		terrain_config.max_lake_regions,
 		_rng.randi(),
 	)
 	_data.lake_layer = LakeLayer.new(
 		_data.grid_tri_cell_layer,
 		_data.region_cell_layer,
 		_data.region_divide_layer,
-		lakes_per_region,
+		terrain_config.max_lakes_per_region,
 		_rng.randi(),
 	)
 	_meshes.lake_debug_mesh = LakeDebugMesh.new(

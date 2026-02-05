@@ -9,8 +9,7 @@ var _meshes: TerrainMeshes
 var _rng := RandomNumberGenerator.new()
 
 func _init(
-	min_slope: float,
-	max_cliff_height: float,
+	terrain_config: TerrainConfig,
 	material_lib: MaterialLib,
 	rng_seed: int,
 	terrain_data: TerrainData,
@@ -26,8 +25,8 @@ func _init(
 		_data.height_layer,
 		_data.river_layer,
 		_data.road_layer,
-		min_slope,
-		max_cliff_height,
+		terrain_config.min_slope_to_cliff,
+		terrain_config.max_cliff_height,
 	)
 	
 	_meshes.cliff_line_mesh = CliffLineMesh.new(

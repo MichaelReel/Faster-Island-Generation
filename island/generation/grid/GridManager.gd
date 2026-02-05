@@ -8,8 +8,7 @@ var _data: TerrainData
 var _meshes: TerrainMeshes
 
 func _init(
-	tri_side: float,
-	points_per_row: int,
+	terrain_config: TerrainConfig,
 	material_lib: MaterialLib,
 	terrain_data: TerrainData,
 	terrain_meshes: TerrainMeshes,
@@ -17,8 +16,10 @@ func _init(
 	_data = terrain_data
 	_meshes = terrain_meshes
 	
-	_data.grid_point_layer = PointLayer.new(tri_side, points_per_row)
-	_data.grid_tri_cell_layer = TriCellLayer.new(_data.grid_point_layer, tri_side)
+	var points_per_row: int = int(terrain_config.bounds_side / terrain_config.tri_side)
+	
+	_data.grid_point_layer = PointLayer.new(terrain_config.tri_side, points_per_row)
+	_data.grid_tri_cell_layer = TriCellLayer.new(_data.grid_point_layer, terrain_config.tri_side)
 	_meshes.grid_mesh = GridMesh.new(_data.grid_point_layer, _data.grid_tri_cell_layer, material_lib)
 
 func perform() -> void:

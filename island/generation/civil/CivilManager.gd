@@ -10,9 +10,7 @@ var _meshes: TerrainMeshes
 var _rng := RandomNumberGenerator.new()
 
 func _init(
-	settlement_spread: int,
-	slope_penalty: float,
-	river_penalty: float,
+	terrain_config: TerrainConfig,
 	material_lib: MaterialLib,
 	rng_seed: int,
 	terrain_data: TerrainData,
@@ -27,7 +25,7 @@ func _init(
 		_data.region_cell_layer,
 		_data.lake_layer,
 		_data.height_layer, # _data.eroded_height_layer?
-		settlement_spread,
+		terrain_config.settlement_spread,
 	)
 	_data.road_layer = RoadLayer.new(
 		_data.grid_tri_cell_layer,
@@ -36,8 +34,8 @@ func _init(
 		_data.height_layer, # _data.eroded_height_layer?
 		_data.river_layer,
 		_data.settlement_layer,
-		slope_penalty,
-		river_penalty,
+		terrain_config.slope_penalty,
+		terrain_config.river_penalty,
 	)
 	_meshes.settlements_mesh = SettlementsMesh.new(
 		_data.grid_tri_cell_layer,

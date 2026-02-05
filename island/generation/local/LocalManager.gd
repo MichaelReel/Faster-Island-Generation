@@ -13,10 +13,7 @@ var _noise_add_layer: NoiseAddLayer
 var _noise_debug_mesh: NoiseDebugMesh
 
 func _init(
-	tri_side: float,
-	bounds_side: float,
-	noise_height: float,
-	upper_ground_cell_size: float,
+	terrain_config: TerrainConfig,
 	material_lib: MaterialLib,
 	rng_seed: int,
 	terrain_data: TerrainData,
@@ -33,14 +30,14 @@ func _init(
 	_noise_add_layer = NoiseAddLayer.new(
 		_base_continuity_layer,
 		_rng.randi(),
-		noise_height,
+		terrain_config.noise_height,
 	)
 	_noise_debug_mesh = NoiseDebugMesh.new(
 		_data.grid_point_layer,
 		_noise_add_layer,
-		tri_side,
-		bounds_side,
-		upper_ground_cell_size,
+		terrain_config.tri_side,
+		terrain_config.bounds_side,
+		terrain_config.upper_ground_cell_size,
 		material_lib,
 	)
 

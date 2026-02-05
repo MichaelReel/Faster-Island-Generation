@@ -10,8 +10,7 @@ var _meshes: TerrainMeshes
 var _rng := RandomNumberGenerator.new()
 
 func _init(
-	river_count: int,
-	erode_depth: float,
+	terrain_config: TerrainConfig,
 	material_lib: MaterialLib,
 	rng_seed: int,
 	terrain_data: TerrainData,
@@ -26,8 +25,8 @@ func _init(
 		_data.region_cell_layer,
 		_data.lake_layer,
 		_data.height_layer,
-		river_count,
-		erode_depth,
+		terrain_config.river_count,
+		terrain_config.erode_depth,
 		_rng.randi(),
 	)
 	_meshes.water_mesh = WaterMesh.new(

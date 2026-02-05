@@ -8,8 +8,7 @@ var _meshes: TerrainMeshes
 var _rng := RandomNumberGenerator.new()
 
 func _init(
-	diff_height: float,
-	diff_max_multi: int,
+	terrain_config: TerrainConfig,
 	material_lib: MaterialLib,
 	rng_seed: int,
 	terrain_data: TerrainData,
@@ -24,8 +23,8 @@ func _init(
 		_data.region_cell_layer,
 		_data.island_outline_layer,
 		_data.lake_layer,
-		diff_height,
-		diff_max_multi,
+		terrain_config.diff_height,
+		terrain_config.diff_max_multi,
 		_rng.randi()
 	)
 	_meshes.height_mesh = HeightMesh.new(
