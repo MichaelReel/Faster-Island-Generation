@@ -2,7 +2,7 @@
 extends Node3D
 
 @export_category("In Editor Only")
-@export var changes_pending: bool = false
+@export var tool_changes_pending: bool = false
 @export var editor_display: Stage.GlobalStageProgressStep = Stage.GlobalStageProgressStep.OUTLINE
 
 @export_category("Base Settings")
@@ -21,6 +21,7 @@ extends Node3D
 @onready var bounds : Mesh = $BoundsMesh.mesh
 @onready var material_lib: MaterialLib = MaterialLib.new()
 
+var _runtime_changes_pending: bool = true
 var _terrain_manager : TerrainManager
 var _mesh_instance_dict : Dictionary = {}
 
@@ -34,13 +35,13 @@ func _ready() -> void:
 	material_lib.set_material("cliff", cliff)
 
 func _process(delta: float) -> void:
-	if not changes_pending:
-		return
-	if Engine.is_editor_hint():
+	if Engine.is_editor_hint() and tool_changes_pending:
 		_tool_execute(delta)
-	if not Engine.is_editor_hint():
+		tool_changes_pending = false
+	
+	if not Engine.is_editor_hint() and _runtime_changes_pending:
 		_game_execute(delta)
-	changes_pending = false
+		_runtime_changes_pending = false
 
 func get_height_at_xz(xz: Vector2) -> float:
 	if _terrain_manager:
