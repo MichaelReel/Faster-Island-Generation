@@ -1,20 +1,16 @@
 extends Stage
 
 const LowLODLayer: GDScript = preload("geometry/LowLODLayer.gd")
-const NoiseAddLayer: GDScript = preload("geometry/NoiseAddLayer.gd")
-const NoiseDebugMesh: GDScript = preload("mesh/NoiseDebugMesh.gd")
 
 var _data: TerrainData
 var _meshes: TerrainMeshes
 
 var _rng := RandomNumberGenerator.new()
-var _base_continuity_layer: LowLODLayer
-var _noise_add_layer: NoiseAddLayer
-var _noise_debug_mesh: NoiseDebugMesh
+var _low_lod_layer: LowLODLayer
 
 func _init(
-	terrain_config: TerrainConfig,
-	material_lib: MaterialLib,
+	_terrain_config: TerrainConfig,
+	_material_lib: MaterialLib,
 	rng_seed: int,
 	terrain_data: TerrainData,
 	terrain_meshes: TerrainMeshes,
@@ -23,29 +19,15 @@ func _init(
 	_meshes = terrain_meshes
 	_rng.seed = rng_seed
 	
-	_base_continuity_layer = LowLODLayer.new(
+	_low_lod_layer = LowLODLayer.new(
 		_data.grid_tri_cell_layer,
 		_data.cliff_layer,
 	)
-	_noise_add_layer = NoiseAddLayer.new(
-		_base_continuity_layer,
-		_rng.randi(),
-		terrain_config.noise_height,
-	)
-	_noise_debug_mesh = NoiseDebugMesh.new(
-		_data.grid_point_layer,
-		_noise_add_layer,
-		terrain_config.tri_side,
-		terrain_config.bounds_side,
-		terrain_config.upper_ground_cell_size,
-		material_lib,
-	)
+
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
-	_base_continuity_layer.perform()
-	#_noise_add_layer.perform()
-	#_noise_debug_mesh.perform()
+	_low_lod_layer.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -55,12 +37,10 @@ func _to_string() -> String:
 	return "Local Stage"
 
 func get_mesh_dict() -> Dictionary:
-	return {
-		"upper_terrain": _noise_debug_mesh
-	}
+	return {}
 
 func get_height_at_xz(xz: Vector2) -> float:
-	if _base_continuity_layer:
-		return _base_continuity_layer.get_height_at_xz(xz)
+	if _low_lod_layer:
+		return _low_lod_layer.get_height_at_xz(xz)
 	else:
 		return 0.0
