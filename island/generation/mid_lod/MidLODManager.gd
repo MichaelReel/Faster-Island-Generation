@@ -1,6 +1,6 @@
 extends Stage
 
-const BaseContinuityLayer: GDScript = preload("geometry/BaseContinuityLayer.gd")
+const LowLODLayer: GDScript = preload("geometry/LowLODLayer.gd")
 const NoiseAddLayer: GDScript = preload("geometry/NoiseAddLayer.gd")
 const NoiseDebugMesh: GDScript = preload("mesh/NoiseDebugMesh.gd")
 
@@ -8,7 +8,7 @@ var _data: TerrainData
 var _meshes: TerrainMeshes
 
 var _rng := RandomNumberGenerator.new()
-var _base_continuity_layer: BaseContinuityLayer
+var _base_continuity_layer: LowLODLayer
 var _noise_add_layer: NoiseAddLayer
 var _noise_debug_mesh: NoiseDebugMesh
 
@@ -23,7 +23,7 @@ func _init(
 	_meshes = terrain_meshes
 	_rng.seed = rng_seed
 	
-	_base_continuity_layer = BaseContinuityLayer.new(
+	_base_continuity_layer = LowLODLayer.new(
 		_data.grid_tri_cell_layer,
 		_data.cliff_layer,
 	)

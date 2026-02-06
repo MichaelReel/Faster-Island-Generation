@@ -1,13 +1,13 @@
 extends Stage
 
-const BaseContinuityLayer: GDScript = preload("BaseContinuityLayer.gd")
+const LowLODLayer: GDScript = preload("LowLODLayer.gd")
 
-var _base_continuity_layer: BaseContinuityLayer
+var _base_continuity_layer: LowLODLayer
 var _noise: FastNoiseLite = FastNoiseLite.new()
 var _noise_height: float
 
 func _init(
-	base_continuity_layer: BaseContinuityLayer,
+	base_continuity_layer: LowLODLayer,
 	rng_seed: int,
 	noise_height: float,
 ) -> void:
