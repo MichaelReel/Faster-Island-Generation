@@ -20,6 +20,10 @@ const RoadLayer: GDScript = preload("civil/geometry/RoadLayer.gd")
 
 const CliffLayer: GDScript = preload("cliffs/geometry/CliffLayer.gd")
 
+const LowLODAggregateLayer: GDScript = preload("mid_lod/geometry/LowLODAggregateLayer.gd")
+const MidLODBaseLayer: GDScript = preload("mid_lod/geometry/MidLODBaseLayer.gd")
+
+
 var grid_point_layer: GridPointLayer
 var grid_tri_cell_layer: GridTriCellLayer
 
@@ -37,3 +41,13 @@ var settlement_layer: SettlementLayer
 var road_layer: RoadLayer
 
 var cliff_layer: CliffLayer
+
+var low_lod_agg_layer: LowLODAggregateLayer
+var mid_lod_base_layer: MidLODBaseLayer
+
+
+func get_height_at_xz(xz: Vector2) -> float:
+	if low_lod_agg_layer:
+		return low_lod_agg_layer.get_height_at_xz(xz)
+	else:
+		return 0.0

@@ -28,6 +28,6 @@ extends Resource
 @export var min_slope_to_cliff: float = 0.5
 @export var max_cliff_height: float = 1.0
 
-@export_subgroup("Local Creation")
-@export var noise_height: float = 1.0
-@export var upper_ground_cell_size: float = 0.25
+@export_subgroup("Mid LOD Creation")
+@export var mid_lod_noise_height: float = 1.0
+@export var mid_lod_subdivision: int = 8

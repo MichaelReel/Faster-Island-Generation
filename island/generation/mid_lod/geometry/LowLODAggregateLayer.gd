@@ -1,4 +1,4 @@
-@abstract extends Stage
+extends Stage
 
 const TriCellLayer: GDScript = preload("../../grid/geometry/TriCellLayer.gd")
 const CliffLayer: GDScript = preload("../../cliffs/geometry/CliffLayer.gd")
@@ -45,4 +45,4 @@ func _get_normal(points: PackedVector3Array) -> Vector3:
 	return (points[1] - points[0]).cross(points[1] - points[2])
 
 func _to_string() -> String:
-	return "Unnamed Stage"
+	return "Low LOD Compliation Stage"

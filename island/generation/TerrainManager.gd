@@ -88,8 +88,8 @@ func perform(up_to_stage: Stage.GlobalStageProgressStep = Stage.GlobalStageProgr
 	emit_signal("all_stages_complete")
 
 func get_height_at_xz(xz: Vector2) -> float:
-	if _mid_lod_manager:
-		return _mid_lod_manager.get_height_at_xz(xz)
+	if _terrain_data:
+		return _terrain_data.get_height_at_xz(xz)
 	else:
 		return 0.0
 

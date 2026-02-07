@@ -1,12 +1,12 @@
 extends Stage
 
-const LowLODLayer: GDScript = preload("geometry/LowLODLayer.gd")
+const LowLODAggregateLayer: GDScript = preload("geometry/LowLODAggregateLayer.gd")
+const MidLODBaseLayer: GDScript = preload("geometry/MidLODBaseLayer.gd")
 
 var _data: TerrainData
 var _meshes: TerrainMeshes
 
 var _rng := RandomNumberGenerator.new()
-var _low_lod_layer: LowLODLayer
 
 func _init(
 	_terrain_config: TerrainConfig,
@@ -19,15 +19,23 @@ func _init(
 	_meshes = terrain_meshes
 	_rng.seed = rng_seed
 	
-	_low_lod_layer = LowLODLayer.new(
+	_data.low_lod_agg_layer = LowLODAggregateLayer.new(
 		_data.grid_tri_cell_layer,
 		_data.cliff_layer,
+	)
+	
+	_data.mid_lod_base_layer = MidLODBaseLayer.new(
+		_data.grid_tri_cell_layer,
+		_data.low_lod_agg_layer,
+		_terrain_config.mid_lod_subdivision,
 	)
 
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
-	_low_lod_layer.perform()
+	_data.low_lod_agg_layer.perform()
+	emit_signal("percent_complete", self, 50.0)
+	_data.mid_lod_base_layer.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -38,9 +46,3 @@ func _to_string() -> String:
 
 func get_mesh_dict() -> Dictionary:
 	return {}
-
-func get_height_at_xz(xz: Vector2) -> float:
-	if _low_lod_layer:
-		return _low_lod_layer.get_height_at_xz(xz)
-	else:
-		return 0.0
