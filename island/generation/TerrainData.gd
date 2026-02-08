@@ -21,7 +21,7 @@ const RoadLayer: GDScript = preload("civil/geometry/RoadLayer.gd")
 const CliffLayer: GDScript = preload("cliffs/geometry/CliffLayer.gd")
 
 const LowLODAggregateLayer: GDScript = preload("mid_lod/geometry/LowLODAggregateLayer.gd")
-const MidLODBaseLayer: GDScript = preload("mid_lod/geometry/MidLODBaseLayer.gd")
+const MidLODPointLayer: GDScript = preload("mid_lod/geometry/MidLODPointLayer.gd")
 
 
 var grid_point_layer: GridPointLayer
@@ -43,7 +43,7 @@ var road_layer: RoadLayer
 var cliff_layer: CliffLayer
 
 var low_lod_agg_layer: LowLODAggregateLayer
-var mid_lod_base_layer: MidLODBaseLayer
+var mid_lod_point_layer: MidLODPointLayer
 
 
 func get_height_at_xz(xz: Vector2) -> float:
