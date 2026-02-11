@@ -22,12 +22,6 @@ func _init(
 	_low_lod_agg_layer = low_lod_agg_layer
 	_mid_lod_subdivision = mid_lod_subdivision
 
-#
-#
-# TODO: Point heights don't seem to be getting set correctly!
-#
-#
-
 func perform() -> void:
 	var cell_count = _tri_cell_layer.get_total_cell_count()
 	_cell_subpoints.resize(cell_count)
@@ -158,8 +152,8 @@ func _subdivide_downward_pointing_triangle(
 	return new_vertices
 
 func _set_heights_to_low_lod_height(points: PackedVector3Array, low_lod_agg_layer: LowLODAggregateLayer) -> void:
-	for point in points:
-		point.y = low_lod_agg_layer.get_height_at_xz(Vector2(point.x, point.z))
+	for point_index: int in range(points.size()):
+		points[point_index].y = low_lod_agg_layer.get_height_at_xz(Vector2(points[point_index].x, points[point_index].z))
 
 func _to_string() -> String:
 	return "Mid LOD Point Stage"
