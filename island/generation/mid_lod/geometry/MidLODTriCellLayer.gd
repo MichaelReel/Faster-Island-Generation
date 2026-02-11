@@ -20,13 +20,6 @@ func _init(
 	_mid_lod_subdivision = mid_lod_subdivision
 
 
-#
-#
-# TODO: Reverse the vertex order of all the triangle!
-#    - Note, code fix is easy, need to update docs/examples here too!
-#
-
-
 func perform() -> void:
 	# We don't need to go through each triangle,
 	# we only need to know the orientation
@@ -44,10 +37,10 @@ func perform() -> void:
 	#  _________\/_________                     \/____\/____\/____\/     
 	#           9\                              6\    7     8     /9     
 
-	# 1,0,4  1,4,5  2,1,5  2,5,6  3,2,6                0,1,2
-	#        5,4,7  5,7,8  6,5,8                1,3,4  1,4,2  2,4,5
-	#               8,7,9                3,6,7  3,7,4  4,7,8  4,8,5  5,8,9
-	#                             6,A,B  6,B,7  7,B,C  7,C,8  8,C,D  8,D,9  9,D,E
+	# 1,4,0  1,5,4  2,5,1  2,6,5  3,6,2                0,2,1
+	#        5,7,4  5,8,7  6,8,5                1,4,3  1,2,4  2,5,4
+	#               8,9,7                3,7,6  3,4,7  4,8,7  4,5,8  5,9,8
+	#                             6,B,A  6,7,B  7,C,B  7,8,C  8,D,C  8,9,D  9,E,D
 	
 
 	_cell_up_subtriangles = _create_cell_up_subtriangles(_mid_lod_subdivision)
@@ -58,7 +51,7 @@ func perform() -> void:
 func _create_cell_up_subtriangles(mid_lod_subdivision: int) -> PackedInt32Array:
 	var tri_indices: PackedInt32Array = PackedInt32Array()
 
-	# Upward cells always start and continue the same way
+	# Upward cells will always start and continue the same way
 	# 
 	#     row            _________0/_________ 
 	#                             /\          
@@ -71,11 +64,11 @@ func _create_cell_up_subtriangles(mid_lod_subdivision: int) -> PackedInt32Array:
 	#      2               /t4\  /t6\  /t8\   
 	#                    \/____\/____\/____\/ 
 	#                    6\    7     8     /9 
- 
-	#                           0,1,2
-	#                    1,3,4  1,4,2  2,4,5
-	#             3,6,7  3,7,4  4,7,8  4,8,5  5,8,9
-	# 6,10,11  6,11,7  7,11,12  7,12,8  8,12,13  8,13,9  9,13,14
+	#
+	#                           0,2,1
+	#                    1,4,3  1,2,4  2,5,4
+	#             3,7,6  3,4,7  4,8,7  4,5,8  5,9,8
+	# 6,11,10  6,7,11  7,12,11  7,8,12  8,13,12  8,9,13  9,14,13
 	#                         ...etc...
 	
 	var tri_1_start_point: int = 0
@@ -84,23 +77,26 @@ func _create_cell_up_subtriangles(mid_lod_subdivision: int) -> PackedInt32Array:
 		
 		# Each row of points starts with a trangular number 0, 1, 3, 6, 10 etc.
 		tri_1_start_point += row
-		# Each second point starts with the next trianglular number up
-		var tri_2_start_point: int = tri_1_start_point + row + 1
-		# The third point will start on the second row of points, just after the second point
-		var tri_3_start_point_a: int = tri_2_start_point + 1
-		# The third point will alternatve to the first row
-		var tri_3_start_point_b: int = tri_1_start_point + 1
+		
+		# The second triangle point will have 2 "start" points that alternate
+		# One on the second row of points, just after the second point
+		var tri_2_start_point_a: int = tri_1_start_point + row + 2
+		# The other will start on the the first row
+		var tri_2_start_point_b: int = tri_1_start_point + 1
+		
+		# Each third point starts with the next trianglular number up from the first point
+		var tri_3_start_point: int = tri_1_start_point + row + 1
 		
 		for cell_in_row: int in range(cells_in_row):
 			# First points all increment every even one across 0, 1 1 2, 3 3 4 4 5, 6 6 7 7 8 8 9
 			var tri_1: int = tri_1_start_point + cell_in_row / 2
-			# Second points all increment every odd one across 1, 3 4 4, 6 7 7 8 8, 10 11 11 12 12 13 13 
-			var tri_2: int = tri_2_start_point + (cell_in_row + 1) / 2
-			# Third points alternate between rows, evens to a, odds to b
+			# Second points alternate between rows, evens to a, odds to b
 			# 2, 4 2 5, 7 4 8 5 9, 11 7 12 8 13 9 14
-			var tri_3: int = cell_in_row / 2 + (
-				tri_3_start_point_a if cell_in_row % 2 == 0 else tri_3_start_point_b
+			var tri_2: int = cell_in_row / 2 + (
+				tri_2_start_point_a if cell_in_row % 2 == 0 else tri_2_start_point_b
 			)
+			# Third points all increment every odd one across 1, 3 4 4, 6 7 7 8 8, 10 11 11 12 12 13 13 
+			var tri_3: int = tri_3_start_point + (cell_in_row + 1) / 2
 
 			tri_indices.append(tri_1)
 			tri_indices.append(tri_2)
@@ -116,8 +112,13 @@ func _create_cell_down_subtriangles(
 	# The downwards triangle can be made from the upwards list
 	# Find the max point index, then foreach trio from the back of the upward list:
 	#   deduct each index from max point index
-	#   add each index to the down indices, rotating slightly
-
+	#   add each trio of indices to the down indices, rotating slightly
+	#
+	# The upward list for a side=3 triangle would be:
+	# 0,2,1, 1,4,3, 1,2,4, 2,5,4, 3,7,6, 3,4,7, 4,8,7, 4,5,8, 5,9,8
+	#
+	# The equivalent downward triangle:
+	#
 	#  0/____1_____2_____\3              
 	#  /\ t0 /\ t2 /\ t4 /\              
 	#    \  /t1\  /t3\  /                
@@ -130,10 +131,13 @@ func _create_cell_down_subtriangles(
 	#  _________\/_________              
 	#           9\                       
 	#
-	# 1,0,4  1,4,5  2,1,5  2,5,6  3,2,6  
-	#        5,4,7  5,7,8  6,5,8         
-	#               8,7,9                
+	# 0,1,4  4,1,5  1,2,5  5,2,6  2,3,6  
+	#        4,5,7  7,5,8  5,6,8         
+	#               7,8,9                
 	#                                    
+	# 5,9,8 -> (from max) -> 4,0,1 -> (ccw rotate) -> 0,1,4
+	# 4,5,8        ->        5,4,1         ->         4,1,5
+	# etc
 	
 	var points_per_side: int = mid_lod_subdivision + 1
 	var max_point_index: int = points_per_side * (points_per_side + 1) / 2 - 1
@@ -152,11 +156,11 @@ func _create_cell_down_subtriangles(
 	return tri_indices
 
 func get_subcell_index_by_coords() -> int:
-
-	# Need to think about how to reference a subcell
-
+	# TODO
 	return 0
-
+	# Need to think about how to reference a subcell
+	# Maybe use something like the lower level grid coords?
+	#
 	#                          point columns
 	#                 0         1         2         3   
 	#             ,-------. ,-------. ,-------. ,-------. 
