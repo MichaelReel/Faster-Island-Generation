@@ -2,6 +2,8 @@ extends Stage
 
 const LowLODAggregateLayer: GDScript = preload("geometry/LowLODAggregateLayer.gd")
 const MidLODPointLayer: GDScript = preload("geometry/MidLODPointLayer.gd")
+const MidLODTriCellLayer: GDScript = preload("geometry/MidLODTriCellLayer.gd")
+const MidLODBaseMesh: GDScript = preload("mesh/MidLODBaseMesh.gd")
 
 var _data: TerrainData
 var _meshes: TerrainMeshes
@@ -29,13 +31,29 @@ func _init(
 		_data.low_lod_agg_layer,
 		_terrain_config.mid_lod_subdivision,
 	)
+	
+	_data.mid_lod_tri_cell_layer = MidLODTriCellLayer.new(
+		_data.grid_tri_cell_layer,
+		_data.mid_lod_point_layer,
+		_terrain_config.mid_lod_subdivision,
+	)
+	
+	_meshes.mid_lod_base_mesh = MidLODBaseMesh.new(
+		_data.grid_tri_cell_layer,
+		_data.mid_lod_tri_cell_layer,
+		_material_lib,
+	)
 
 
 func perform() -> void:
 	emit_signal("percent_complete", self, 0.0)
 	_data.low_lod_agg_layer.perform()
-	emit_signal("percent_complete", self, 50.0)
+	emit_signal("percent_complete", self, 25.0)
 	_data.mid_lod_point_layer.perform()
+	emit_signal("percent_complete", self, 50.0)
+	_data.mid_lod_tri_cell_layer.perform()
+	emit_signal("percent_complete", self, 75.0)
+	_meshes.mid_lod_base_mesh.perform()
 	emit_signal("percent_complete", self, 100.0)
 
 func get_progess_step() -> GlobalStageProgressStep:
@@ -45,4 +63,6 @@ func _to_string() -> String:
 	return "Local Stage"
 
 func get_mesh_dict() -> Dictionary:
-	return {}
+	return {
+		"terrain": _meshes.mid_lod_base_mesh
+	}

@@ -21,6 +21,9 @@ const RoadsMesh: GDScript = preload("civil/mesh/RoadsMesh.gd")
 const CliffLineMesh: GDScript = preload("cliffs/mesh/CliffLineMesh.gd")
 const CliffTerrainMesh: GDScript = preload("cliffs/mesh/CliffTerrainMesh.gd")
 
+const MidLODBaseMesh: GDScript = preload("mid_lod/mesh/MidLODBaseMesh.gd")
+
+
 var grid_mesh: GridMesh
 
 var island_debug_mesh: IslandDebugMesh
@@ -40,3 +43,5 @@ var roads_mesh: RoadsMesh
 
 var cliff_line_mesh: CliffLineMesh
 var cliff_terrain_mesh: CliffTerrainMesh
+
+var mid_lod_base_mesh: MidLODBaseMesh
