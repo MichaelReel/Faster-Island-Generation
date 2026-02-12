@@ -18,14 +18,15 @@ func _init(
 func perform() -> void:
 	readied = true
 
-func get_height_at_xz(xz: Vector2) -> float:
+func get_height_at_xz(xz: Vector2, cell_ind: int = -1) -> float:
 	if not readied:
 		return 0.0
 	
 	# Find the cell this point is in (or not)
-	var cell_ind: int = _tri_cell_layer.get_cell_index_at_xz_position(xz)
-	if cell_ind < 0 or cell_ind >= _tri_cell_layer.get_total_cell_count():
-		return 0.0
+	if cell_ind == -1:
+		cell_ind = _tri_cell_layer.get_cell_index_at_xz_position(xz)
+		if cell_ind < 0 or cell_ind >= _tri_cell_layer.get_total_cell_count():
+			return 0.0
 	
 	# Find the real positions of all the associated corners for this cell 
 	var point_indices: PackedInt32Array = _tri_cell_layer.get_triangle_as_point_indices(cell_ind)

@@ -29,7 +29,9 @@ func perform() -> void:
 	# Create a new subsectioned triangle grid for every triangle in the tri cell grid
 	for cell_index in range(cell_count):
 		# Get the points in the cell, the points wont have the cell height yet, but that's okay
-		var outer_verts: PackedVector3Array = _tri_cell_layer.get_triangle_as_vector3_array_for_index(cell_index)
+		var outer_verts: PackedVector3Array = (
+			_tri_cell_layer.get_triangle_as_vector3_array_for_index(cell_index)
+		)
 		
 		var sorted_verts: Array[Vector3] = _sort_vertices_z_x_inc(outer_verts)
 		
@@ -39,7 +41,7 @@ func perform() -> void:
 		)
 		 
 		# Fit each new vertex to the current height maps 
-		_set_heights_to_low_lod_height(_cell_subpoints[cell_index], _low_lod_agg_layer)
+		_set_heights_to_low_lod_height(_cell_subpoints[cell_index], _low_lod_agg_layer, cell_index)
 
 func get_cell_subpoints(cell_index: int) -> PackedVector3Array:
 	return _cell_subpoints[cell_index]
@@ -151,9 +153,13 @@ func _subdivide_downward_pointing_triangle(
 	
 	return new_vertices
 
-func _set_heights_to_low_lod_height(points: PackedVector3Array, low_lod_agg_layer: LowLODAggregateLayer) -> void:
+func _set_heights_to_low_lod_height(
+	points: PackedVector3Array, low_lod_agg_layer: LowLODAggregateLayer, cell_index: int
+) -> void:
 	for point_index: int in range(points.size()):
-		points[point_index].y = low_lod_agg_layer.get_height_at_xz(Vector2(points[point_index].x, points[point_index].z))
+		points[point_index].y = low_lod_agg_layer.get_height_at_xz(
+			Vector2(points[point_index].x, points[point_index].z), cell_index
+		)
 
 func _to_string() -> String:
 	return "Mid LOD Point Stage"
